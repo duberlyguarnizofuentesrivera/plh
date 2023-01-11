@@ -7,4 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class PlhApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(PlhApplication.class, args
+        SpringApplication.run(PlhApplication.class, args);
+    }
+
+}
