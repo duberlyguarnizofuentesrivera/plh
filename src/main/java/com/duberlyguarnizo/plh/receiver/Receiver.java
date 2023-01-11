@@ -24,7 +24,7 @@ public class Receiver {
     @Id
     @GeneratedValue
     private Long id;
-    private boolean isCompany;
+    private boolean company;
     @NotBlank
     private String names;
     @Column(unique = true)
