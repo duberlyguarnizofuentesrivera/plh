@@ -5,10 +5,7 @@ import com.duberlyguarnizo.plh.enums.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.Length;
@@ -24,6 +21,8 @@ import java.util.List;
 @Setter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "_user")
 public class User implements UserDetails {
@@ -31,7 +30,9 @@ public class User implements UserDetails {
     @GeneratedValue
     private Long id;
     @NotBlank
-    private String names;
+    private String firstName;
+    @NotBlank
+    private String lastName;
     @NotBlank
     @Column(unique = true)
     private String idNumber;
