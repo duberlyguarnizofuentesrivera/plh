@@ -67,7 +67,7 @@ public class TicketController {
 
     @GetMapping("/by-date/{date}")
     public List<Ticket> getTicketsByDate(@PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
-        return ticketRepository.findByModificationDateBetween(date.atStartOfDay(), date.atTime(23, 59, 59));
+        return ticketRepository.findByLastModifiedDateBetween(date.atStartOfDay(), date.atTime(23, 59, 59));
     }
 
     @GetMapping("/by-payment/{payment}")

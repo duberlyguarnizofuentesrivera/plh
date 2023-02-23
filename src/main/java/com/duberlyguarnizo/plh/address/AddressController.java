@@ -49,7 +49,7 @@ public class AddressController {
     @GetMapping("/by-date/{date}")
     public List<Address> getAddressByDate(@PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
         return addressRepository.
-                findByModificationDateBetween(date.atStartOfDay(),
+                findByLastModifiedDateBetween(date.atStartOfDay(),
                         date.atTime(23, 59, 59));
     }
 

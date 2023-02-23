@@ -16,6 +16,6 @@ public interface ReceiverRepository extends JpaRepository<Receiver, Long> {
 
     List<Receiver> findByCompany(boolean isCompany);
 
-    List<Receiver> findByModificationDateBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
+    List<Receiver> findByLastModifiedDateBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
 
 }

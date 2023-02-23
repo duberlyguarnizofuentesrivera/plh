@@ -84,7 +84,7 @@ public class ClientController {
 
     @GetMapping("/by-date/{date}")
     public List<Client> getClientByDate(@PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
-        List<Client> result = clientRepository.findByModificationDateBetween(date.atStartOfDay(), date.atTime(23, 59, 59));
+        List<Client> result = clientRepository.findByLastModifiedDateBetween(date.atStartOfDay(), date.atTime(23, 59, 59));
         if (result.isEmpty()) {
             return Collections.emptyList();
         }

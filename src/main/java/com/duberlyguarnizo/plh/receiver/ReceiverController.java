@@ -80,6 +80,6 @@ public class ReceiverController {
 
     @GetMapping("/by-date/{date}")
     public List<Receiver> getReceiversByDate(@PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
-        return receiverRepository.findByModificationDateBetween(date.atStartOfDay(), date.atTime(23, 59, 59));
+        return receiverRepository.findByLastModifiedDateBetween(date.atStartOfDay(), date.atTime(23, 59, 59));
     }
 }

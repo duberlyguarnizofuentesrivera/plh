@@ -33,7 +33,7 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
 
     List<Shipment> findByReceiverUser_Id(Long userId, PageRequest pageRequest);//NOSONAR
 
-    List<Shipment> findByModificationDateBetween(LocalDateTime startDate, LocalDateTime endDate, PageRequest pageRequest);
+    List<Shipment> findByLastModifiedDateBetween(LocalDateTime startDate, LocalDateTime endDate, PageRequest pageRequest);
 
     List<Shipment> findByProblems(ShipmentProblem shipmentProblem, PageRequest pageRequest);
 

@@ -1,6 +1,7 @@
 package com.duberlyguarnizo.plh.client;
 
 import com.duberlyguarnizo.plh.address.Address;
+import com.duberlyguarnizo.plh.auditing.AuditableEntity;
 import com.duberlyguarnizo.plh.enums.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -9,10 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,7 +19,7 @@ import java.util.Set;
 @ToString
 @NoArgsConstructor
 @Entity
-public class Client {
+public class Client extends AuditableEntity {
     @Id
     @GeneratedValue
     private Long id;
@@ -40,8 +38,4 @@ public class Client {
     @ToString.Exclude
     @OneToMany
     private Set<Address> pickUpAddresses = new HashSet<>();
-    @CreationTimestamp
-    private LocalDateTime creationDate;
-    @UpdateTimestamp
-    private LocalDateTime modificationDate;
 }

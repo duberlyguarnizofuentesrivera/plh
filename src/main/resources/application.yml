@@ -1,13 +1,16 @@
 spring:
   jpa:
-    show-sql: true
+    show-sql: false
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/prex_db
     username: postgres
     password: postgres
+  security:
+    user:
+      password: 1801
 
 management:
   endpoints:

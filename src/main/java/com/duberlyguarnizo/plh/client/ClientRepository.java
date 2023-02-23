@@ -15,6 +15,6 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     List<Client> findByStatus(UserStatus clientStatus);
 
-    List<Client> findByModificationDateBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
+    List<Client> findByLastModifiedDateBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
 
 }

@@ -23,6 +23,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     List<Ticket> findByPaymentStatus(TicketPaymentStatus ticketPaymentStatus, PageRequest pageRequest);
 
-    List<Ticket> findByModificationDateBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
+    List<Ticket> findByLastModifiedDateBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
 
 }

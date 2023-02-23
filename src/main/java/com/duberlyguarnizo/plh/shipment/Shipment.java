@@ -1,6 +1,7 @@
 package com.duberlyguarnizo.plh.shipment;
 
 import com.duberlyguarnizo.plh.address.Address;
+import com.duberlyguarnizo.plh.auditing.AuditableEntity;
 import com.duberlyguarnizo.plh.client.Client;
 import com.duberlyguarnizo.plh.enums.ShipmentProblem;
 import com.duberlyguarnizo.plh.enums.ShipmentStatus;
@@ -14,8 +15,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -26,7 +25,7 @@ import java.util.Set;
 @ToString
 @NoArgsConstructor
 @Entity
-public class Shipment {
+public class Shipment extends AuditableEntity {
     @Id
     @GeneratedValue
     private Long id;
@@ -66,8 +65,4 @@ public class Shipment {
     private ShipmentProblem problems;
     @Enumerated(EnumType.STRING)
     private ShipmentStatus status;
-    @CreationTimestamp
-    private LocalDateTime creationDate;
-    @UpdateTimestamp
-    private LocalDateTime modificationDate;
 }

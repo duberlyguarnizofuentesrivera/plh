@@ -1,5 +1,6 @@
 package com.duberlyguarnizo.plh.address;
 
+import com.duberlyguarnizo.plh.auditing.AuditableEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -8,17 +9,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @Entity
-public class Address {
+public class Address extends AuditableEntity {
     @Id
     @GeneratedValue
     private Long id;
@@ -28,8 +25,4 @@ public class Address {
     @NotBlank
     private String addressLine;
     private String observations;
-    @CreationTimestamp
-    private LocalDateTime creationDate;
-    @UpdateTimestamp
-    private LocalDateTime modificationDate;
 }

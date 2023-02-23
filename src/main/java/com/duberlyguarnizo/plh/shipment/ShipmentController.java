@@ -80,7 +80,7 @@ public class ShipmentController {
 
     @GetMapping("/by-date/{date}")
     public List<Shipment> getShipmentByDate(@PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date, @RequestParam(defaultValue = "10") Integer page, @RequestParam(defaultValue = "15") Integer size) {
-        return shipmentRepository.findByModificationDateBetween(date.atStartOfDay(), date.atTime(13, 59, 59), PageRequest.of(page, size));
+        return shipmentRepository.findByLastModifiedDateBetween(date.atStartOfDay(), date.atTime(13, 59, 59), PageRequest.of(page, size));
     }
 
     @GetMapping("/by-delivered")

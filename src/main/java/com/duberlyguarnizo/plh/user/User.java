@@ -1,19 +1,17 @@
 package com.duberlyguarnizo.plh.user;
 
+import com.duberlyguarnizo.plh.auditing.AuditableEntity;
 import com.duberlyguarnizo.plh.enums.UserRole;
 import com.duberlyguarnizo.plh.enums.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -25,7 +23,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "_user")
-public class User implements UserDetails {
+public class User extends AuditableEntity implements UserDetails {
     @Id
     @GeneratedValue
     private Long id;
@@ -44,15 +42,12 @@ public class User implements UserDetails {
     private UserStatus status;
     @Enumerated(EnumType.STRING)
     private UserRole role;
+    @Column(unique = true)
     @NotBlank
     @Length(min = 5) //min 5 chars TODO: validate length in frontend
     private String username;
     @NotBlank
     private String password;
-    @CreationTimestamp
-    private LocalDateTime creationDate;
-    @UpdateTimestamp
-    private LocalDateTime modificationDate;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

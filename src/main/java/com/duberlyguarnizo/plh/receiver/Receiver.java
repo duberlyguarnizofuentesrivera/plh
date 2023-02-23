@@ -1,6 +1,7 @@
 package com.duberlyguarnizo.plh.receiver;
 
 import com.duberlyguarnizo.plh.address.Address;
+import com.duberlyguarnizo.plh.auditing.AuditableEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -8,10 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,7 +18,7 @@ import java.util.Set;
 @ToString
 @NoArgsConstructor
 @Entity
-public class Receiver {
+public class Receiver extends AuditableEntity {
     @Id
     @GeneratedValue
     private Long id;
@@ -36,8 +34,4 @@ public class Receiver {
     @ToString.Exclude
     @OneToMany
     private Set<Address> addresses = new HashSet<>();
-    @CreationTimestamp
-    private LocalDateTime creationDate;
-    @UpdateTimestamp
-    private LocalDateTime modificationDate;
 }
