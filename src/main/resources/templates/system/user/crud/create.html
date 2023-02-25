@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="es" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+          name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <title>RedXpress Soluciones - Crear Usuario</title>
+    <!-- Favicons -->
+    <link rel="icon" th:href="@{/common-assets/img/favicon.png}">
+    <link rel="apple-touch-icon" th:href="@{/common-assets/img/apple-touch-icon.png}">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+          rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/bootstrap-icons/bootstrap-icons.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/boxicons/css/boxicons.min.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/quill/quill.snow.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/quill/quill.bubble.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/remixicon/remixicon.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/simple-datatables/style.css}">
+
+    <!-- Template Main CSS File -->
+    <link rel="stylesheet" th:href="@{/common-assets/css/style.css}">
+</head>
+<body>
+<header th:replace="fragments::header">
+</header>
+<aside th:replace="fragments::aside">
+</aside>
+<main class="main" id="main">
+    <div class="pagetitle">
+        <h1>Sistema RedXPress - Crear Usuario</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">Principal</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/system}">Sistema</a></li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Crear Nuevo Usuario</h5>
+                        <form method="post" th:action="@{/system/user/crud/create-action}" th:object="${userDto}">
+
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label" for="firstName">Nombres</label>
+                                <div class="col-sm-9">
+                                    <input class="form-control" id="firstName" required th:field="*{firstName}"
+                                           type="text">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label" for="lastName">Apellidos</label>
+                                <div class="col-sm-9">
+                                    <input class="form-control" id="lastName" required th:field="*{lastName}"
+                                           type="text">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label" for="idNumber">DNI/CE</label>
+                                <div class="col-sm-9">
+                                    <input class="form-control" id="idNumber" pattern="/^\d{8,20}$/g" required
+                                           th:field="*{idNumber}" type="number">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label" for="phone">Celular</label>
+                                <div class="col-sm-9">
+                                    <input class="form-control" id="phone" pattern="[\d]{9}" required th:field="*{phone}"
+                                           type="tel">
+                                    <div class="form-text">Sin espacios ni guiones</div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label" for="phone2">Celular #2</label>
+                                <div class="col-sm-9">
+                                    <input class="form-control" id="phone2" pattern="/^\d{9}$/" th:field="*{phone2}"
+                                           type="tel">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label" for="email">Email</label>
+                                <div class="col-sm-9">
+                                    <input class="form-control" id="email" th:field="*{email}" type="email">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label" for="status">Estado</label>
+                                <div class="col-sm-9">
+                                    <select class="form-control" id="status" name="status" required
+                                            th:field="*{status}">
+                                        <option th:each="statusItem: ${statusList}" th:text="${statusItem.toString()}"
+                                                th:value="${statusItem.toString()}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label" for="role">Rol</label>
+                                <div class="col-sm-9">
+                                    <select class="form-control" id="role" name="role" required th:field="*{role}">
+                                        <option th:each="roleItem: ${roleList}" th:text="${roleItem.toString()}"
+                                                th:value="${roleItem.toString()}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label" for="username">Nombre de usuario</label>
+                                <div class="col-sm-9">
+                                    <input class="form-control" id="username" minlength="5" required
+                                           th:field="*{username}" type="text">
+                                    <div class="form-text">5 caracteres como mínimo</div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label" for="password">Contraseña</label>
+                                <div class="col-sm-9">
+                                    <input class="form-control" id="password" required th:field="*{password}"
+                                           type="password">
+                                </div>
+                            </div>
+                            <div class="row mt-3 justify-content-around">
+                                <button class="btn btn-primary col-4 col-sm-3" type="submit">Crear</button>
+                                <a class="btn btn-warning col-4 col-sm-3" th:href="@{/system/admin-panel}">Cancelar</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="fragments::footer"></footer>
+<a class="back-to-top d-flex align-items-center justify-content-center" href="#"><i
+        class="bi bi-arrow-up-short"></i></a>
+<!-- Vendor JS Files -->
+<script th:src="@{/common-assets/vendor/apexcharts/apexcharts.min.js}"></script>
+<script th:src="@{/common-assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/common-assets/vendor/chart.js/chart.umd.js}"></script>
+<script th:src="@{/common-assets/vendor/echarts/echarts.min.js}"></script>
+<script th:src="@{/common-assets/vendor/quill/quill.min.js}"></script>
+<script th:src="@{/common-assets/vendor/simple-datatables/simple-datatables.js}"></script>
+<script th:src="@{/common-assets/vendor/tinymce/tinymce.min.js}"></script>
+<script th:src="@{/common-assets/vendor/php-email-form/validate.js}"></script>
+
+<!-- Template Main JS File -->
+<script th:src="@{/common-assets/js/main.js}"></script>
+</body>
+</html>

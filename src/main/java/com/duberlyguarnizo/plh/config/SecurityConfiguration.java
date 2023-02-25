@@ -1,5 +1,7 @@
 package com.duberlyguarnizo.plh.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,6 +14,14 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
+
+    private final String rememberKey;
+
+    @Autowired
+    public SecurityConfiguration(@Value("${custom.properties.remember.key}") String rememberKey) {
+        this.rememberKey = rememberKey;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -32,17 +42,18 @@ public class SecurityConfiguration {
                 .loginPage("/login")
                 .usernameParameter("username")
                 .passwordParameter("password")
-                .defaultSuccessUrl("/system/index", true)
+                .defaultSuccessUrl("/system", true)
                 .failureUrl("/login?error=true")
                 //.failureHandler(authenticationFailureHandler()) //to audit login attempts
                 .and()
                 .logout()
-                .logoutUrl("/perform_logout")
                 .deleteCookies("JSESSIONID")
                 //.logoutSuccessHandler(logoutSuccessHandler())
                 .and()
                 .rememberMe()
-                .rememberMeParameter("remember");
+                .alwaysRemember(true)
+                .rememberMeParameter("remember") //unnecessary now
+                .key(rememberKey);
 
         return http.build();
     }

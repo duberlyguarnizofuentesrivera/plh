@@ -44,7 +44,7 @@ public class User extends AuditableEntity implements UserDetails {
     private UserRole role;
     @Column(unique = true)
     @NotBlank
-    @Length(min = 5) //min 5 chars TODO: validate length in frontend
+    @Length(min = 5) //min 5 chars
     private String username;
     @NotBlank
     private String password;

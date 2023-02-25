@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Fragments</title>
+</head>
+<body>
+<h1>You are not supposed wo view this page!</h1>
+
+<!-- ======= Header ======= -->
+<header class="header fixed-top d-flex align-items-center" id="header" th:fragment="header">
+
+    <div class="d-flex align-items-center justify-content-between">
+        <a class="logo d-flex align-items-center" href="index.html">
+            <img alt="" th:src="@{/common-assets/img/logo.png}">
+            <span class="d-none d-lg-block">RedXPress</span>
+        </a>
+        <i class="bi bi-list toggle-sidebar-btn"></i>
+    </div><!-- End Logo -->
+
+    <div class="search-bar">
+        <form action="#" class="search-form d-flex align-items-center" method="POST">
+            <input name="query" placeholder="Buscar envío" title="Ingresa las palabras clave" type="text">
+            <button title="Buscar" type="submit"><i class="bi bi-search"></i></button>
+        </form>
+    </div><!-- End Search Bar -->
+
+    <nav class="header-nav ms-auto">
+        <ul class="d-flex align-items-center">
+
+            <li class="nav-item d-block d-lg-none">
+                <a class="nav-link nav-icon search-bar-toggle " href="#">
+                    <i class="bi bi-search"></i>
+                </a>
+            </li><!-- End Search Icon-->
+
+            <li class="nav-item dropdown">
+
+                <a class="nav-link nav-icon" data-bs-toggle="dropdown" href="#">
+                    <i class="bi bi-bell"></i>
+                    <span class="badge bg-primary badge-number">4</span>
+                </a><!-- End Notification Icon -->
+
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications">
+                    <li class="dropdown-header">
+                        Tienes <span>X</span> notificaciones
+                        <a href="#"><span class="badge rounded-pill bg-primary p-2 ms-2">Ver todas</span></a>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+
+                    <li class="notification-item">
+                        <i class="bi bi-exclamation-circle text-warning"></i>
+                        <div>
+                            <h4>Envío con problemas</h4>
+                            <p>Cod. ABC-123</p>
+                            <p>Hace 30 min.</p>
+                        </div>
+                    </li>
+
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+
+                    <li class="notification-item">
+                        <i class="bi bi-x-circle text-danger"></i>
+                        <div>
+                            <h4>Envío No Entregado</h4>
+                            <p>Quae dolorem earum veritatis oditseno</p>
+                            <p>1 hr. ago</p>
+                        </div>
+                    </li>
+
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+
+                    <li class="notification-item">
+                        <i class="bi bi-check-circle text-success"></i>
+                        <div>
+                            <h4>Entregado</h4>
+                            <p>Cod. MNF-568</p>
+                            <p>Hace 2 hrs.</p>
+                        </div>
+                    </li>
+
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+
+                    <li class="notification-item">
+                        <i class="bi bi-info-circle text-primary"></i>
+                        <div>
+                            <h4>En Camino</h4>
+                            <p>Cod. LOP-984</p>
+                            <p>Hace 4 hrs.</p>
+                        </div>
+                    </li>
+
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li class="dropdown-footer">
+                        <a href="#">Ver todas las notificaciones</a>
+                    </li>
+
+                </ul><!-- End Notification Dropdown Items -->
+
+            </li><!-- End Notification Nav -->
+
+
+            <li class="nav-item dropdown pe-3">
+
+                <a class="nav-link nav-profile d-flex align-items-center pe-0" data-bs-toggle="dropdown" href="#">
+                    <img alt="Profile" class="rounded-circle" th:src="@{/common-assets/img/profile-img.jpg}">
+                    <span class="d-none d-md-block dropdown-toggle ps-2 text-capitalize"
+                          th:text="${#authentication.name}"></span>
+                </a><!-- End Profile Image Icon -->
+
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+                    <li class="dropdown-header">
+                        <h6><span class="text-capitalize" sec:authentication="name"></span></h6>
+                        <!--Sec:authentication is returning a list... we must iterate over it-->
+                        <div th:each="role: ${#authentication.getAuthorities()}">
+                            <span class="text-capitalize" th:text="${#strings.toLowerCase(role)}"></span>
+                        </div>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center" href="/system/profile">
+                            <i class="bi bi-person"></i>
+                            <span>Perfil</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center" href="system/request_help.html">
+                            <i class="bi bi-question-circle"></i>
+                            <span>Pedir ayuda</span>
+                        </a>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center" href="/logout">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span>Cerrar Sesión</span>
+                        </a>
+                    </li>
+
+                </ul><!-- End Profile Dropdown Items -->
+            </li><!-- End Profile Nav -->
+
+        </ul>
+    </nav><!-- End Icons Navigation -->
+
+</header><!-- End Header -->
+
+
+<!-- ======= Sidebar ======= -->
+<aside class="sidebar" id="sidebar" th:fragment="sidebar">
+
+    <ul class="sidebar-nav" id="sidebar-nav">
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" th:href="@{/system}">
+                <i class="bi bi-grid"></i>
+                <span>Principal</span>
+            </a>
+        </li><!-- End Dashboard Nav -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" th:href="@{/tracking}">
+                <i class="bi bi-grid"></i>
+                <span>Seguimiento</span>
+            </a>
+        </li><!-- End Dashboard Nav -->
+
+
+        <li class="nav-item">
+            <a class="nav-link " data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-menu-button-wide"></i><span>Tickets</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul class="nav-content collapse show" data-bs-parent="#sidebar-nav" id="components-nav">
+                <li>
+                    <a class="active" href="#">
+                        <i class="bi bi-circle"></i><span>Nuevo</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-circle"></i><span>Listado</span>
+                    </a>
+                </li>
+            </ul>
+        </li><!-- End Tickets Nav -->
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-journal-text"></i><span>Clientes</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul class="nav-content collapse " data-bs-parent="#sidebar-nav" id="forms-nav">
+                <li>
+                    <a href="#">
+                        <i class="bi bi-circle"></i><span>Nuevo</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-circle"></i><span>Listado</span>
+                    </a>
+                </li>
+            </ul>
+        </li><!-- End Clients Nav -->
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" data-bs-target="#tables-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-layout-text-window-reverse"></i><span>Destinatarios</span><i
+                    class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul class="nav-content collapse " data-bs-parent="#sidebar-nav" id="tables-nav">
+                <li>
+                    <a href="#">
+                        <i class="bi bi-circle"></i><span>Nuevo</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-circle"></i><span>Listar</span>
+                    </a>
+                </li>
+            </ul>
+        </li><!-- End Receiver Nav -->
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-bar-chart"></i><span>Transportistas</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul class="nav-content collapse " data-bs-parent="#sidebar-nav" id="charts-nav">
+                <li>
+                    <a href="#">
+                        <i class="bi bi-circle"></i><span>Asignar</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-circle"></i><span>Nuevo</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-circle"></i><span>Listar</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-circle"></i><span>En Camino</span>
+                    </a>
+                </li>
+            </ul>
+        </li><!-- End transporter Nav -->
+        <li class="nav-heading">Acciones</li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#">
+                <i class="bi bi-person"></i>
+                <span>Asignar Transportista</span>
+            </a>
+        </li><!-- End AssignTransporter: visible by Dispatcher Nav -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#">
+                <i class="bi bi-question-circle"></i>
+                <span>Adm. Envíos</span>
+            </a>
+        </li><!-- End ShipmentManagement: visible by Transporter Nav -->
+
+        <li class="nav-item" sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')">
+            <a class="nav-link collapsed" href="#">
+                <i class="bi bi-question-circle"></i>
+                <span>Panel de administración</span>
+            </a>
+        </li><!-- End AdminPanel visible by ADMIN and SUPER Nav -->
+
+
+    </ul>
+
+</aside><!-- End Sidebar-->
+
+
+<!-- ======= Footer ======= -->
+<footer class="footer" id="footer" th:fragment="footer">
+    <div class="copyright">
+        &copy;<span>2023 </span><strong><span>RedXPress Soluciones</span></strong>. Lima, Perú.
+    </div>
+    <div class="credits"></div>
+</footer><!-- End Footer -->
+</body>
+</html>

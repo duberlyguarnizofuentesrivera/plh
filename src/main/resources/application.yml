@@ -27,3 +27,8 @@ management:
 logging:
   level:
     web: debug
+
+custom:
+  properties:
+    remember:
+      key: all_the_things_ive_done

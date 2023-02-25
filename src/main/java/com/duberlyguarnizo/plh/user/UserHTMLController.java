@@ -6,10 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("users")
+@RequestMapping("/system/user/")
 @Slf4j
 public class UserHTMLController {
     private final UserService userService;
@@ -27,9 +28,14 @@ public class UserHTMLController {
     }
 
     //CRUD methods
-    @PostMapping("/create")
-    public boolean createUser(@RequestBody UserRegisterDto userRegister) {
-        return userService.save(userRegister);
+    @PostMapping(path = "/crud/create-action")
+    public String createUser(@ModelAttribute UserRegisterDto userRegister, Model model) {
+        boolean result = userService.save(userRegister);
+        if (result) {
+            return "redirect:/system/user/crud/by-username/" + userRegister.username();
+        } else {
+            return "redirect:/system/crud-error";
+        }
     }
 
     @PostMapping("/update")
@@ -42,11 +48,12 @@ public class UserHTMLController {
         return userService.deleteByUserName(username);
     }
 
-    @GetMapping("/all")
-    public Page<UserBasicDto> getAllUser(@RequestParam(defaultValue = "10") Integer page, @RequestParam(defaultValue = "15") Integer size) {
+    @GetMapping("/list")
+    public String getAllUser(@RequestParam(defaultValue = "10") Integer page, @RequestParam(defaultValue = "15") Integer size, Model model) {
         Page<UserBasicDto> result = userService.findAll(page, size);
         result.getTotalPages();
-        return result;
+        model.addAttribute("queryResult", result);
+        return "/system/user/list";
     }
 
     @GetMapping("/by-role/{role}")
@@ -69,8 +76,10 @@ public class UserHTMLController {
         }
     }
 
-    @GetMapping("/by-username/{username}")
-    public UserDto getUsersByUserName(@PathVariable("username") String username) {
-        return userService.getByUsername(username).orElse(null);
+    @GetMapping("/crud/by-username/{username}")
+    public String getUsersByUserName(@PathVariable("username") String username, Model model) {
+        UserDto userDto = userService.getByUsername(username).orElse(null);
+        model.addAttribute("userDto", userDto);
+        return "/system/user/crud/detail";
     }
 }
