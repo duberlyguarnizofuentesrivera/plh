@@ -98,7 +98,7 @@
                                     <select class="form-control" id="status" name="status" required
                                             th:field="*{status}">
                                         <option th:each="statusItem: ${statusList}" th:text="${statusItem.toString()}"
-                                                th:value="${statusItem.toString()}"></option>
+                                                th:value="${statusItem.name()}"></option>
                                     </select>
                                 </div>
                             </div>
@@ -107,7 +107,7 @@
                                 <div class="col-sm-9">
                                     <select class="form-control" id="role" name="role" required th:field="*{role}">
                                         <option th:each="roleItem: ${roleList}" th:text="${roleItem.toString()}"
-                                                th:value="${roleItem.toString()}"></option>
+                                                th:value="${roleItem.name()}"></option>
                                     </select>
                                 </div>
                             </div>

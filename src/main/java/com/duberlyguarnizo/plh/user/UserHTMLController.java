@@ -9,6 +9,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @Controller
 @RequestMapping("/system/user/")
 @Slf4j
@@ -80,6 +82,12 @@ public class UserHTMLController {
     public String getUsersByUserName(@PathVariable("username") String username, Model model) {
         UserDto userDto = userService.getByUsername(username).orElse(null);
         model.addAttribute("userDto", userDto);
+        if (userDto != null && userDto.createdBy() != null && userDto.lastModifiedBy() != null) {
+            Optional<UserBasicDto> createdByUser = userService.getById(userDto.createdBy());
+            Optional<UserBasicDto> modifiedByUser = userService.getById(userDto.lastModifiedBy());
+            createdByUser.ifPresent(userBasicDto -> model.addAttribute("createdByUser", userBasicDto));
+            modifiedByUser.ifPresent(userBasicDto -> model.addAttribute("modifiedByUser", userBasicDto));
+        }
         return "/system/user/crud/detail";
     }
 }

@@ -14,7 +14,7 @@ import java.util.Optional;
 @Component
 @Slf4j
 public class CurrentUserAuditorAware implements AuditorAware<User> {
-    UserRepository repository;
+    private final UserRepository repository;
 
     public CurrentUserAuditorAware(UserRepository repository) {
         this.repository = repository;

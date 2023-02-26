@@ -123,7 +123,7 @@
                         <h6><span class="text-capitalize" sec:authentication="name"></span></h6>
                         <!--Sec:authentication is returning a list... we must iterate over it-->
                         <div th:each="role: ${#authentication.getAuthorities()}">
-                            <span class="text-capitalize" th:text="${#strings.toLowerCase(role)}"></span>
+                            <span class="text-capitalize" th:text="${#strings.toLowerCase(role.getAuthority())}"></span>
                         </div>
                     </li>
                     <li>

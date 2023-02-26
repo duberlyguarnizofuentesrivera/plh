@@ -34,6 +34,11 @@ public class UserService {
         return userList.map(mapper::toBasicDto);
     }
 
+    public Optional<UserBasicDto> getById(Long id) {
+        Optional<User> user = repository.findById(id);
+        return user.map(mapper::toBasicDto);
+    }
+
     public Page<UserBasicDto> findByRole(UserRole role, Integer page, Integer size) {
         Page<User> userList = repository.findByRole(role, PageRequest.of(page, size));
         return userList.map(mapper::toBasicDto);

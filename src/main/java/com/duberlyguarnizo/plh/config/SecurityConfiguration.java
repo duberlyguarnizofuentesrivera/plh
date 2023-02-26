@@ -40,6 +40,7 @@ public class SecurityConfiguration {
                 .and()
                 .formLogin()
                 .loginPage("/login")
+                .permitAll()
                 .usernameParameter("username")
                 .passwordParameter("password")
                 .defaultSuccessUrl("/system", true)

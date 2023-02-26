@@ -24,7 +24,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         Optional<User> userSearch = repository.findByUsername(username);
         User user;
         if (userSearch.isEmpty()) {
-            throw new UsernameNotFoundException("No user found with this username!");
+            throw new UsernameNotFoundException("CustomUserDetailsService: No user found with this username!");
         } else {
             user = userSearch.get();
         }

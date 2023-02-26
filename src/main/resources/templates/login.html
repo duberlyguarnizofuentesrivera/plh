@@ -51,7 +51,7 @@
                         <div class="d-flex justify-content-center py-4">
                             <a class="logo d-flex align-items-center w-auto" href="../index.html">
                                 <img alt="" th:src="@{/common-assets/img/logo.png}">
-                                <span class="d-none d-lg-block">NiceAdmin</span>
+                                <span class="d-none d-lg-block">RedXPress</span>
                             </a>
                         </div><!-- End Logo -->
 
@@ -90,7 +90,6 @@
                                                    type="text">
                                             <div class="invalid-feedback">Por favor, ingresa un nombre de usuario.</div>
                                         </div>
-
                                     </div>
 
                                     <div class="col-12">
@@ -102,7 +101,8 @@
 
                                     <div class="col-12">
                                         <div class="form-check">
-                                            <input class="form-check-input" id="remember" name="remember" type="checkbox"
+                                            <input class="form-check-input" id="remember" name="remember"
+                                                   type="checkbox"
                                                    value="true">
                                             <label class="form-check-label" for="remember">Recordarme</label>
                                         </div>
@@ -116,16 +116,7 @@
                                             una al administrador</a></p>
                                     </div>
                                 </form>
-
                             </div>
-                        </div>
-
-                        <div class="credits">
-                            <!-- All the links in the footer should remain intact. -->
-                            <!-- You can delete the links only if you purchased the pro version. -->
-                            <!-- Licensing information: https://bootstrapmade.com/license/ -->
-                            <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ -->
-                            &#169; 2023 <a href="https://bootstrapmade.com/">RedXPress Soluciones</a>
                         </div>
 
                     </div>
@@ -139,7 +130,7 @@
 
 <a class="back-to-top d-flex align-items-center justify-content-center" href="#"><i
         class="bi bi-arrow-up-short"></i></a>
-<footer th:replace="fragments::footer"></footer>
+<footer th:replace="~{fragments::footer}"></footer>
 <!-- Vendor JS Files -->
 <script th:src="@{/common-assets/vendor/apexcharts/apexcharts.min.js}"></script>
 <script th:src="@{/common-assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
