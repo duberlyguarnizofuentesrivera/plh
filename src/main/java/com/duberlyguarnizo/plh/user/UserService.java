@@ -123,23 +123,27 @@ public class UserService {
         statusValue = "all".equals(userStatus) ? null : UserStatus.valueOf(userStatus);
         roleValue = "all".equals(userRole) ? null : UserRole.valueOf(userRole);
         if (statusValue == null && roleValue == null) {
+            log.warn("case: rol and status null");
             if (search.isEmpty()) {
                 result = repository.findAll(PageRequest.of(page - 1, size));
             } else {
                 result = repository.findByFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(search, search, PageRequest.of(page - 1, size));
             }
         } else {
+            log.warn("case: any of rol and status not null");
             if (search.isEmpty()) {
+                log.warn("search is empty");
                 if (statusValue != null && roleValue != null) {
                     result = repository.findByStatusAndRole(statusValue, roleValue, PageRequest.of(page - 1, size));
                 } else {
                     if (statusValue == null) {
-                        result = repository.findByRole(roleValue, PageRequest.of(page, size));
+                        result = repository.findByRole(roleValue, PageRequest.of(page - 1, size));
                     } else {
-                        result = repository.findByStatus(statusValue, PageRequest.of(page, size));
+                        result = repository.findByStatus(statusValue, PageRequest.of(page - 1, size));
                     }
                 }
             } else {
+                log.warn("search is NOT empty");
                 if (statusValue != null && roleValue != null) {
                     result = repository.findByRoleAndStatusAndFirstNameContainsIgnoreCaseOrLastNameNotContainsIgnoreCase(roleValue, statusValue, search, search, PageRequest.of(page - 1, size));
                 } else {

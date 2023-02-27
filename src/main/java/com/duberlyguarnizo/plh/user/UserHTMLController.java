@@ -1,5 +1,6 @@
 package com.duberlyguarnizo.plh.user;
 
+import com.duberlyguarnizo.plh.enums.UserRole;
 import com.duberlyguarnizo.plh.enums.UserStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,19 +54,10 @@ public class UserHTMLController {
     }
 
     @GetMapping("/list")
-    public String getAllUser(@RequestParam(defaultValue = "1") Integer page,
-                             @RequestParam(defaultValue = "2") Integer size,
-                             @RequestParam(defaultValue = "all") String status,
-                             @RequestParam(defaultValue = "all") String role,
-                             @RequestParam(defaultValue = "") String search,
-                             Model model) {
-        Page<UserBasicDto> result;
-        int totalPages;
-        result = userService.findWithFilters(status, role, search, page, size);
-        totalPages = result.getTotalPages();
-        model.addAttribute("queryResult", result.getContent());
-        model.addAttribute("totalPages", totalPages);
-
+    public String getAllUser(Model model) {
+        model.addAttribute("statusList", UserStatus.values());
+        model.addAttribute("roleList", UserRole.values());
+        //Filters are processed using API controller, with JS.
         return "/system/user/list";
     }
 
