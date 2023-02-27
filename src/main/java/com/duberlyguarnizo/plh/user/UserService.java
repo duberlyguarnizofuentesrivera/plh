@@ -109,4 +109,50 @@ public class UserService {
             return Optional.of(mapper.toBasicDto(currentUser.get()));
         }
     }
+
+    public Page<UserBasicDto> findByStatusAndRole(UserStatus userStatus, UserRole userRole, Integer page, Integer size) {
+        Page<User> result = repository.findByStatusAndRole(userStatus, userRole, PageRequest.of(page, size));
+        return result.map(mapper::toBasicDto);
+    }
+
+
+    public Page<UserBasicDto> findWithFilters(String userStatus, String userRole, String search, Integer page, Integer size) {
+        UserRole roleValue;
+        UserStatus statusValue;
+        Page<User> result;
+        statusValue = "all".equals(userStatus) ? null : UserStatus.valueOf(userStatus);
+        roleValue = "all".equals(userRole) ? null : UserRole.valueOf(userRole);
+        if (statusValue == null && roleValue == null) {
+            if (search.isEmpty()) {
+                result = repository.findAll(PageRequest.of(page - 1, size));
+            } else {
+                result = repository.findByFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(search, search, PageRequest.of(page - 1, size));
+            }
+        } else {
+            if (search.isEmpty()) {
+                if (statusValue != null && roleValue != null) {
+                    result = repository.findByStatusAndRole(statusValue, roleValue, PageRequest.of(page - 1, size));
+                } else {
+                    if (statusValue == null) {
+                        result = repository.findByRole(roleValue, PageRequest.of(page, size));
+                    } else {
+                        result = repository.findByStatus(statusValue, PageRequest.of(page, size));
+                    }
+                }
+            } else {
+                if (statusValue != null && roleValue != null) {
+                    result = repository.findByRoleAndStatusAndFirstNameContainsIgnoreCaseOrLastNameNotContainsIgnoreCase(roleValue, statusValue, search, search, PageRequest.of(page - 1, size));
+                } else {
+                    if (statusValue != null) {
+                        result = repository.findByStatusAndFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(statusValue, search, search, PageRequest.of(page - 1, size));
+                    } else {
+                        result = repository.findByRoleAndFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(roleValue, search, search, PageRequest.of(page - 1, size));
+                    }
+                }
+            }
+        }
+        System.out.println("FIND WITH FILTERS:");
+        System.out.println(result.getContent());
+        return result.map(mapper::toBasicDto);
+    }
 }

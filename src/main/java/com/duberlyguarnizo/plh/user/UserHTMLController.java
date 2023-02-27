@@ -1,6 +1,5 @@
 package com.duberlyguarnizo.plh.user;
 
-import com.duberlyguarnizo.plh.enums.UserRole;
 import com.duberlyguarnizo.plh.enums.UserStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +14,14 @@ import java.util.Optional;
 @RequestMapping("/system/user/")
 @Slf4j
 public class UserHTMLController {
+    private final UserMapper userMapper;
     private final UserService userService;
 
     @Autowired
-    public UserHTMLController(UserService userService) {
+    public UserHTMLController(UserService userService,
+                              UserMapper userMapper) {
         this.userService = userService;
+        this.userMapper = userMapper;
     }
 
     //get current user
@@ -51,21 +53,20 @@ public class UserHTMLController {
     }
 
     @GetMapping("/list")
-    public String getAllUser(@RequestParam(defaultValue = "10") Integer page, @RequestParam(defaultValue = "15") Integer size, Model model) {
-        Page<UserBasicDto> result = userService.findAll(page, size);
-        result.getTotalPages();
-        model.addAttribute("queryResult", result);
-        return "/system/user/list";
-    }
+    public String getAllUser(@RequestParam(defaultValue = "1") Integer page,
+                             @RequestParam(defaultValue = "2") Integer size,
+                             @RequestParam(defaultValue = "all") String status,
+                             @RequestParam(defaultValue = "all") String role,
+                             @RequestParam(defaultValue = "") String search,
+                             Model model) {
+        Page<UserBasicDto> result;
+        int totalPages;
+        result = userService.findWithFilters(status, role, search, page, size);
+        totalPages = result.getTotalPages();
+        model.addAttribute("queryResult", result.getContent());
+        model.addAttribute("totalPages", totalPages);
 
-    @GetMapping("/by-role/{role}")
-    public Page<UserBasicDto> getAllUsersByRole(@PathVariable("role") String role, @RequestParam(defaultValue = "10") Integer page, @RequestParam(defaultValue = "15") Integer size) {
-        try {
-            UserRole userRole = UserRole.valueOf(role);
-            return userService.findByRole(userRole, page, size);
-        } catch (IllegalArgumentException e) {
-            return Page.empty();
-        }
+        return "/system/user/list";
     }
 
     @GetMapping("/by-status/{status}")

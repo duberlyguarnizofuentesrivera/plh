@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
@@ -28,9 +28,9 @@
     <link rel="stylesheet" th:href="@{/common-assets/css/style.css}">
 </head>
 <body>
-<header th:replace="fragments::header">
+<header th:replace="~{fragments::header}">
 </header>
-<aside th:replace="fragments::aside">
+<aside th:replace="~{fragments::aside}">
 </aside>
 <main class="main" id="main">
     <div class="pagetitle">
@@ -43,15 +43,88 @@
         </nav>
     </div><!-- End Page Title -->
     <section class="section dashboard">
-        <div class="row">
+        <div class="row d-flex justify-content-center">
             <div class="col-lg-10">
-                <p>Usuarios actualmente registrados en el sistema:</p>
+                <div class="card recent-sales overflow-auto">
+                    <div class="card-body"><h5 class="card-title">Usuarios Registrados <span>| Todos</span></h5>
+                        <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
+                            <div class="dataTable-top">
+                                <div class="dataTable-dropdown"><label><select class="dataTable-selector">
+                                    <option value="5">5</option>
+                                    <option selected="" value="10">10</option>
+                                    <option value="15">15</option>
+                                    <option value="20">20</option>
+                                    <option value="25">25</option>
+                                </select> entradas por página</label></div>
+                                <div class="dataTable-search"><input class="dataTable-input" data-ms-editor="true"
+                                                                     placeholder="Buscar..." spellcheck="false"
+                                                                     type="text"></div>
+                            </div>
+                            <div class="dataTable-container">
+                                <span th:text="${totalPages}"></span>
+                                <span th:text="${queryResult.size()}"></span>
+                                <table class="table table-borderless datatable dataTable-table">
+                                    <thead>
+                                    <tr>
+                                        <th data-sortable="" scope="col">
+                                            <a class="dataTable-sorter" href="#">Dni/CE</a>
+                                        </th>
+                                        <th data-sortable="" scope="col">
+                                            <a class="dataTable-sorter" href="#">Perfíl</a>
+                                        </th>
+                                        <th data-sortable="" scope="col">
+                                            <a class="dataTable-sorter" href="#">Nombres</a>
+                                        </th>
+                                        <th data-sortable="" scope="col">
+                                            <a class="dataTable-sorter" href="#">Rol</a>
+                                        </th>
+                                        <th data-sortable="" scope="col">
+                                            <a class="dataTable-sorter" href="#">Estado</a>
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="user: ${queryResult}">
+                                        <th scope="row"><span th:text="${user.idNumber()}"></span></th>
+                                        <td><a th:href="@{${'/system/user/crud/by-username/' + user.username()} }">
+                                            <i class="bi bi-person-fill"></i>&nbsp;
+                                            <span class="text-capitalize" th:text="${user.username()}"></span></a></td>
+                                        <td><span th:text="${user.firstName() + ' ' + user.lastName()}"></span></td>
+                                        <td><span th:text="${user.role()}"></span></td>
+                                        <td>
+                                            <span class="badge bg-success" th:if="${user.status().name()=='ACTIVE'}"
+                                                  th:text="${user.status()}"></span>
+                                            <span class="badge bg-danger" th:if="${user.status().name()=='INACTIVE'}"
+                                                  th:text="${user.status()}"></span>
+                                        </td>
+                                    </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="dataTable-bottom">
+                                <div class="dataTable-info">Showing 1 to 5 of 5 entries</div>
+                                <nav class="dataTable-pagination">
+                                    <ul class="dataTable-pagination-list">
+                                        <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                                        <li class="page-item" th:each="page: ${#numbers.sequence(1, totalPages)}">
+                                            <a class="page-link"
+                                               th:href="@{${'/system/user/list?page=' + (page)}}"><span
+                                                    th:text="${page}"></span></a>
+                                        </li>
+                                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 </main>
 
-<footer th:replace="fragments::footer"></footer>
+<footer th:replace="~{fragments::footer}"></footer>
 <a class="back-to-top d-flex align-items-center justify-content-center" href="#"><i
         class="bi bi-arrow-up-short"></i></a>
 <!-- Vendor JS Files -->
