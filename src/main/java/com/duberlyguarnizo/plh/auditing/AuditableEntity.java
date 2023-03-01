@@ -32,4 +32,6 @@ public abstract class AuditableEntity {
 
     @UpdateTimestamp
     protected LocalDateTime lastModifiedDate;
+
+    protected boolean deleted = Boolean.FALSE;
 }

@@ -32,8 +32,8 @@ public class CurrentUserAuditorAware implements AuditorAware<User> {
         if (result instanceof String) {
             return repository.findByUsername((String) authentication.getPrincipal());
         } else {
-            org.springframework.security.core.userdetails.User userDetail =
-                    (org.springframework.security.core.userdetails.User) result;
+            User userDetail =
+                    (User) result;
             return repository.findByUsername(userDetail.getUsername());
         }
 

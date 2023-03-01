@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
@@ -28,9 +28,9 @@
     <link rel="stylesheet" th:href="@{/common-assets/css/style.css}">
 </head>
 <body>
-<header th:replace="fragments::header">
+<header th:replace="~{fragments::header}">
 </header>
-<aside th:replace="fragments::aside">
+<aside th:replace="~{fragments::aside}">
 </aside>
 <main class="main" id="main">
     <div class="pagetitle">
@@ -69,7 +69,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card">
+                <div class="card" sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')">
                     <div class="card-body profile-overview">
                         <h5 class="card-title">Auditoría</h5>
                         <div class="row">
@@ -118,15 +118,15 @@
                                 </button>
                             </li>
 
-                            <li class="nav-item">
+                            <li class="nav-item" sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')">
                                 <button class="nav-link" data-bs-target="#profile-edit" data-bs-toggle="tab">Editar
                                     Perfil
                                 </button>
                             </li>
 
-                            <li class="nav-item">
+                            <li class="nav-item" sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')">
                                 <button class="nav-link" data-bs-target="#profile-settings" data-bs-toggle="tab">
-                                    Configuración
+                                    Opciones
                                 </button>
                             </li>
 
@@ -197,7 +197,7 @@
                             <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
 
                                 <!-- Profile Edit Form -->
-                                <form>
+                                <div class="form" id="form-edit-profile">
                                     <div class="row mb-3">
                                         <label class="col-md-4 col-lg-3 col-form-label" for="profileImage">Profile
                                             Image</label>
@@ -314,65 +314,86 @@
                                     </div>
 
                                     <div class="text-center">
-                                        <button class="btn btn-primary" type="submit">Save Changes</button>
+                                        <button class="btn btn-primary">Save Changes</button>
                                     </div>
-                                </form><!-- End Profile Edit Form -->
+                                </div><!-- End Profile Edit Form -->
 
                             </div>
 
                             <div class="tab-pane fade pt-3" id="profile-settings">
-
-                                <!-- Settings Form -->
-                                <form>
-
-                                    <div class="row mb-3">
-                                        <label class="col-md-4 col-lg-3 col-form-label" for="fullName">Email
-                                            Notifications</label>
+                                <!-- deactivateUser Form -->
+                                <div class="form mb-3" id="form-deactivate-user">
+                                    <div class="row mb-4">
+                                        <h5>Desactivar Usuario</h5>
+                                        <p>Si un usuario deja de ser empleado, es útil desactivarlo en vez de borrarlo.
+                                            De esta manera, mantienes todos sus registros asociados. Un usuario
+                                            desactivado no puede iniciar sesión.
+                                            <br>Necesitas tener rol de administrador para poder desactivar a un usuario
+                                        </p>
                                         <div class="col-md-8 col-lg-9">
                                             <div class="form-check">
-                                                <input checked class="form-check-input" id="changesMade"
-                                                       type="checkbox">
-                                                <label class="form-check-label" for="changesMade">
-                                                    Changes made to your account
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input checked class="form-check-input" id="newProducts"
-                                                       type="checkbox">
-                                                <label class="form-check-label" for="newProducts">
-                                                    Information on new products and services
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" id="proOffers" type="checkbox">
-                                                <label class="form-check-label" for="proOffers">
-                                                    Marketing and promo offers
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input checked class="form-check-input" disabled
-                                                       id="securityNotify" type="checkbox">
-                                                <label class="form-check-label" for="securityNotify">
-                                                    Security alerts
+                                                <input class="form-check-input"
+                                                       id="securityNotifyDeactivateUser" type="checkbox">
+                                                <label class="form-check-label" for="securityNotifyDeactivateUser">
+                                                    Entiendo lo que representa desactivar a un usuario.
                                                 </label>
                                             </div>
                                         </div>
                                     </div>
-
                                     <div class="text-center">
-                                        <button class="btn btn-primary" type="submit">Save Changes</button>
+                                        <p class="text-muted" sec:authorize="hasAuthority('SUPERVISOR')">No
+                                            autorizado</p>
+                                        <button class="btn btn-warning" disabled
+                                                id="btn-deactivate-user" sec:authorize="hasAuthority('ADMIN')">
+                                            <i class="bi bi-exclamation-triangle pe-2"></i>Desactivar Usuario
+                                        </button>
+                                        <button class="btn btn-warning" disabled
+                                                id="dummy-btn-deactivate" sec:authorize="hasAuthority('SUPERVISOR')">
+                                            <i class="bi bi-exclamation-triangle pe-2"></i>Desactivar Usuario
+                                        </button>
                                     </div>
-                                </form><!-- End settings Form -->
+                                </div><!-- End deactivateUser Form -->
+                                <!-- deleteUser Form -->
+                                <div class="form mb-4" id="form-delete-user">
+                                    <div class="row mb-3">
+                                        <h5>Eliminar Usuario</h5>
+                                        <p>Borrar usuarios es una acción importante.
+                                            Deberías hacerlo únicamente si es que te equivocaste al crearlo,
+                                            y preferentemente sin que este haya creado ningún ticket.<br>
+                                            Solo podrás eliminar un usuario si tienes el rol de Administrador.</p>
+                                        <div class="col-md-8 col-lg-9">
+                                            <div class="form-check">
+                                                <input class="form-check-input"
+                                                       id="securityNotifyDeleteUser" type="checkbox">
+                                                <label class="form-check-label" for="securityNotifyDeleteUser">
+                                                    Entiendo lo que estoy haciendo.
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-muted" sec:authorize="hasAuthority('SUPERVISOR')">No
+                                            autorizado</p>
+                                        <button class="btn btn-danger" disabled
+                                                id="btn-delete-user" sec:authorize="hasAuthority('ADMIN')">
+                                            <i class="bi bi-exclamation-triangle pe-2"></i>Eliminar Usuario
+                                        </button>
+                                        <button class="btn btn-danger" disabled
+                                                id="dummy-btn-delete" sec:authorize="hasAuthority('SUPERVISOR')">
+                                            <i class="bi bi-exclamation-triangle pe-2"></i>Eliminar Usuario
+                                        </button>
+                                    </div>
+                                </div><!-- End deleteUser Form -->
 
                             </div>
 
                             <div class="tab-pane fade pt-3" id="profile-change-password">
-                                <!-- Change Password Form -->
-                                <form>
-
-                                    <div class="row mb-3">
-                                        <label class="col-md-4 col-lg-3 col-form-label" for="currentPassword">Current
-                                            Password</label>
+                                <!-- Change Password Form for regular users-->
+                                <div class="form" id="form-change-password">
+                                    <div class="row mb-3"
+                                         sec:authorize="hasAnyAuthority('DISPATCHER', 'TRANSPORTER', 'SUPERVISOR')">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="currentPassword">Contraseña
+                                            Actual</label>
                                         <div class="col-md-8 col-lg-9">
                                             <input class="form-control" id="currentPassword" name="password"
                                                    type="password">
@@ -380,17 +401,20 @@
                                     </div>
 
                                     <div class="row mb-3">
-                                        <label class="col-md-4 col-lg-3 col-form-label" for="newPassword">New
-                                            Password</label>
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="newPassword">Nueva
+                                            Contraseña</label>
                                         <div class="col-md-8 col-lg-9">
                                             <input class="form-control" id="newPassword" name="newpassword"
                                                    type="password">
+                                            <div class="form-text" id="passwordHelp">Debe contener al menos 4
+                                                caracteres, no especiales.
+                                            </div>
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
-                                        <label class="col-md-4 col-lg-3 col-form-label" for="renewPassword">Re-enter New
-                                            Password</label>
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="renewPassword">Reingresa la
+                                            nueva contraseña</label>
                                         <div class="col-md-8 col-lg-9">
                                             <input class="form-control" id="renewPassword" name="renewpassword"
                                                    type="password">
@@ -398,9 +422,33 @@
                                     </div>
 
                                     <div class="text-center">
-                                        <button class="btn btn-primary" type="submit">Change Password</button>
+                                        <button class="btn btn-primary" disabled id="btnChangePassword">Cambiar
+                                            Contraseña
+                                        </button>
                                     </div>
-                                </form><!-- End Change Password Form -->
+                                    <div class="alert alert-success mt-3 alert-dismissible fade show" id="passwordChangedOkInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-check-circle"></i> La contraseña se cambió con éxito. Vas a
+                                        tener que <strong>reiniciar tu sesión</strong>.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                    </div>
+                                    <div class="alert alert-warning mt-3 alert-dismissible fade show" id="passwordChangedBadPwdInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-exclamation-triangle"></i> La contraseña actual es
+                                        incorrecta.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                    </div>
+                                    <div class="alert alert-danger mt-3 alert-dismissible fade show" id="passwordChangedErrorInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-exclamation-triangle"></i> Ocurrió un error. ¿Tienes
+                                        internet? Comunícate con un administrador.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                    </div>
+                                </div><!-- End Change Password Form -->
+
 
                             </div>
 
@@ -414,21 +462,21 @@
     </section>
 </main>
 
-<footer th:replace="fragments::footer"></footer>
+<footer th:replace="~{fragments::footer}"></footer>
 <a class="back-to-top d-flex align-items-center justify-content-center" href="#"><i
         class="bi bi-arrow-up-short"></i></a>
 
 <!-- Vendor JS Files -->
-<script th:src="@{/common-assets/vendor/apexcharts/apexcharts.min.js}"></script>
+
 <script th:src="@{/common-assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
 
 <script th:src="@{/common-assets/vendor/echarts/echarts.min.js}"></script>
 
 <script th:src="@{/common-assets/vendor/simple-datatables/simple-datatables.js}"></script>
 
-<script th:src="@{/common-assets/vendor/php-email-form/validate.js}"></script>
 
 <!-- Template Main JS File -->
 <script th:src="@{/common-assets/js/main.js}"></script>
+<script th:src="@{/system-assets/js/user-detail.js}"></script>
 </body>
 </html>

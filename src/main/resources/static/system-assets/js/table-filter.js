@@ -1,17 +1,27 @@
+//------------Helper functions------------
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+//------------End Helper Functions-------
+
 const params = new URLSearchParams();
 const fields = document.querySelectorAll('.filter-form');
 const table = document.getElementById("table-body");
+const loadingIndicator = document.getElementById("loading-indicator");
 //add change listener to each field
 fields.forEach(field => {
     field.addEventListener('change', doFilter);
 });
 
-function fetchUsersWithFilters(filterList) {
+function fetchUsersWithFilters() {
     console.log('Fetching users with filters')
     //disable fields until fetch is complete
     fields.forEach(field => {
         field.disabled = true;
     });
+    loadingIndicator.style.visibility = "visible";
+    console.log(loadingIndicator.style.visibility);
     console.log("/api/v1/user/list?" + params.toString());
     fetch("/api/v1/user/list?" + params.toString())
         .then((response) => response.json()
@@ -44,13 +54,16 @@ function fetchUsersWithFilters(filterList) {
                         table.appendChild(tr);
 
                     })
+                    //enable fields and hide spinner, but wait half a second to give a "loading" effect
+                    fields.forEach(field => {
+                        field.disabled = false;
+                    });
+                    loadingIndicator.style.visibility = "hidden";
+                    console.log(loadingIndicator.style.visibility);
+
                 }
-            ));
-
-
-    fields.forEach(field => {
-        field.disabled = false;
-    });
+            )
+        )
 }
 
 function doFilter() {

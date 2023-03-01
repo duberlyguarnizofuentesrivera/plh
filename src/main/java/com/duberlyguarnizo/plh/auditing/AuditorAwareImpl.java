@@ -22,8 +22,8 @@ public class AuditorAwareImpl implements AuditorAware<Long> {
 
     @Override
     public Optional<Long> getCurrentAuditor() {
-        org.springframework.security.core.userdetails.User principal =
-                (org.springframework.security.core.userdetails.User) SecurityContextHolder
+        User principal =
+                (User) SecurityContextHolder
                         .getContext()
                         .getAuthentication()
                         .getPrincipal();

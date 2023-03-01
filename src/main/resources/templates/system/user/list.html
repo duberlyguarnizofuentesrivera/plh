@@ -46,6 +46,11 @@
         <div class="row d-flex justify-content-center">
             <div class="col-lg-10">
                 <div class="card recent-sales overflow-auto">
+                    <div class="filter pe-1" id="loading-indicator">
+                        <div class="spinner-border text-secondary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
                     <div class="card-body"><h5 class="card-title">Usuarios Registrados <span>| Todos</span></h5>
                         <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
                             <div class="dataTable-top d-flex justify-content-around row g-2">
@@ -128,14 +133,13 @@
 <a class="back-to-top d-flex align-items-center justify-content-center" href="#"><i
         class="bi bi-arrow-up-short"></i></a>
 <!-- Vendor JS Files -->
-<script th:src="@{/common-assets/vendor/apexcharts/apexcharts.min.js}"></script>
+
 <script th:src="@{/common-assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
 
 <script th:src="@{/common-assets/vendor/echarts/echarts.min.js}"></script>
 
 <script th:src="@{/common-assets/vendor/simple-datatables/simple-datatables.js}"></script>
 
-<script th:src="@{/common-assets/vendor/php-email-form/validate.js}"></script>
 
 <!-- Template Main JS File -->
 <script th:src="@{/common-assets/js/main.js}"></script>

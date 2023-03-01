@@ -27,15 +27,17 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("CustomUserDetailsService: No user found with this username!");
         } else {
             user = userSearch.get();
+            return user;
         }
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                user.isEnabled(),
-                user.isAccountNonExpired(),
-                user.isCredentialsNonExpired(),
-                user.isAccountNonLocked(),
-                user.getAuthorities()
-        );
+//        return new org.springframework.security.core.userdetails.User(
+//                user.getUsername(),
+//                user.getPassword(),
+//                user.isEnabled(),
+//                user.isAccountNonExpired(),
+//                user.isCredentialsNonExpired(),
+//                user.isAccountNonLocked(),
+//                user.getAuthorities()
+//        );
+
     }
 }

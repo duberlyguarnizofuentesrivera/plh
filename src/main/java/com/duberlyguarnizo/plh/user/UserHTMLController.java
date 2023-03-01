@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+
 @Controller
 @RequestMapping("/system/user/")
 @Slf4j
@@ -82,5 +83,23 @@ public class UserHTMLController {
             modifiedByUser.ifPresent(userBasicDto -> model.addAttribute("modifiedByUser", userBasicDto));
         }
         return "/system/user/crud/detail";
+    }
+
+    @GetMapping("/profile")
+    public String getProfile(Model model) {
+        Optional<UserBasicDto> currentUser = userService.getCurrentUser();
+        if (currentUser.isPresent()) {
+            UserDto userDto = userService.getByUsername(currentUser.get().username()).orElse(null);
+            model.addAttribute("userDto", userDto);
+            if (userDto != null && userDto.createdBy() != null && userDto.lastModifiedBy() != null) {
+                Optional<UserBasicDto> createdByUser = userService.getById(userDto.createdBy());
+                Optional<UserBasicDto> modifiedByUser = userService.getById(userDto.lastModifiedBy());
+                createdByUser.ifPresent(userBasicDto -> model.addAttribute("createdByUser", userBasicDto));
+                modifiedByUser.ifPresent(userBasicDto -> model.addAttribute("modifiedByUser", userBasicDto));
+            }
+            return "/system/user/crud/detail";
+        } else {
+            return "redirect:/";
+        }
     }
 }

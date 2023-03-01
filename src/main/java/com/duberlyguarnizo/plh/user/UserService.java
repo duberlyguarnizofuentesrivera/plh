@@ -159,4 +159,39 @@ public class UserService {
         System.out.println(result.getContent());
         return result.map(mapper::toBasicDto);
     }
+
+    public boolean verifyCurrentUserPassword(String oldPassword) {
+        Optional<User> currentUser = auditorAware.getCurrentAuditor();
+        if (currentUser.isEmpty()) {
+            log.warn("User Service - VerifyPassword: Current auditor requested, but no user currently logged in!");
+            return false;
+        } else {
+            return encoder.matches(oldPassword, currentUser.get().getPassword());
+        }
+    }
+
+    public boolean changeCurrentUserPassword(String newPassword) {
+        Optional<User> currentUser = auditorAware.getCurrentAuditor();
+        return changePasswordForAnyUser(newPassword, currentUser);
+    }
+
+
+    public boolean changeOtherUserPassword(String userName, String newPassword) {
+        Optional<User> userToChangePassword = repository.findByUsername(userName);
+        return changePasswordForAnyUser(newPassword, userToChangePassword);
+    }
+
+    //-------------Utility methods--------------------------------
+    private boolean changePasswordForAnyUser(String newPassword, Optional<User> currentUser) {
+        if (currentUser.isEmpty()) {
+            log.warn("User Service - ChangePassword: Current auditor requested, but no user currently logged in!");
+            return false;
+        } else {
+
+            currentUser.get().setPassword(encoder.encode(newPassword));
+            repository.save(currentUser.get());
+            log.info("User Service - ChangePassword: User " + currentUser.get().getUsername().toUpperCase() + " password changed successfully!");
+            return true;
+        }
+    }
 }

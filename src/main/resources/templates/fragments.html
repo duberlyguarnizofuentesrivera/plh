@@ -123,7 +123,11 @@
                         <h6><span class="text-capitalize" sec:authentication="name"></span></h6>
                         <!--Sec:authentication is returning a list... we must iterate over it-->
                         <div th:each="role: ${#authentication.getAuthorities()}">
-                            <span class="text-capitalize" th:text="${#strings.toLowerCase(role.getAuthority())}"></span>
+                            <span class="text-capitalize"
+                                  th:text="${#strings.toLowerCase(
+                                  (role.getAuthority()=='TRANSPORTER' || role.getAuthority()=='DISPATCHER') ? 'Usuario': role.getAuthority()
+                                  )}">
+                            </span>
                         </div>
                     </li>
                     <li>
@@ -131,7 +135,7 @@
                     </li>
 
                     <li>
-                        <a class="dropdown-item d-flex align-items-center" href="/system/profile">
+                        <a class="dropdown-item d-flex align-items-center" href="/system/user/profile">
                             <i class="bi bi-person"></i>
                             <span>Perfil</span>
                         </a>
