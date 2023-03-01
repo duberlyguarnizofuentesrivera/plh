@@ -6,17 +6,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
+
 @Controller
-@RequestMapping("users")
+@RequestMapping("/system/user/")
 @Slf4j
 public class UserHTMLController {
+    private final UserMapper userMapper;
     private final UserService userService;
 
     @Autowired
-    public UserHTMLController(UserService userService) {
+    public UserHTMLController(UserService userService,
+                              UserMapper userMapper) {
         this.userService = userService;
+        this.userMapper = userMapper;
     }
 
     //get current user
@@ -27,9 +34,14 @@ public class UserHTMLController {
     }
 
     //CRUD methods
-    @PostMapping("/create")
-    public boolean createUser(@RequestBody UserRegisterDto userRegister) {
-        return userService.save(userRegister);
+    @PostMapping(path = "/crud/create-action")
+    public String createUser(@ModelAttribute UserRegisterDto userRegister, Model model) {
+        boolean result = userService.save(userRegister);
+        if (result) {
+            return "redirect:/system/user/crud/by-username/" + userRegister.username();
+        } else {
+            return "redirect:/system/crud-error";
+        }
     }
 
     @PostMapping("/update")
@@ -42,21 +54,12 @@ public class UserHTMLController {
         return userService.deleteByUserName(username);
     }
 
-    @GetMapping("/all")
-    public Page<UserBasicDto> getAllUser(@RequestParam(defaultValue = "10") Integer page, @RequestParam(defaultValue = "15") Integer size) {
-        Page<UserBasicDto> result = userService.findAll(page, size);
-        result.getTotalPages();
-        return result;
-    }
-
-    @GetMapping("/by-role/{role}")
-    public Page<UserBasicDto> getAllUsersByRole(@PathVariable("role") String role, @RequestParam(defaultValue = "10") Integer page, @RequestParam(defaultValue = "15") Integer size) {
-        try {
-            UserRole userRole = UserRole.valueOf(role);
-            return userService.findByRole(userRole, page, size);
-        } catch (IllegalArgumentException e) {
-            return Page.empty();
-        }
+    @GetMapping("/list")
+    public String getAllUser(Model model) {
+        model.addAttribute("statusList", UserStatus.values());
+        model.addAttribute("roleList", UserRole.values());
+        //Filters are processed using API controller, with JS.
+        return "/system/user/list";
     }
 
     @GetMapping("/by-status/{status}")
@@ -69,8 +72,34 @@ public class UserHTMLController {
         }
     }
 
-    @GetMapping("/by-username/{username}")
-    public UserDto getUsersByUserName(@PathVariable("username") String username) {
-        return userService.getByUsername(username).orElse(null);
+    @GetMapping("/crud/by-username/{username}")
+    public String getUsersByUserName(@PathVariable("username") String username, Model model) {
+        UserDto userDto = userService.getByUsername(username).orElse(null);
+        model.addAttribute("userDto", userDto);
+        if (userDto != null && userDto.createdBy() != null && userDto.lastModifiedBy() != null) {
+            Optional<UserBasicDto> createdByUser = userService.getById(userDto.createdBy());
+            Optional<UserBasicDto> modifiedByUser = userService.getById(userDto.lastModifiedBy());
+            createdByUser.ifPresent(userBasicDto -> model.addAttribute("createdByUser", userBasicDto));
+            modifiedByUser.ifPresent(userBasicDto -> model.addAttribute("modifiedByUser", userBasicDto));
+        }
+        return "/system/user/crud/detail";
+    }
+
+    @GetMapping("/profile")
+    public String getProfile(Model model) {
+        Optional<UserBasicDto> currentUser = userService.getCurrentUser();
+        if (currentUser.isPresent()) {
+            UserDto userDto = userService.getByUsername(currentUser.get().username()).orElse(null);
+            model.addAttribute("userDto", userDto);
+            if (userDto != null && userDto.createdBy() != null && userDto.lastModifiedBy() != null) {
+                Optional<UserBasicDto> createdByUser = userService.getById(userDto.createdBy());
+                Optional<UserBasicDto> modifiedByUser = userService.getById(userDto.lastModifiedBy());
+                createdByUser.ifPresent(userBasicDto -> model.addAttribute("createdByUser", userBasicDto));
+                modifiedByUser.ifPresent(userBasicDto -> model.addAttribute("modifiedByUser", userBasicDto));
+            }
+            return "/system/user/crud/detail";
+        } else {
+            return "redirect:/";
+        }
     }
 }

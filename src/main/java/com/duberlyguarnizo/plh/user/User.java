@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,6 +25,8 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "_user")
+@SQLDelete(sql = "UPDATE _users SET deleted = true WHERE id = ?")
+@Where(clause = "deleted=false")
 public class User extends AuditableEntity implements UserDetails {
     @Id
     @GeneratedValue
@@ -44,7 +48,7 @@ public class User extends AuditableEntity implements UserDetails {
     private UserRole role;
     @Column(unique = true)
     @NotBlank
-    @Length(min = 5) //min 5 chars TODO: validate length in frontend
+    @Length(min = 5) //min 5 chars
     private String username;
     @NotBlank
     private String password;

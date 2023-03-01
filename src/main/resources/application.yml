@@ -1,6 +1,6 @@
 spring:
   jpa:
-    show-sql: false
+    show-sql: true
     hibernate:
       ddl-auto: update
   datasource:
@@ -27,3 +27,10 @@ management:
 logging:
   level:
     web: debug
+  pattern:
+    console: "%clr(%d{dd-MM-yy HH:mm:ss}){faint} %clr(%5p) %clr(---){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"
+
+custom:
+  properties:
+    remember:
+      key: all_the_things_ive_done

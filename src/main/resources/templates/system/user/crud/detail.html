@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="es" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+          name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <title>RedXpress Soluciones - Detalle De Usuario</title>
+    <!-- Favicons -->
+    <link rel="icon" th:href="@{/common-assets/img/favicon.png}">
+    <link rel="apple-touch-icon" th:href="@{/common-assets/img/apple-touch-icon.png}">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+          rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/bootstrap-icons/bootstrap-icons.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/boxicons/css/boxicons.min.css}">
+
+
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/remixicon/remixicon.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/simple-datatables/style.css}">
+
+    <!-- Template Main CSS File -->
+    <link rel="stylesheet" th:href="@{/common-assets/css/style.css}">
+</head>
+<body>
+<header th:replace="~{fragments::header}">
+</header>
+<aside th:replace="~{fragments::aside}">
+</aside>
+<main class="main" id="main">
+    <div class="pagetitle">
+        <h1>Sistema RedXPress - Detalle de Usuario</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">Principal</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/system}">Sistema</a></li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+    <section class="section profile">
+        <div class="row">
+            <div class="col-xl-4">
+
+                <div class="card">
+                    <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
+                        <img alt="Profile" class="rounded-circle" th:src="@{/common-assets/img/profile-img.jpg}">
+                        <h2><span class="text-capitalize"
+                                  th:text="${userDto.firstName() +' '+ userDto.lastName()}"></span></h2>
+                        <h3><span class="text-capitalize" th:text="${userDto.role().toString().toLowerCase()}"></span>
+                        </h3>
+                        <h3>
+                            <span class="text-capitalize badge text-bg-danger"
+                                  th:if="${userDto.status().toString()=='INACTIVE'}" th:text="${userDto.status()}"></span>
+                            <span class="text-capitalize badge text-bg-secondary"
+                                  th:if="${userDto.status().toString()=='ACTIVE'}" th:text="${userDto.status()}"></span>
+                        </h3>
+                        <div class="social-links mt-2">
+                            <a class="" th:href="${'tel:' + userDto.phone()}"
+                               th:unless="${#strings.isEmpty(userDto.phone())}"><i class="bi bi-phone"></i></a>
+                            <a class="" th:href="${'mailto:'+ userDto.email()}"
+                               th:unless="${#strings.isEmpty(userDto.email())}"><i class="bi bi-at"></i></a>
+                            <a class=""
+                               th:href="${'https://wa.me/51' + userDto.phone()}" th:unless="${#strings.isEmpty(userDto.phone())}"><i class="bi bi-whatsapp"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')">
+                    <div class="card-body profile-overview">
+                        <h5 class="card-title">Auditoría</h5>
+                        <div class="row">
+                            <div class="col-lg-5 col-md-4 label ">Creación</div>
+                            <div class="col-lg-7 col-md-8"><span class="text-capitalize"
+                                                                 th:text="${#temporals.format(userDto.createdDate(), 'dd-MM-yyyy HH:mm')}"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-5 col-md-4 label ">Creado Por</div>
+                            <div class="col-lg-7 col-md-8">
+                                <span class="text-capitalize" th:if="${createdByUser!=null}"
+                                      th:text="${createdByUser.firstName() + ' ' + createdByUser.lastName()}"></span>
+                                <span class="text-muted" th:if="${createdByUser==null}">Sin datos</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-5 col-md-4 label ">Modificación</div>
+                            <div class="col-lg-7 col-md-8"><span class="text-capitalize"
+                                                                 th:text="${#temporals.format(userDto.lastModifiedDate(), 'dd-MM-yyyy HH:mm')}"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-5 col-md-4 label ">Modificado Por</div>
+                            <div class="col-lg-7 col-md-8">
+                                <span class="text-capitalize" th:if="${modifiedByUser!=null}"
+                                      th:text="${createdByUser.firstName() + ' ' + createdByUser.lastName()}"></span>
+                                <span class="text-muted" th:if="${modifiedByUser==null}">Sin datos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-xl-8">
+
+                <div class="card">
+                    <div class="card-body pt-3">
+                        <!-- Bordered Tabs -->
+                        <ul class="nav nav-tabs nav-tabs-bordered">
+
+                            <li class="nav-item">
+                                <button class="nav-link active" data-bs-target="#profile-overview" data-bs-toggle="tab">
+                                    Resumen
+                                </button>
+                            </li>
+
+                            <li class="nav-item" sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')">
+                                <button class="nav-link" data-bs-target="#profile-edit" data-bs-toggle="tab">Editar
+                                    Perfil
+                                </button>
+                            </li>
+
+                            <li class="nav-item" sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')">
+                                <button class="nav-link" data-bs-target="#profile-settings" data-bs-toggle="tab">
+                                    Opciones
+                                </button>
+                            </li>
+
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-target="#profile-change-password" data-bs-toggle="tab">
+                                    Cambiar Contraseña
+                                </button>
+                            </li>
+
+                        </ul>
+                        <div class="tab-content pt-2">
+
+                            <div class="tab-pane fade show active profile-overview" id="profile-overview">
+                                <h5 class="card-title">Notas</h5>
+                                <!--                                <--TODO: add notes to entities-->
+                                <p class="small fst-italic" th:text="${userDto.username()}"></p>
+
+                                <h5 class="card-title">Detalles de usuario</h5>
+
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label ">Nombres Completos</div>
+                                    <div class="col-lg-8 col-md-7"><span class="text-capitalize"
+                                                                         th:text="${userDto.firstName() +' '+ userDto.lastName()}"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label">DNI</div>
+                                    <div class="col-lg-8 col-md-7"><span th:text="${userDto.idNumber()}"></span></div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label">Usuario</div>
+                                    <div class="col-lg-8 col-md-7"><span th:text="${userDto.username()}"></span></div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label">Celular</div>
+                                    <div class="col-lg-8 col-md-7">
+                                        <span th:text="${userDto.phone()}"
+                                              th:unless="${#strings.isEmpty(userDto.phone())}"></span>
+                                        <span class="text-muted"
+                                              th:if="${#strings.isEmpty(userDto.phone())}">Sin datos</span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label">2do teléfono</div>
+                                    <div class="col-lg-8 col-md-7">
+                                        <span th:text="${userDto.phone2()}"
+                                              th:unless="${#strings.isEmpty(userDto.phone2())}"></span>
+                                        <span class="text-muted"
+                                              th:if="${#strings.isEmpty(userDto.phone2())}">Sin datos</span>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label">Email</div>
+                                    <div class="col-lg-8 col-md-7">
+                                        <span th:text="${userDto.email()}"
+                                              th:unless="${#strings.isEmpty(userDto.email())}"></span>
+                                        <span class="text-muted"
+                                              th:if="${#strings.isEmpty(userDto.email())}">Sin datos</span>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
+
+                                <!-- Profile Edit Form -->
+                                <div class="form" id="form-edit-profile">
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="profileImage">Profile
+                                            Image</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <img alt="Profile" id="profileImage"
+                                                 th:src="@{/common-assets/img/profile-img.jpg}">
+                                            <div class="pt-2">
+                                                <a class="btn btn-primary btn-sm" href="#"
+                                                   title="Upload new profile image"><i class="bi bi-upload"></i></a>
+                                                <a class="btn btn-danger btn-sm" href="#"
+                                                   title="Remove my profile image"><i class="bi bi-trash"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="fullName">Full Name</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="fullName" name="fullName" type="text"
+                                                   value="Kevin Anderson">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="about">About</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <textarea class="form-control" id="about" name="about"
+                                                      style="height: 100px">Sunt est soluta temporibus accusantium neque nam maiores cumque temporibus. Tempora libero non est unde veniam est qui dolor. Ut sunt iure rerum quae quisquam autem eveniet perspiciatis odit. Fuga sequi sed ea saepe at unde.</textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="company">Company</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="company" name="company" type="text"
+                                                   value="Lueilwitz, Wisoky and Leuschke">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="Job">Job</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="Job" name="job" type="text"
+                                                   value="Web Designer">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="Country">Country</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="Country" name="country" type="text"
+                                                   value="USA">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="Address">Address</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="Address" name="address" type="text"
+                                                   value="A108 Adam Street, New York, NY 535022">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="Phone">Phone</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="Phone" name="phone" type="text"
+                                                   value="(436) 486-3538 x29071">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="Email">Email</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="Email" name="email" type="email"
+                                                   value="k.anderson@example.com">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="Twitter">Twitter
+                                            Profile</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="Twitter" name="twitter" type="text"
+                                                   value="https://twitter.com/#">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="Facebook">Facebook
+                                            Profile</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="Facebook" name="facebook" type="text"
+                                                   value="https://facebook.com/#">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="Instagram">Instagram
+                                            Profile</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="Instagram" name="instagram" type="text"
+                                                   value="https://instagram.com/#">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="Linkedin">Linkedin
+                                            Profile</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="Linkedin" name="linkedin" type="text"
+                                                   value="https://linkedin.com/#">
+                                        </div>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <button class="btn btn-primary">Save Changes</button>
+                                    </div>
+                                </div><!-- End Profile Edit Form -->
+
+                            </div>
+
+                            <div class="tab-pane fade pt-3" id="profile-settings">
+                                <!-- deactivateUser Form -->
+                                <div class="form mb-3" id="form-deactivate-user">
+                                    <div class="row mb-4">
+                                        <h5>Desactivar Usuario</h5>
+                                        <p>Si un usuario deja de ser empleado, es útil desactivarlo en vez de borrarlo.
+                                            De esta manera, mantienes todos sus registros asociados. Un usuario
+                                            desactivado no puede iniciar sesión.
+                                            <br>Necesitas tener rol de administrador para poder desactivar a un usuario
+                                        </p>
+                                        <div class="col-md-8 col-lg-9">
+                                            <div class="form-check">
+                                                <input class="form-check-input"
+                                                       id="securityNotifyDeactivateUser" type="checkbox">
+                                                <label class="form-check-label" for="securityNotifyDeactivateUser">
+                                                    Entiendo lo que representa desactivar a un usuario.
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-muted" sec:authorize="hasAuthority('SUPERVISOR')">No
+                                            autorizado</p>
+                                        <button class="btn btn-warning" disabled
+                                                id="btn-deactivate-user" sec:authorize="hasAuthority('ADMIN')">
+                                            <i class="bi bi-exclamation-triangle pe-2"></i>Desactivar Usuario
+                                        </button>
+                                        <button class="btn btn-warning" disabled
+                                                id="dummy-btn-deactivate" sec:authorize="hasAuthority('SUPERVISOR')">
+                                            <i class="bi bi-exclamation-triangle pe-2"></i>Desactivar Usuario
+                                        </button>
+                                    </div>
+                                </div><!-- End deactivateUser Form -->
+                                <!-- deleteUser Form -->
+                                <div class="form mb-4" id="form-delete-user">
+                                    <div class="row mb-3">
+                                        <h5>Eliminar Usuario</h5>
+                                        <p>Borrar usuarios es una acción importante.
+                                            Deberías hacerlo únicamente si es que te equivocaste al crearlo,
+                                            y preferentemente sin que este haya creado ningún ticket.<br>
+                                            Solo podrás eliminar un usuario si tienes el rol de Administrador.</p>
+                                        <div class="col-md-8 col-lg-9">
+                                            <div class="form-check">
+                                                <input class="form-check-input"
+                                                       id="securityNotifyDeleteUser" type="checkbox">
+                                                <label class="form-check-label" for="securityNotifyDeleteUser">
+                                                    Entiendo lo que estoy haciendo.
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-muted" sec:authorize="hasAuthority('SUPERVISOR')">No
+                                            autorizado</p>
+                                        <button class="btn btn-danger" disabled
+                                                id="btn-delete-user" sec:authorize="hasAuthority('ADMIN')">
+                                            <i class="bi bi-exclamation-triangle pe-2"></i>Eliminar Usuario
+                                        </button>
+                                        <button class="btn btn-danger" disabled
+                                                id="dummy-btn-delete" sec:authorize="hasAuthority('SUPERVISOR')">
+                                            <i class="bi bi-exclamation-triangle pe-2"></i>Eliminar Usuario
+                                        </button>
+                                    </div>
+                                </div><!-- End deleteUser Form -->
+
+                            </div>
+
+                            <div class="tab-pane fade pt-3" id="profile-change-password">
+                                <!-- Change Password Form for regular users-->
+                                <div class="form" id="form-change-password">
+                                    <div class="row mb-3"
+                                         sec:authorize="hasAnyAuthority('DISPATCHER', 'TRANSPORTER', 'SUPERVISOR')">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="currentPassword">Contraseña
+                                            Actual</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="currentPassword" name="password"
+                                                   type="password">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="newPassword">Nueva
+                                            Contraseña</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="newPassword" name="newpassword"
+                                                   type="password">
+                                            <div class="form-text" id="passwordHelp">Debe contener al menos 4
+                                                caracteres, no especiales.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="renewPassword">Reingresa la
+                                            nueva contraseña</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="renewPassword" name="renewpassword"
+                                                   type="password">
+                                        </div>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <button class="btn btn-primary" disabled id="btnChangePassword">Cambiar
+                                            Contraseña
+                                        </button>
+                                    </div>
+                                    <div class="alert alert-success mt-3 alert-dismissible fade show" id="passwordChangedOkInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-check-circle"></i> La contraseña se cambió con éxito. Vas a
+                                        tener que <strong>reiniciar tu sesión</strong>.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                    </div>
+                                    <div class="alert alert-warning mt-3 alert-dismissible fade show" id="passwordChangedBadPwdInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-exclamation-triangle"></i> La contraseña actual es
+                                        incorrecta.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                    </div>
+                                    <div class="alert alert-danger mt-3 alert-dismissible fade show" id="passwordChangedErrorInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-exclamation-triangle"></i> Ocurrió un error. ¿Tienes
+                                        internet? Comunícate con un administrador.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                    </div>
+                                </div><!-- End Change Password Form -->
+
+
+                            </div>
+
+                        </div><!-- End Bordered Tabs -->
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments::footer}"></footer>
+<a class="back-to-top d-flex align-items-center justify-content-center" href="#"><i
+        class="bi bi-arrow-up-short"></i></a>
+
+<!-- Vendor JS Files -->
+
+<script th:src="@{/common-assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+<script th:src="@{/common-assets/vendor/echarts/echarts.min.js}"></script>
+
+<script th:src="@{/common-assets/vendor/simple-datatables/simple-datatables.js}"></script>
+
+
+<!-- Template Main JS File -->
+<script th:src="@{/common-assets/js/main.js}"></script>
+<script th:src="@{/system-assets/js/user-detail.js}"></script>
+</body>
+</html>

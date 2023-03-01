@@ -779,7 +779,7 @@ h6 {
 /* Filter dropdown */
 .dashboard .filter {
     position: absolute;
-    right: 0px;
+    right: 5px;
     top: 15px;
 }
 
@@ -836,17 +836,17 @@ h6 {
     flex-grow: 0;
 }
 
-.dashboard .sales-card .card-icon {
+.dashboard .tickets-card .card-icon {
     color: #4154f1;
     background: #f6f6fe;
 }
 
-.dashboard .revenue-card .card-icon {
+.dashboard .delivered-card .card-icon {
     color: #2eca6a;
     background: #e0f8e9;
 }
 
-.dashboard .customers-card .card-icon {
+.dashboard .clients-card .card-icon {
     color: #ff771d;
     background: #ffecdf;
 }
@@ -1257,4 +1257,8 @@ h6 {
     text-align: center;
     font-size: 13px;
     color: #012970;
+}
+
+.same-size-btn {
+    min-width: 170px;
 }

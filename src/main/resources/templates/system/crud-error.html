@@ -5,7 +5,7 @@
     <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
           name="viewport">
     <meta content="ie=edge" http-equiv="X-UA-Compatible">
-    <title>RedXpress Soluciones</title>
+    <title>RedXpress Soluciones - Error De Procesamiento</title>
     <!-- Favicons -->
     <link rel="icon" th:href="@{/common-assets/img/favicon.png}">
     <link rel="apple-touch-icon" th:href="@{/common-assets/img/apple-touch-icon.png}">
@@ -28,26 +28,43 @@
     <link rel="stylesheet" th:href="@{/common-assets/css/style.css}">
 </head>
 <body>
-<div class="container mt-5">
-    <div class="row">
-        <div class="col">
-            <h1>Hello! This is our page.</h1>
-            <p>Use the links to navigate</p>
+<header th:replace="fragments::header">
+</header>
+<aside th:replace="fragments::aside">
+</aside>
+<main class="main" id="main">
+    <div class="pagetitle">
+        <h1>Sistema RedXPress - Error De Procesamiento</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">Principal</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/system}">Sistema</a></li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+    <section class="section dashboard">
+        <div class="row">
+            <div class="col-lg-10">
+                <p>Ha ocurrido un error en el procesamiento de tu petición. Este evento ha sido registrado. Vuelve a
+                    intentarlo, por favor. Si el error persiste, comunícate con un supervisor.</p>
+            </div>
         </div>
-        <div class="col">
-            <p th:if="${user!=null}">Bienvenido de vuelta,
-                <span th:text="${#strings.capitalize(user.firstName())}"></span>
-            </p>
-            <ul>
-                <li><a href="/">Principal</a></li>
-                <li><a href="/about">Nosotros</a></li>
-                <li><a href="/client">Seguimiento</a></li>
-                <li><a href="/system">Sistema</a></li>
-            </ul>
-            <a class="btn btn-outline-warning" href="/logout" th:if="${user!=null}">Cerrar Sesión</a>
-        </div>
-    </div>
-</div>
+    </section>
+</main>
+
 <footer th:replace="fragments::footer"></footer>
+<a class="back-to-top d-flex align-items-center justify-content-center" href="#"><i
+        class="bi bi-arrow-up-short"></i></a>
+<!-- Vendor JS Files -->
+
+<script th:src="@{/common-assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+<script th:src="@{/common-assets/vendor/echarts/echarts.min.js}"></script>
+
+<script th:src="@{/common-assets/vendor/simple-datatables/simple-datatables.js}"></script>
+
+
+<!-- Template Main JS File -->
+<script th:src="@{/common-assets/js/main.js}"></script>
 </body>
 </html>

@@ -34,6 +34,11 @@ public class UserService {
         return userList.map(mapper::toBasicDto);
     }
 
+    public Optional<UserBasicDto> getById(Long id) {
+        Optional<User> user = repository.findById(id);
+        return user.map(mapper::toBasicDto);
+    }
+
     public Page<UserBasicDto> findByRole(UserRole role, Integer page, Integer size) {
         Page<User> userList = repository.findByRole(role, PageRequest.of(page, size));
         return userList.map(mapper::toBasicDto);
@@ -102,6 +107,91 @@ public class UserService {
             return Optional.empty();
         } else {
             return Optional.of(mapper.toBasicDto(currentUser.get()));
+        }
+    }
+
+    public Page<UserBasicDto> findByStatusAndRole(UserStatus userStatus, UserRole userRole, Integer page, Integer size) {
+        Page<User> result = repository.findByStatusAndRole(userStatus, userRole, PageRequest.of(page, size));
+        return result.map(mapper::toBasicDto);
+    }
+
+
+    public Page<UserBasicDto> findWithFilters(String userStatus, String userRole, String search, Integer page, Integer size) {
+        UserRole roleValue;
+        UserStatus statusValue;
+        Page<User> result;
+        statusValue = "all".equals(userStatus) ? null : UserStatus.valueOf(userStatus);
+        roleValue = "all".equals(userRole) ? null : UserRole.valueOf(userRole);
+        if (statusValue == null && roleValue == null) {
+            log.warn("case: rol and status null");
+            if (search.isEmpty()) {
+                result = repository.findAll(PageRequest.of(page - 1, size));
+            } else {
+                result = repository.findByFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(search, search, PageRequest.of(page - 1, size));
+            }
+        } else {
+            log.warn("case: any of rol and status not null");
+            if (search.isEmpty()) {
+                log.warn("search is empty");
+                if (statusValue != null && roleValue != null) {
+                    result = repository.findByStatusAndRole(statusValue, roleValue, PageRequest.of(page - 1, size));
+                } else {
+                    if (statusValue == null) {
+                        result = repository.findByRole(roleValue, PageRequest.of(page - 1, size));
+                    } else {
+                        result = repository.findByStatus(statusValue, PageRequest.of(page - 1, size));
+                    }
+                }
+            } else {
+                log.warn("search is NOT empty");
+                if (statusValue != null && roleValue != null) {
+                    result = repository.findByRoleAndStatusAndFirstNameContainsIgnoreCaseOrLastNameNotContainsIgnoreCase(roleValue, statusValue, search, search, PageRequest.of(page - 1, size));
+                } else {
+                    if (statusValue != null) {
+                        result = repository.findByStatusAndFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(statusValue, search, search, PageRequest.of(page - 1, size));
+                    } else {
+                        result = repository.findByRoleAndFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(roleValue, search, search, PageRequest.of(page - 1, size));
+                    }
+                }
+            }
+        }
+        System.out.println("FIND WITH FILTERS:");
+        System.out.println(result.getContent());
+        return result.map(mapper::toBasicDto);
+    }
+
+    public boolean verifyCurrentUserPassword(String oldPassword) {
+        Optional<User> currentUser = auditorAware.getCurrentAuditor();
+        if (currentUser.isEmpty()) {
+            log.warn("User Service - VerifyPassword: Current auditor requested, but no user currently logged in!");
+            return false;
+        } else {
+            return encoder.matches(oldPassword, currentUser.get().getPassword());
+        }
+    }
+
+    public boolean changeCurrentUserPassword(String newPassword) {
+        Optional<User> currentUser = auditorAware.getCurrentAuditor();
+        return changePasswordForAnyUser(newPassword, currentUser);
+    }
+
+
+    public boolean changeOtherUserPassword(String userName, String newPassword) {
+        Optional<User> userToChangePassword = repository.findByUsername(userName);
+        return changePasswordForAnyUser(newPassword, userToChangePassword);
+    }
+
+    //-------------Utility methods--------------------------------
+    private boolean changePasswordForAnyUser(String newPassword, Optional<User> currentUser) {
+        if (currentUser.isEmpty()) {
+            log.warn("User Service - ChangePassword: Current auditor requested, but no user currently logged in!");
+            return false;
+        } else {
+
+            currentUser.get().setPassword(encoder.encode(newPassword));
+            repository.save(currentUser.get());
+            log.info("User Service - ChangePassword: User " + currentUser.get().getUsername().toUpperCase() + " password changed successfully!");
+            return true;
         }
     }
 }
