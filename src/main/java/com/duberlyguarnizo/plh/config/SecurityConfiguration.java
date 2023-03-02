@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -28,10 +29,11 @@ public class SecurityConfiguration {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/admin/").hasAnyRole("ADMIN", "SUPERVISOR")
-                .requestMatchers("/system/transporter").hasAnyRole("ADMIN", "SUPERVISOR", "TRANSPORTER")
-                .requestMatchers("/system/dispatcher").hasAnyRole("ADMIN", "SUPERVISOR", "DISPATCHER")
-                .requestMatchers("/system/user/crud/**").hasAnyRole("ADMIN", "SUPERVISOR")
+                .requestMatchers(HttpMethod.TRACE).denyAll()
+                .requestMatchers("/admin/").hasAnyAuthority("ADMIN", "SUPERVISOR")
+                .requestMatchers("/system/transporter").hasAnyAuthority("ADMIN", "SUPERVISOR", "TRANSPORTER")
+                .requestMatchers("/system/dispatcher").hasAnyAuthority("ADMIN", "SUPERVISOR", "DISPATCHER")
+                .requestMatchers("/system/users/crud/**").hasAnyAuthority("ADMIN", "SUPERVISOR")
                 .requestMatchers("/system/**", "/auth/**", "/system-assets/**").authenticated()
                 .anyRequest()
                 .permitAll()

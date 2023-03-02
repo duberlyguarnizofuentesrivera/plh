@@ -2,7 +2,7 @@ package com.duberlyguarnizo.plh.user;
 
 import com.duberlyguarnizo.plh.enums.UserRole;
 import com.duberlyguarnizo.plh.enums.UserStatus;
-import com.duberlyguarnizo.plh.generators.CurrentUserAuditorAware;
+import com.duberlyguarnizo.plh.util.CurrentUserAuditorAware;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +67,11 @@ public class UserService {
         if (user.isPresent()) { //user does exist, so we update
             User updateUser = user.get();
             updateUser = mapper.partialRegisterUpdate(userRegisterDto, updateUser);
-            updateUser.setPassword(encoder.encode(updateUser.getPassword())); //secure password
+            String password = userRegisterDto.password();
+            if (password != null && !password.isEmpty()) {
+                //if password was on body of request, change it to encoded value
+                updateUser.setPassword(encoder.encode(password)); //secure password
+            }
             log.info("UserService - Update: User " + updateUser.getUsername().toUpperCase() + " updated successfully!");
             repository.save(updateUser);
             return true;
@@ -192,6 +196,24 @@ public class UserService {
             repository.save(currentUser.get());
             log.info("User Service - ChangePassword: User " + currentUser.get().getUsername().toUpperCase() + " password changed successfully!");
             return true;
+        }
+    }
+
+    public boolean setStatus(String username) {
+        if (username.isEmpty()) {
+            return false;
+        } else {
+            Optional<User> user = repository.findByUsername(username);
+            if (user.isPresent()) {
+                User currentUser = user.get();
+                currentUser.setStatus(currentUser.getStatus() == UserStatus.INACTIVE ? UserStatus.ACTIVE : UserStatus.INACTIVE);
+                repository.save(currentUser);
+                log.info("User Service - setStatus: User " + currentUser.getUsername().toUpperCase() + " status changed successfully!");
+                return true;
+            } else {
+                //no user with username
+                return false;
+            }
         }
     }
 }

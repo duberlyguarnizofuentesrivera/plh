@@ -1,20 +1,32 @@
-const deleteBtn = document.getElementById("btn-delete-user");
-const deleteCheck = document.getElementById("securityNotifyDeleteUser");
-const deactivateBtn = document.getElementById("btn-deactivate-user");
-const deactivateCheck = document.getElementById("securityNotifyDeactivateUser");
+//------Checkboxes----------------------
+const checkDeleteUser = document.getElementById("securityNotifyDeleteUser");
+const checkDeactivateUser = document.getElementById("securityNotifyDeactivateUser");
+//-------Inputs---------------------
 const curPassword = document.getElementById("currentPassword");
 const newPassword = document.getElementById("newPassword");
 const reNewPassword = document.getElementById("renewPassword");
+//-----Buttons-----------------
+const btnDeleteUser = document.getElementById("btn-delete-user");
+const btnToggleStatusUser = document.getElementById("btn-toggle-status-user");
 const btnChangePassword = document.getElementById("btnChangePassword");
+//------Alerts--------------------------------
 const passwordChangedOkInfo = document.getElementById("passwordChangedOkInfo");
 const passwordChangedErrorInfo = document.getElementById("passwordChangedErrorInfo");
 const passwordChangedBadPwdInfo = document.getElementById("passwordChangedBadPwdInfo");
+const toggleStatusUserOkInfo = document.getElementById("toggleStatusUserOkInfo");
+const toggleStatusUserSameUserInfo = document.getElementById("toggleStatusUserSameUserInfo");
+const toggleStatusUserErrorInfo = document.getElementById("toggleStatusUserErrorInfo");
+const deleteUserOkInfo = document.getElementById("deleteUserOkInfo");
+const deleteUserSameUserInfo = document.getElementById("deleteUserSameUserInfo");
+const deleteUserErrorInfo = document.getElementById("deleteUserErrorInfo");
 
-deleteCheck.addEventListener("change", () => {
-    deleteBtn.toggleAttribute("disabled");
+
+//--------Event Handlers--------------------------------
+checkDeleteUser.addEventListener("change", () => {
+    btnDeleteUser.toggleAttribute("disabled");
 });
-deactivateCheck.addEventListener("change", () => {
-    deactivateBtn.toggleAttribute("disabled");
+checkDeactivateUser.addEventListener("change", () => {
+    btnToggleStatusUser.toggleAttribute("disabled");
 });
 /*--------------------------------------------------
 Change Password
@@ -63,7 +75,7 @@ btnChangePassword.addEventListener("click", () => {
     if (curPassword == null) {
         //Path may contain parameters, but original path will be the same. Because of this,
         // se select a fixed index for the name of the user currently on screen.
-        //Path format is: /system/user/crud/by-username/<username>
+        //Path format is: /system/users/crud/by-username/<username>
         const selectedUser = window.location.pathname.split('/')[5];
         console.log(selectedUser);
         //API call for admin user
@@ -73,7 +85,7 @@ btnChangePassword.addEventListener("click", () => {
             username: selectedUser
         };
         //this API call is made in the ADMIN controller.
-        fetch("/api/v1/user/change-password", {
+        fetch("/api/v1/users/change-any-password", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -85,7 +97,7 @@ btnChangePassword.addEventListener("click", () => {
                 console.log(response);
                 response.json().then(data => {
                     if (data['result'] === "PASSWORD_CHANGED") {
-                        passwordChangedOkInfo.style.visibility = "visible";
+                        passwordChangedOkInfo.style.display = "block";
                     }
                     btnChangePassword.removeAttribute("disabled");
                 })
@@ -93,7 +105,7 @@ btnChangePassword.addEventListener("click", () => {
         ).catch(err => {
             console.log("error");
             console.log(err);
-            passwordChangedErrorInfo.style.visibility = "visible";
+            passwordChangedErrorInfo.style.display = "block";
         });
     } else {
         //API call for regular users. Must be same user as profile name
@@ -103,7 +115,7 @@ btnChangePassword.addEventListener("click", () => {
             newPassword: newPassword.value
         };
         //this API call is made in the general controller.
-        fetch("/api/v1/user/change-password", {
+        fetch("/api/v1/users/change-password", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -116,10 +128,10 @@ btnChangePassword.addEventListener("click", () => {
                     console.log(data);
                     switch (data['result']) {
                         case "BAD_PASSWORD":
-                            passwordChangedBadPwdInfo.style.visibility = "visible";
+                            passwordChangedBadPwdInfo.style.display = "block";
                             break;
                         case "PASSWORD_CHANGED":
-                            passwordChangedOkInfo.style.visibility = "visible";
+                            passwordChangedOkInfo.style.display = "block";
                             break;
                     }
                     btnChangePassword.removeAttribute("disabled");
@@ -128,14 +140,91 @@ btnChangePassword.addEventListener("click", () => {
         ).catch(err => {
             console.log("error");
             console.log(err);
-            passwordChangedErrorInfo.style.visibility = "visible";
+            passwordChangedErrorInfo.style.display = "block";
             btnChangePassword.removeAttribute("disabled");
         });
     }
 })
 
+btnDeleteUser.addEventListener("click", () => {
+    btnDeleteUser.setAttribute("disabled", "");
+    const selectedUser = window.location.pathname.split('/')[5];
+    fetch("/api/v1/users/" + selectedUser, {
+        method: 'DELETE',
+    })
+        .then(
+            response => {
+                response.json().then(async data => {
+
+                    switch (data["result"]) {
+                        case 'USER_DELETED':
+                            deleteUserOkInfo.style.display = "block";
+                            await new Promise(() => setTimeout(() => {
+                                console.log("User deleted... waited for 5 seconds...")
+                            }, 5000));
+                            break;
+                        case 'ERROR':
+                            deleteUserErrorInfo.style.display = "block";
+                            btnDeleteUser.removeAttribute("disabled");
+                            break;
+                        case 'CANNOT_DELETE_SAME_USER':
+                            deleteUserSameUserInfo.style.display = "block"
+                            btnDeleteUser.removeAttribute("disabled");
+                            break;
+                    }
+                })
+            }
+        ).catch(() => {
+        deleteUserErrorInfo.style.display = "block";
+        btnDeleteUser.removeAttribute("disabled");
+    });
+});
+
+
+btnToggleStatusUser.addEventListener("click", () => {
+    btnToggleStatusUser.setAttribute("disabled", "");
+    const selectedUser = window.location.pathname.split('/')[5];
+    const deleteData = {username: selectedUser}
+    fetch("/api/v1/users/status", {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(deleteData)
+    })
+        .then(
+            response => {
+                response.json().then(async data => {
+
+                    switch (data["result"]) {
+                        case 'STATUS_CHANGED':
+                            toggleStatusUserOkInfo.style.display = "block";
+                            break;
+                        case 'ERROR':
+                            toggleStatusUserErrorInfo.style.display = "block";
+                            break;
+                        case 'CANNOT_TOGGLE_STATUS_SAME_USER':
+                            toggleStatusUserSameUserInfo.style.display = "block"
+                            break;
+                    }
+                    btnToggleStatusUser.removeAttribute("disabled");
+                })
+            }
+        ).catch(() => {
+        toggleStatusUserErrorInfo.style.display = "block";
+        btnToggleStatusUser.removeAttribute("disabled");
+    });
+});
+
+
 window.onload = () => {
-    passwordChangedOkInfo.style.visibility = "hidden";
-    passwordChangedErrorInfo.style.visibility = "hidden";
-    passwordChangedBadPwdInfo.style.visibility = "hidden";
+    passwordChangedOkInfo.style.display = "none";
+    passwordChangedErrorInfo.style.display = "none";
+    passwordChangedBadPwdInfo.style.display = "none";
+    toggleStatusUserOkInfo.style.display = "none";
+    toggleStatusUserErrorInfo.style.display = "none";
+    toggleStatusUserSameUserInfo.style.display = "none";
+    deleteUserOkInfo.style.display = "none";
+    deleteUserSameUserInfo.style.display = "none";
+    deleteUserErrorInfo.style.display = "none";
 };

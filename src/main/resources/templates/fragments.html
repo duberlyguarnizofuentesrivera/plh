@@ -11,7 +11,7 @@
 <header class="header fixed-top d-flex align-items-center" id="header" th:fragment="header">
 
     <div class="d-flex align-items-center justify-content-between">
-        <a class="logo d-flex align-items-center" href="index.html">
+        <a class="logo d-flex align-items-center" th:href="@{/}">
             <img alt="" th:src="@{/common-assets/img/logo.png}">
             <span class="d-none d-lg-block">RedXPress</span>
         </a>
@@ -135,7 +135,7 @@
                     </li>
 
                     <li>
-                        <a class="dropdown-item d-flex align-items-center" href="/system/user/profile">
+                        <a class="dropdown-item d-flex align-items-center" href="/system/users/profile">
                             <i class="bi bi-person"></i>
                             <span>Perfil</span>
                         </a>

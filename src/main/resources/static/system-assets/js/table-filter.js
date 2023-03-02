@@ -22,18 +22,18 @@ function fetchUsersWithFilters() {
     });
     loadingIndicator.style.visibility = "visible";
     console.log(loadingIndicator.style.visibility);
-    console.log("/api/v1/user/list?" + params.toString());
-    fetch("/api/v1/user/list?" + params.toString())
+    console.log("/api/v1/users/list?" + params.toString());
+    fetch("/api/v1/users/list?" + params.toString())
         .then((response) => response.json()
             .then((data) => {
-                    console.log("Received data")
-                    console.log(data);
-                    table.innerHTML = "";
-                    data.forEach((user) => {
-                        const tr = document.createElement("tr");
-                        let statusLabel;
-                        if (user.status.label === "Activo") {
-                            statusLabel = "<span class='badge rounded-pill text-bg-success'>" +
+                console.log("Received data")
+                console.log(data);
+                table.innerHTML = "";
+                data.forEach((user) => {
+                    const tr = document.createElement("tr");
+                    let statusLabel;
+                    if (user.status.label === "Activo") {
+                        statusLabel = "<span class='badge rounded-pill text-bg-success'>" +
                                 "<i class='bi bi-check-circle-fill pe-1'></i> " +
                                 user.status.label +
                                 "</span>";
@@ -45,7 +45,7 @@ function fetchUsersWithFilters() {
                         }
                         tr.innerHTML =
                             "<td>" + user.idNumber + "</td>" +
-                            "<td><a href='/system/user/crud/by-username/"
+                            "<td><a href='/system/users/crud/by-username/"
                             + user.username + "'><i class='bi bi-person-fill pe-1'></i> "
                             + user.username + "</a></td>" +
                             "<td>" + user.firstName + " " + user.lastName + "</td>" +
@@ -75,8 +75,9 @@ function doFilter() {
     const currentEntityUrl = window.location.pathname;
     //format: /system/<entity>/...
     const entity = currentEntityUrl.split("/")[2];
+    console.log(entity);
     switch (entity) {
-        case "user":
+        case "users":
             fetchUsersWithFilters();
     }
 }

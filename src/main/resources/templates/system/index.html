@@ -28,9 +28,9 @@
     <link rel="stylesheet" th:href="@{/common-assets/css/style.css}">
 </head>
 <body>
-<header th:replace="fragments::header">
+<header th:replace="~{fragments::header}">
 </header>
-<aside th:replace="fragments::aside">
+<aside th:replace="~{fragments::aside}">
 </aside>
 <main class="main" id="main">
     <div class="pagetitle">
@@ -87,38 +87,43 @@
             </div>
             <div class="col-lg-4">
                 <div class="row g-2">
-                    <div class="col-xl-6 col-12 d-flex justify-content-center"><a class="btn btn-primary same-size-btn"
-                                                                                  href="#"><i
-                            class="bi bi-plus-circle pe-1"></i>Ticket</a></div>
-                    <div class="col-xl-6 col-12 d-flex justify-content-center"><a class="btn btn-primary same-size-btn"
-                                                                                  href="#"><i
-                            class="bi bi-plus-circle pe-1"></i>Cliente</a></div>
-                    <div class="col-xl-6 col-12 d-flex justify-content-center"><a class="btn btn-primary same-size-btn"
-                                                                                  href="#"><i
-                            class="bi bi-plus-circle pe-1"></i>Destinatario</a></div>
-                    <div class="col-xl-6 col-12 d-flex justify-content-center"><a class="btn btn-primary same-size-btn"
-                                                                                  href="#"><i
-                            class="bi bi-plus-circle pe-1"></i>Transportista</a></div>
-                    <div class="col-xl-6 col-12 d-flex justify-content-center"><a class="btn btn-primary same-size-btn"
-                                                                                  href="#"><i
-                            class="bi bi-plus-circle pe-1"></i>Usuario</a></div>
+                    <div class="col-xl-6 col-6 d-flex justify-content-center">
+                        <a class="btn btn-secondary same-size-btn" href="#">
+                            <i class="bi bi-plus-circle pe-1"></i>Ticket</a>
+                    </div>
+                    <div class="col-xl-6 col-6 d-flex justify-content-center">
+                        <a class="btn btn-secondary same-size-btn" href="#">
+                            <i class="bi bi-plus-circle pe-1"></i>Cliente</a>
+                    </div>
+                    <div class="col-xl-6 col-6 d-flex justify-content-center">
+                        <a class="btn btn-secondary same-size-btn block" href="#">
+                            <i class="bi bi-plus-circle pe-1"></i>Destinatario</a>
+                    </div>
+                    <div class="col-xl-6 col-6 d-flex justify-content-center">
+                        <a class="btn btn-secondary same-size-btn block" href="#">
+                            <i class="bi bi-plus-circle pe-1"></i>Transportista</a>
+                    </div>
+                    <div class="col-xl-6 col-6 d-flex justify-content-center">
+                        <a class="btn btn-secondary same-size-btn" href="#">
+                            <i class="bi bi-plus-circle pe-1"></i>Usuario</a>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
-    <section class="section dashboard">
+    <section class="section dashboard mt-3">
         <div class="row">
             <div class="col">
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Acciones</h5>
                         <div class="row g-3 d-flex justify-content-center">
-                            <div class="col text-center"><a class="btn btn-secondary same-size-btn" href="#">Asignar
+                            <div class="col text-center"><a class="btn btn-primary same-size-btn" href="#">Asignar
                                 Transportista</a></div>
-                            <div class="col text-center"><a class="btn btn-secondary same-size-btn" href="#">Adm.
+                            <div class="col text-center"><a class="btn btn-primary same-size-btn" href="#">Adm.
                                 Envíos</a></div>
                             <div class="col text-center" sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')"><a
-                                    class="btn btn-secondary same-size-btn" th:href="@{/system/admin-panel}">Panel
+                                    class="btn btn-primary same-size-btn" th:href="@{/system/admin-panel}">Panel
                                 Admin</a></div>
                         </div>
                     </div>
@@ -128,7 +133,7 @@
     </section>
 </main>
 
-<footer th:replace="fragments::footer"></footer>
+<footer th:replace="~{fragments::footer}"></footer>
 <a class="back-to-top d-flex align-items-center justify-content-center" href="#"><i
         class="bi bi-arrow-up-short"></i></a>
 <!-- Vendor JS Files -->

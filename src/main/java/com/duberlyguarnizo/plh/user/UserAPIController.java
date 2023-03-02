@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,7 +12,8 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/users")
+
 public class UserAPIController {
     private final UserService userService;
 
@@ -19,7 +21,7 @@ public class UserAPIController {
         this.userService = userService;
     }
 
-    @GetMapping("/user/list")
+    @GetMapping("/list")
     public ResponseEntity<List<UserBasicDto>> getUserListWithFilters(@RequestParam(defaultValue = "all") String status,
                                                                      @RequestParam(defaultValue = "all") String role,
                                                                      @RequestParam(defaultValue = "") String search,
@@ -30,7 +32,9 @@ public class UserAPIController {
                 .getContent());
     }
 
-    @PostMapping(value = "/user/change-password", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/change-password",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, String>> changeMyUserPassword(@RequestBody Map<String, String> pwds) {
         boolean result;
         log.warn("received data: ");
@@ -51,7 +55,9 @@ public class UserAPIController {
 
     }
 
-    @PostMapping(value = "/admin/change-password", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/change-any-password",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, String>> changeOtherUserPassword(@RequestBody Map<String, String> pwds) {
         boolean result;
         log.warn("received data: ");
@@ -70,7 +76,40 @@ public class UserAPIController {
             log.warn("Other user password not changed due to error");
             return new ResponseEntity<>(Map.of("result", "ERROR"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
 
+    @DeleteMapping("/{username}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable String username) {
+        var currentUser = userService.getCurrentUser();
+        if (currentUser.isPresent() && (currentUser.get().username().equals(username))) {
+            //You are trying to delete your own user!!!
+            return new ResponseEntity<>(Map.of("result", "CANNOT_DELETE_SAME_USER"), HttpStatus.OK);
+        }
 
+        boolean result = userService.deleteByUserName(username);
+
+        if (result) {
+            return new ResponseEntity<>(Map.of("result", "USER_DELETED"), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(Map.of("result", "ERROR"), HttpStatus.OK);
+        }
+    }
+
+    @PatchMapping("/status")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Map<String, String>> changeUserStatus(@RequestBody Map<String, String> data) {
+        String username = data.get("username");
+        var currentUser = userService.getCurrentUser();
+        if (currentUser.isPresent() && (currentUser.get().username().equals(username))) {
+            //You are trying to change status of your own user!!!
+            return new ResponseEntity<>(Map.of("result", "CANNOT_DELETE_SAME_USER"), HttpStatus.OK);
+        }
+        boolean result = userService.setStatus(username);
+        if (result) {
+            return new ResponseEntity<>(Map.of("result", "STATUS_CHANGED"), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(Map.of("result", "ERROR"), HttpStatus.OK);
+        }
     }
 }

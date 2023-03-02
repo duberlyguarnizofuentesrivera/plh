@@ -25,7 +25,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "_user")
-@SQLDelete(sql = "UPDATE _users SET deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE _user SET deleted = true WHERE id = ?")
 @Where(clause = "deleted=false")
 public class User extends AuditableEntity implements UserDetails {
     @Id
@@ -52,6 +52,8 @@ public class User extends AuditableEntity implements UserDetails {
     private String username;
     @NotBlank
     private String password;
+
+    private String profilePicturePath;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
