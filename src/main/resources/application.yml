@@ -11,6 +11,10 @@ spring:
   security:
     user:
       password: 1801
+  servlet:
+    multipart:
+      max-request-size: 15MB
+      max-file-size: 2MB
 
 management:
   endpoints:

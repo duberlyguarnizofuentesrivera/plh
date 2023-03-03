@@ -21,6 +21,6 @@ public record UserRegisterDto(@NotBlank String firstName,
                               UserRole role,
                               @NotBlank @Length(min = 5) String username,
                               @NotBlank String password,
-                              String profilePicturePath
+                              String notes
 ) implements Serializable {
 }

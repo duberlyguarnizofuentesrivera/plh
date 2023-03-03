@@ -16,5 +16,5 @@ public record UserDto(Long createdBy, LocalDateTime createdDate, Long lastModifi
                       @NotBlank String firstName, @NotBlank String lastName, @NotBlank String idNumber, String phone,
                       String phone2, @Email String email, UserStatus status, UserRole role,
                       @NotBlank @Length(min = 5) String username, @NotBlank String password,
-                      String profilePicturePath) implements Serializable {
+                      String notes) implements Serializable {
 }

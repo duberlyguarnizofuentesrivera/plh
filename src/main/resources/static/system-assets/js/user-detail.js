@@ -5,10 +5,12 @@ const checkDeactivateUser = document.getElementById("securityNotifyDeactivateUse
 const curPassword = document.getElementById("currentPassword");
 const newPassword = document.getElementById("newPassword");
 const reNewPassword = document.getElementById("renewPassword");
+const profilePictureSelector = document.getElementById("profilePictureSelector");
 //-----Buttons-----------------
 const btnDeleteUser = document.getElementById("btn-delete-user");
 const btnToggleStatusUser = document.getElementById("btn-toggle-status-user");
 const btnChangePassword = document.getElementById("btnChangePassword");
+const btnUploadProfilePicture = document.getElementById("btnUploadProfilePicture");
 //------Alerts--------------------------------
 const passwordChangedOkInfo = document.getElementById("passwordChangedOkInfo");
 const passwordChangedErrorInfo = document.getElementById("passwordChangedErrorInfo");
@@ -216,7 +218,31 @@ btnToggleStatusUser.addEventListener("click", () => {
     });
 });
 
-
+btnUploadProfilePicture.addEventListener("click", () => {
+    const selectedUser = window.location.pathname.split('/')[5];
+    profilePictureSelector.click();
+    profilePictureSelector.onchange = () => {
+        const file = profilePictureSelector.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('username', selectedUser);
+        fetch("/api/v1/users/upload-profile-picture", {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            response.json().then(data => {
+                switch (data['result']) {
+                    case 'PROFILE_PICTURE_UPLOADED':
+                        alert("imagen subida con éxito");
+                        break;
+                    case 'ERROR':
+                        alert("error al subir la imagen");
+                        break;
+                }
+            })
+        })
+    }
+})
 window.onload = () => {
     passwordChangedOkInfo.style.display = "none";
     passwordChangedErrorInfo.style.display = "none";

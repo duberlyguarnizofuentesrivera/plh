@@ -17,6 +17,6 @@ public record UserBasicDto(
         UserStatus status,
         UserRole role,
         @NotBlank @Length(min = 5) String username,
-        String profilePicturePath)
+        String notes)
         implements Serializable {
 }

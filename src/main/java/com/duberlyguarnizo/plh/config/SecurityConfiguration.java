@@ -34,7 +34,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/system/transporter").hasAnyAuthority("ADMIN", "SUPERVISOR", "TRANSPORTER")
                 .requestMatchers("/system/dispatcher").hasAnyAuthority("ADMIN", "SUPERVISOR", "DISPATCHER")
                 .requestMatchers("/system/users/crud/**").hasAnyAuthority("ADMIN", "SUPERVISOR")
-                .requestMatchers("/system/**", "/auth/**", "/system-assets/**").authenticated()
+                .requestMatchers("/system/**", "/auth/**", "/system-assets/**", "/uploads/profilePics/**").authenticated()
                 .anyRequest()
                 .permitAll()
                 .and()

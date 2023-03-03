@@ -1,11 +1,13 @@
 package com.duberlyguarnizo.plh.user;
 
+import com.duberlyguarnizo.plh.util.ImageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -16,9 +18,11 @@ import java.util.Map;
 
 public class UserAPIController {
     private final UserService userService;
+    private final ImageService imageService;
 
-    public UserAPIController(UserService userService) {
+    public UserAPIController(UserService userService, ImageService imageService) {
         this.userService = userService;
+        this.imageService = imageService;
     }
 
     @GetMapping("/list")
@@ -111,5 +115,17 @@ public class UserAPIController {
         } else {
             return new ResponseEntity<>(Map.of("result", "ERROR"), HttpStatus.OK);
         }
+    }
+
+    @PostMapping(value = "/upload-profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, String>> uploadProfilePicture(@RequestParam("file") MultipartFile file, @RequestParam("username") String username) {
+        log.warn("UploadProfilePicture");
+        log.warn("received username= " + username);
+        log.warn("received file: " + file.toString());
+        boolean result = imageService.saveProfilePicture(file, username);
+        if (!result) {
+            return new ResponseEntity<>(Map.of("result", "ERROR"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(Map.of("result", "IMAGE_UPLOADED"), HttpStatus.OK);
     }
 }

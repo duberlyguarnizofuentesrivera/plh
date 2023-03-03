@@ -46,7 +46,8 @@
 
                 <div class="card">
                     <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
-                        <img alt="Profile" class="rounded-circle" th:src="@{/common-assets/img/profile-img.jpg}">
+                        <img alt="Profile" class="rounded-circle"
+                             th:src="@{${'/uploads/profilePics/' + userDto.username() + '.jpg'}}">
                         <h2><span class="text-capitalize"
                                   th:text="${userDto.firstName() +' '+ userDto.lastName()}"></span></h2>
                         <h3><span class="text-capitalize" th:text="${userDto.role().toString().toLowerCase()}"></span>
@@ -142,7 +143,7 @@
                             <div class="tab-pane fade show active profile-overview" id="profile-overview">
                                 <h5 class="card-title">Notas</h5>
                                 <!--                                <--TODO: add notes to entities-->
-                                <p class="small fst-italic" th:text="${userDto.username()}"></p>
+                                <p class="small fst-italic" th:text="${userDto.notes()}"></p>
 
                                 <h5 class="card-title">Detalles de usuario</h5>
 
@@ -196,7 +197,8 @@
                                     <div class="col-lg-8 col-md-7">
                                         <span class="badge rounded-pill text-bg-danger" th:text="${userDto.status()}"
                                               th:unless="${userDto.status().name()=='ACTIVE'}"></span>
-                                        <span class="badge rounded-pill text-bg-success" th:if="${userDto.status().name()=='ACTIVE'}"
+                                        <span class="badge rounded-pill text-bg-success"
+                                              th:if="${userDto.status().name()=='ACTIVE'}"
                                               th:text="${userDto.status()}"></span>
                                     </div>
                                 </div>
@@ -214,11 +216,23 @@
                                             <img alt="Profile" id="profileImage"
                                                  th:src="@{/common-assets/img/profile-img.jpg}">
                                             <div class="pt-2">
-                                                <a class="btn btn-primary btn-sm" href="#"
-                                                   title="Upload new profile image"><i class="bi bi-upload"></i></a>
-                                                <a class="btn btn-danger btn-sm" href="#"
-                                                   title="Remove my profile image"><i class="bi bi-trash"></i></a>
+                                                <!--                                                TODO: Fix case when admin is viewing its own profile-->
+                                                <button class="btn btn-primary btn-sm" id="btnUploadProfilePicture"
+                                                        title="Cargar nueva imagen"><i class="bi bi-upload"></i>
+                                                </button>
+                                                <button class="btn btn-danger btn-sm" id="btnDeleteProfilePicture"
+                                                        title="Remover imagen actual"><i class="bi bi-trash"></i>
+                                                </button>
                                             </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label"
+                                               for="editNotes">Notas</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="editNotes" name="editNotes"
+                                                   th:value="${userDto.notes()}"
+                                                   type="text">
                                         </div>
                                     </div>
 
@@ -252,7 +266,8 @@
                                     <div class="row mb-3">
                                         <label class="col-md-4 col-lg-3 col-form-label" for="editPhone">Celular</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="editPhone" name="editPhone" th:value="${userDto.phone()}"
+                                            <input class="form-control" id="editPhone" name="editPhone"
+                                                   th:value="${userDto.phone()}"
                                                    type="tel">
                                         </div>
                                     </div>
@@ -260,14 +275,16 @@
                                         <label class="col-md-4 col-lg-3 col-form-label" for="editPhone2">2do
                                             teléfono</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="editPhone2" name="editPhone2" th:value="${userDto.phone2()}"
+                                            <input class="form-control" id="editPhone2" name="editPhone2"
+                                                   th:value="${userDto.phone2()}"
                                                    type="tel">
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-md-4 col-lg-3 col-form-label" for="editEmail">Email</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="editEmail" name="editEmail" th:value="${userDto.email()}"
+                                            <input class="form-control" id="editEmail" name="editEmail"
+                                                   th:value="${userDto.email()}"
                                                    type="tel">
                                         </div>
                                     </div>
@@ -395,6 +412,9 @@
                                         personal de IT.
                                         <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
                                                 type="button"></button>
+                                        <!-- Next line is hidden field to get the new profile image"-->
+                                        <input accept=".jpg, .png, .jpeg" hidden="hidden" id="profilePictureSelector"
+                                               type="file">
                                     </div>
                                 </div><!-- End deleteUser Form -->
 

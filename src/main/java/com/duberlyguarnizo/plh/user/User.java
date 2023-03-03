@@ -53,7 +53,7 @@ public class User extends AuditableEntity implements UserDetails {
     @NotBlank
     private String password;
 
-    private String profilePicturePath;
+    private String notes;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
