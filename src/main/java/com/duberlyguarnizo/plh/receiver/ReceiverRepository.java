@@ -7,16 +7,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ReceiverRepository extends JpaRepository<Receiver, Long> {
     Page<Receiver> findByNames(String receiverNames, Pageable pageable);
 
-    List<Receiver> findByIdNumber(String receiverIdNumber);
+    Optional<Receiver> findByIdNumber(String receiverIdNumber);
 
-    List<Receiver> findByType(PersonType type);
+    Page<Receiver> findByType(PersonType type, Pageable pageable);
 
-    List<Receiver> findByLastModifiedDateBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
+    Page<Receiver> findByLastModifiedDateBetween(LocalDateTime startDateTime, LocalDateTime endDateTime, Pageable pageable);
 
 }
