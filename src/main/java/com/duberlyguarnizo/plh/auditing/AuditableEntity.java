@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class AuditableEntity {
+    protected boolean deleted = false;
     @CreatedBy
     @Column(updatable = false)
     protected Long createdBy;
@@ -32,6 +33,5 @@ public abstract class AuditableEntity {
 
     @UpdateTimestamp
     protected LocalDateTime lastModifiedDate;
-
-    protected boolean deleted = Boolean.FALSE;
+    private String notes;
 }

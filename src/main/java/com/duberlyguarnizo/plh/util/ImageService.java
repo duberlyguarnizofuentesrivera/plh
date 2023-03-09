@@ -23,8 +23,7 @@ public class ImageService {
             log.warn("ImageService: init(): Creating directory");
             log.warn(root.toString());
         } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Could not initialize folder for upload!");
+            log.error("ImageService: init(): Could not initialize folder for upload!");
         }
     }
 
@@ -63,7 +62,6 @@ public class ImageService {
             return false;
         } catch (IOException e) {
             log.warn("ImageService: there was a IO exception!");
-            e.printStackTrace();
             return false;
         } catch (UnsupportedOperationException e) {
             log.warn("ImageService: the operation is not supported!");

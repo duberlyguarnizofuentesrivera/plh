@@ -53,8 +53,6 @@ public class User extends AuditableEntity implements UserDetails {
     @NotBlank
     private String password;
 
-    private String notes;
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

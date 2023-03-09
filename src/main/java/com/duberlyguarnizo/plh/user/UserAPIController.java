@@ -17,6 +17,8 @@ import java.util.Map;
 @RequestMapping("/api/v1/users")
 
 public class UserAPIController {
+    private static final String ERROR_CUSTOM_STATUS = "ERROR";
+    private static final String RESULT_TEXT = "result";
     private final UserService userService;
     private final ImageService imageService;
 
@@ -25,6 +27,7 @@ public class UserAPIController {
         this.imageService = imageService;
     }
 
+    //TODO: Change endpoint names to comply with standards
     @GetMapping("/list")
     public ResponseEntity<List<UserBasicDto>> getUserListWithFilters(@RequestParam(defaultValue = "all") String status,
                                                                      @RequestParam(defaultValue = "all") String role,
@@ -32,7 +35,7 @@ public class UserAPIController {
                                                                      @RequestParam(defaultValue = "1") int page,
                                                                      @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(userService
-                .findWithFilters(status, role, search, page, size)
+                .getWithFilters(status, role, search, page, size)
                 .getContent());
     }
 
@@ -47,14 +50,14 @@ public class UserAPIController {
             result = userService.changeCurrentUserPassword(pwds.get("newPassword"));
             if (result) {
                 log.warn("User password changed");
-                return new ResponseEntity<>(Map.of("result", "PASSWORD_CHANGED"), HttpStatus.OK);
+                return new ResponseEntity<>(Map.of(RESULT_TEXT, "PASSWORD_CHANGED"), HttpStatus.OK);
             } else {
                 log.warn("User password not changed due to error");
-                return new ResponseEntity<>(Map.of("result", "ERROR"), HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(Map.of(RESULT_TEXT, ERROR_CUSTOM_STATUS), HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else {
             log.warn("Current password is incorrect");
-            return new ResponseEntity<>(Map.of("result", "BAD_PASSWORD"), HttpStatus.OK);
+            return new ResponseEntity<>(Map.of(RESULT_TEXT, "BAD_PASSWORD"), HttpStatus.OK);
         }
 
     }
@@ -72,13 +75,13 @@ public class UserAPIController {
             result = userService.changeOtherUserPassword(userName, newPassword);
             if (result) {
                 log.warn("Other user password changed");
-                return new ResponseEntity<>(Map.of("result", "PASSWORD_CHANGED"), HttpStatus.OK);
+                return new ResponseEntity<>(Map.of(RESULT_TEXT, "PASSWORD_CHANGED"), HttpStatus.OK);
             } else {
-                return new ResponseEntity<>(Map.of("result", "ERROR"), HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(Map.of(RESULT_TEXT, ERROR_CUSTOM_STATUS), HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else {
             log.warn("Other user password not changed due to error");
-            return new ResponseEntity<>(Map.of("result", "ERROR"), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(Map.of(RESULT_TEXT, ERROR_CUSTOM_STATUS), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -88,15 +91,15 @@ public class UserAPIController {
         var currentUser = userService.getCurrentUser();
         if (currentUser.isPresent() && (currentUser.get().username().equals(username))) {
             //You are trying to delete your own user!!!
-            return new ResponseEntity<>(Map.of("result", "CANNOT_DELETE_SAME_USER"), HttpStatus.OK);
+            return new ResponseEntity<>(Map.of(RESULT_TEXT, "CANNOT_DELETE_SAME_USER"), HttpStatus.OK);
         }
 
         boolean result = userService.deleteByUserName(username);
 
         if (result) {
-            return new ResponseEntity<>(Map.of("result", "USER_DELETED"), HttpStatus.OK);
+            return new ResponseEntity<>(Map.of(RESULT_TEXT, "USER_DELETED"), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(Map.of("result", "ERROR"), HttpStatus.OK);
+            return new ResponseEntity<>(Map.of(RESULT_TEXT, ERROR_CUSTOM_STATUS), HttpStatus.OK);
         }
     }
 
@@ -107,13 +110,13 @@ public class UserAPIController {
         var currentUser = userService.getCurrentUser();
         if (currentUser.isPresent() && (currentUser.get().username().equals(username))) {
             //You are trying to change status of your own user!!!
-            return new ResponseEntity<>(Map.of("result", "CANNOT_DELETE_SAME_USER"), HttpStatus.OK);
+            return new ResponseEntity<>(Map.of(RESULT_TEXT, "CANNOT_DELETE_SAME_USER"), HttpStatus.OK);
         }
         boolean result = userService.setStatus(username);
         if (result) {
-            return new ResponseEntity<>(Map.of("result", "STATUS_CHANGED"), HttpStatus.OK);
+            return new ResponseEntity<>(Map.of(RESULT_TEXT, "STATUS_CHANGED"), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(Map.of("result", "ERROR"), HttpStatus.OK);
+            return new ResponseEntity<>(Map.of(RESULT_TEXT, ERROR_CUSTOM_STATUS), HttpStatus.OK);
         }
     }
 
@@ -124,8 +127,8 @@ public class UserAPIController {
         log.warn("received file: " + file.toString());
         boolean result = imageService.saveProfilePicture(file, username);
         if (!result) {
-            return new ResponseEntity<>(Map.of("result", "ERROR"), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(Map.of(RESULT_TEXT, ERROR_CUSTOM_STATUS), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(Map.of("result", "IMAGE_UPLOADED"), HttpStatus.OK);
+        return new ResponseEntity<>(Map.of(RESULT_TEXT, "IMAGE_UPLOADED"), HttpStatus.OK);
     }
 }

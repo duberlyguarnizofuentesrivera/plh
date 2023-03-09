@@ -1,5 +1,6 @@
 package com.duberlyguarnizo.plh.receiver;
 
+import com.duberlyguarnizo.plh.enums.PersonType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -62,7 +63,7 @@ public class ReceiverController {
 
     @GetMapping("/by-is-company")
     public List<Receiver> getReceiversThatAreCompanies() {
-        List<Receiver> result = receiverRepository.findByCompany(true);
+        List<Receiver> result = receiverRepository.findByType(PersonType.COMPANY);
         if (result.isEmpty()) {
             return Collections.emptyList();
         }
@@ -71,7 +72,7 @@ public class ReceiverController {
 
     @GetMapping("/by-is-not-company")
     public List<Receiver> getReceiversThatAreNotCompanies() {
-        List<Receiver> result = receiverRepository.findByCompany(false);
+        List<Receiver> result = receiverRepository.findByType(PersonType.PERSON);
         if (result.isEmpty()) {
             return Collections.emptyList();
         }

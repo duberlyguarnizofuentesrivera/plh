@@ -16,14 +16,11 @@ import java.util.Optional;
 @RequestMapping("/system/users/")
 @Slf4j
 public class UserHTMLController {
-    private final UserMapper userMapper;
     private final UserService userService;
 
     @Autowired
-    public UserHTMLController(UserService userService,
-                              UserMapper userMapper) {
+    public UserHTMLController(UserService userService) {
         this.userService = userService;
-        this.userMapper = userMapper;
     }
 
     //get current user
@@ -34,6 +31,7 @@ public class UserHTMLController {
     }
 
     //CRUD methods
+    //TODO: Move post methods to API controller
     @PostMapping(path = "/crud/create-action")
     public String createUser(@ModelAttribute UserRegisterDto userRegister, Model model) {
         boolean result = userService.save(userRegister);
@@ -66,7 +64,7 @@ public class UserHTMLController {
     public Page<UserBasicDto> getAllUsersByUserStatus(@PathVariable("status") String status, @RequestParam(defaultValue = "10") Integer page, @RequestParam(defaultValue = "15") Integer size) {
         try {
             UserStatus userStatus = UserStatus.valueOf(status);
-            return userService.findByStatus(userStatus, page, size);
+            return userService.getByStatus(userStatus, page, size);
         } catch (IllegalArgumentException e) {
             return Page.empty();
         }

@@ -19,18 +19,6 @@ public class WebSystemAdminController {
 
     @GetMapping("/user/crud/create")
     public String adminCreateUser(Model model, UserRegisterDto userRegisterDto) {
-//        UserRegisterDto userRegisterDto = new UserRegisterDto(
-//                "Nombre",
-//                "Apellido",
-//                "00000000",
-//                null,
-//                null,
-//                null,
-//                null,
-//                null,
-//                "nombreusuario",
-//                "contraseña"
-//        );
         model.addAttribute("roleList", UserRole.values());
         model.addAttribute("statusList", UserStatus.values());
         model.addAttribute("userDto", userRegisterDto);

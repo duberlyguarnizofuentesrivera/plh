@@ -2,6 +2,7 @@ package com.duberlyguarnizo.plh.client;
 
 import com.duberlyguarnizo.plh.address.Address;
 import com.duberlyguarnizo.plh.auditing.AuditableEntity;
+import com.duberlyguarnizo.plh.enums.PersonType;
 import com.duberlyguarnizo.plh.enums.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -26,7 +27,8 @@ public class Client extends AuditableEntity {
     @NotBlank
     @Column(unique = true)
     private String idNumber;
-    private boolean isCompany;
+    @Enumerated(EnumType.STRING)
+    private PersonType type;
     @NotBlank
     private String names;
     private String contactNames;
