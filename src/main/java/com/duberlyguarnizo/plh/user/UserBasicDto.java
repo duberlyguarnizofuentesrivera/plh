@@ -16,6 +16,7 @@ public record UserBasicDto(
         @NotBlank String idNumber,
         UserStatus status,
         UserRole role,
-        @NotBlank @Length(min = 5) String username)
+        @NotBlank @Length(min = 5) String username,
+        String notes)
         implements Serializable {
 }

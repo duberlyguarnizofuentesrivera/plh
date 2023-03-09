@@ -13,17 +13,14 @@ import java.util.Optional;
 
 
 @Controller
-@RequestMapping("/system/user/")
+@RequestMapping("/system/users/")
 @Slf4j
 public class UserHTMLController {
-    private final UserMapper userMapper;
     private final UserService userService;
 
     @Autowired
-    public UserHTMLController(UserService userService,
-                              UserMapper userMapper) {
+    public UserHTMLController(UserService userService) {
         this.userService = userService;
-        this.userMapper = userMapper;
     }
 
     //get current user
@@ -34,11 +31,12 @@ public class UserHTMLController {
     }
 
     //CRUD methods
+    //TODO: Move post methods to API controller
     @PostMapping(path = "/crud/create-action")
     public String createUser(@ModelAttribute UserRegisterDto userRegister, Model model) {
         boolean result = userService.save(userRegister);
         if (result) {
-            return "redirect:/system/user/crud/by-username/" + userRegister.username();
+            return "redirect:/system/users/crud/by-username/" + userRegister.username();
         } else {
             return "redirect:/system/crud-error";
         }
@@ -59,14 +57,14 @@ public class UserHTMLController {
         model.addAttribute("statusList", UserStatus.values());
         model.addAttribute("roleList", UserRole.values());
         //Filters are processed using API controller, with JS.
-        return "/system/user/list";
+        return "/system/users/list";
     }
 
     @GetMapping("/by-status/{status}")
     public Page<UserBasicDto> getAllUsersByUserStatus(@PathVariable("status") String status, @RequestParam(defaultValue = "10") Integer page, @RequestParam(defaultValue = "15") Integer size) {
         try {
             UserStatus userStatus = UserStatus.valueOf(status);
-            return userService.findByStatus(userStatus, page, size);
+            return userService.getByStatus(userStatus, page, size);
         } catch (IllegalArgumentException e) {
             return Page.empty();
         }
@@ -82,7 +80,7 @@ public class UserHTMLController {
             createdByUser.ifPresent(userBasicDto -> model.addAttribute("createdByUser", userBasicDto));
             modifiedByUser.ifPresent(userBasicDto -> model.addAttribute("modifiedByUser", userBasicDto));
         }
-        return "/system/user/crud/detail";
+        return "/system/users/crud/detail";
     }
 
     @GetMapping("/profile")
@@ -97,7 +95,7 @@ public class UserHTMLController {
                 createdByUser.ifPresent(userBasicDto -> model.addAttribute("createdByUser", userBasicDto));
                 modifiedByUser.ifPresent(userBasicDto -> model.addAttribute("modifiedByUser", userBasicDto));
             }
-            return "/system/user/crud/detail";
+            return "/system/users/crud/detail";
         } else {
             return "redirect:/";
         }

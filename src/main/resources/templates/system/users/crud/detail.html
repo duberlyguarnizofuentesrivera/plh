@@ -19,8 +19,6 @@
     <link rel="stylesheet" th:href="@{/common-assets/vendor/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/common-assets/vendor/bootstrap-icons/bootstrap-icons.css}">
     <link rel="stylesheet" th:href="@{/common-assets/vendor/boxicons/css/boxicons.min.css}">
-
-
     <link rel="stylesheet" th:href="@{/common-assets/vendor/remixicon/remixicon.css}">
     <link rel="stylesheet" th:href="@{/common-assets/vendor/simple-datatables/style.css}">
 
@@ -48,14 +46,16 @@
 
                 <div class="card">
                     <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
-                        <img alt="Profile" class="rounded-circle" th:src="@{/common-assets/img/profile-img.jpg}">
+                        <img alt="Profile" class="rounded-circle"
+                             th:src="@{${'/uploads/profilePics/' + userDto.username() + '.jpg'}}">
                         <h2><span class="text-capitalize"
                                   th:text="${userDto.firstName() +' '+ userDto.lastName()}"></span></h2>
                         <h3><span class="text-capitalize" th:text="${userDto.role().toString().toLowerCase()}"></span>
                         </h3>
                         <h3>
                             <span class="text-capitalize badge text-bg-danger"
-                                  th:if="${userDto.status().toString()=='INACTIVE'}" th:text="${userDto.status()}"></span>
+                                  th:if="${userDto.status().toString()=='INACTIVE'}"
+                                  th:text="${userDto.status()}"></span>
                             <span class="text-capitalize badge text-bg-secondary"
                                   th:if="${userDto.status().toString()=='ACTIVE'}" th:text="${userDto.status()}"></span>
                         </h3>
@@ -65,7 +65,8 @@
                             <a class="" th:href="${'mailto:'+ userDto.email()}"
                                th:unless="${#strings.isEmpty(userDto.email())}"><i class="bi bi-at"></i></a>
                             <a class=""
-                               th:href="${'https://wa.me/51' + userDto.phone()}" th:unless="${#strings.isEmpty(userDto.phone())}"><i class="bi bi-whatsapp"></i></a>
+                               th:href="${'https://wa.me/51' + userDto.phone()}"
+                               th:unless="${#strings.isEmpty(userDto.phone())}"><i class="bi bi-whatsapp"></i></a>
                         </div>
                     </div>
                 </div>
@@ -142,7 +143,7 @@
                             <div class="tab-pane fade show active profile-overview" id="profile-overview">
                                 <h5 class="card-title">Notas</h5>
                                 <!--                                <--TODO: add notes to entities-->
-                                <p class="small fst-italic" th:text="${userDto.username()}"></p>
+                                <p class="small fst-italic" th:text="${userDto.notes()}"></p>
 
                                 <h5 class="card-title">Detalles de usuario</h5>
 
@@ -191,6 +192,16 @@
                                               th:if="${#strings.isEmpty(userDto.email())}">Sin datos</span>
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label">Estado</div>
+                                    <div class="col-lg-8 col-md-7">
+                                        <span class="badge rounded-pill text-bg-danger" th:text="${userDto.status()}"
+                                              th:unless="${userDto.status().name()=='ACTIVE'}"></span>
+                                        <span class="badge rounded-pill text-bg-success"
+                                              th:if="${userDto.status().name()=='ACTIVE'}"
+                                              th:text="${userDto.status()}"></span>
+                                    </div>
+                                </div>
 
                             </div>
 
@@ -205,111 +216,76 @@
                                             <img alt="Profile" id="profileImage"
                                                  th:src="@{/common-assets/img/profile-img.jpg}">
                                             <div class="pt-2">
-                                                <a class="btn btn-primary btn-sm" href="#"
-                                                   title="Upload new profile image"><i class="bi bi-upload"></i></a>
-                                                <a class="btn btn-danger btn-sm" href="#"
-                                                   title="Remove my profile image"><i class="bi bi-trash"></i></a>
+                                                <!--                                                TODO: Fix case when admin is viewing its own profile-->
+                                                <button class="btn btn-primary btn-sm" id="btnUploadProfilePicture"
+                                                        title="Cargar nueva imagen"><i class="bi bi-upload"></i>
+                                                </button>
+                                                <button class="btn btn-danger btn-sm" id="btnDeleteProfilePicture"
+                                                        title="Remover imagen actual"><i class="bi bi-trash"></i>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
-
                                     <div class="row mb-3">
-                                        <label class="col-md-4 col-lg-3 col-form-label" for="fullName">Full Name</label>
+                                        <label class="col-md-4 col-lg-3 col-form-label"
+                                               for="editNotes">Notas</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="fullName" name="fullName" type="text"
-                                                   value="Kevin Anderson">
+                                            <input class="form-control" id="editNotes" name="editNotes"
+                                                   th:value="${userDto.notes()}"
+                                                   type="text">
                                         </div>
                                     </div>
 
                                     <div class="row mb-3">
-                                        <label class="col-md-4 col-lg-3 col-form-label" for="about">About</label>
+                                        <label class="col-md-4 col-lg-3 col-form-label"
+                                               for="editFirstName">Nombres</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <textarea class="form-control" id="about" name="about"
-                                                      style="height: 100px">Sunt est soluta temporibus accusantium neque nam maiores cumque temporibus. Tempora libero non est unde veniam est qui dolor. Ut sunt iure rerum quae quisquam autem eveniet perspiciatis odit. Fuga sequi sed ea saepe at unde.</textarea>
+                                            <input class="form-control" id="editFirstName" name="editFirstName"
+                                                   th:value="${userDto.firstName()}"
+                                                   type="text">
                                         </div>
                                     </div>
-
                                     <div class="row mb-3">
-                                        <label class="col-md-4 col-lg-3 col-form-label" for="company">Company</label>
+                                        <label class="col-md-4 col-lg-3 col-form-label"
+                                               for="editLastName">Apellidos</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="company" name="company" type="text"
-                                                   value="Lueilwitz, Wisoky and Leuschke">
+                                            <input class="form-control" id="editLastName" name="editLastName"
+                                                   th:value="${userDto.lastName()}"
+                                                   type="text">
                                         </div>
                                     </div>
-
                                     <div class="row mb-3">
-                                        <label class="col-md-4 col-lg-3 col-form-label" for="Job">Job</label>
+                                        <label class="col-md-4 col-lg-3 col-form-label"
+                                               for="editIdNumber">DNI/CE</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="Job" name="job" type="text"
-                                                   value="Web Designer">
+                                            <input class="form-control" id="editIdNumber" name="editIdNumber"
+                                                   th:value="${userDto.idNumber()}"
+                                                   type="text">
                                         </div>
                                     </div>
-
                                     <div class="row mb-3">
-                                        <label class="col-md-4 col-lg-3 col-form-label" for="Country">Country</label>
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="editPhone">Celular</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="Country" name="country" type="text"
-                                                   value="USA">
+                                            <input class="form-control" id="editPhone" name="editPhone"
+                                                   th:value="${userDto.phone()}"
+                                                   type="tel">
                                         </div>
                                     </div>
-
                                     <div class="row mb-3">
-                                        <label class="col-md-4 col-lg-3 col-form-label" for="Address">Address</label>
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="editPhone2">2do
+                                            teléfono</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="Address" name="address" type="text"
-                                                   value="A108 Adam Street, New York, NY 535022">
+                                            <input class="form-control" id="editPhone2" name="editPhone2"
+                                                   th:value="${userDto.phone2()}"
+                                                   type="tel">
                                         </div>
                                     </div>
-
                                     <div class="row mb-3">
-                                        <label class="col-md-4 col-lg-3 col-form-label" for="Phone">Phone</label>
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="editEmail">Email</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="Phone" name="phone" type="text"
-                                                   value="(436) 486-3538 x29071">
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <label class="col-md-4 col-lg-3 col-form-label" for="Email">Email</label>
-                                        <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="Email" name="email" type="email"
-                                                   value="k.anderson@example.com">
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <label class="col-md-4 col-lg-3 col-form-label" for="Twitter">Twitter
-                                            Profile</label>
-                                        <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="Twitter" name="twitter" type="text"
-                                                   value="https://twitter.com/#">
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <label class="col-md-4 col-lg-3 col-form-label" for="Facebook">Facebook
-                                            Profile</label>
-                                        <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="Facebook" name="facebook" type="text"
-                                                   value="https://facebook.com/#">
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <label class="col-md-4 col-lg-3 col-form-label" for="Instagram">Instagram
-                                            Profile</label>
-                                        <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="Instagram" name="instagram" type="text"
-                                                   value="https://instagram.com/#">
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <label class="col-md-4 col-lg-3 col-form-label" for="Linkedin">Linkedin
-                                            Profile</label>
-                                        <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="Linkedin" name="linkedin" type="text"
-                                                   value="https://linkedin.com/#">
+                                            <input class="form-control" id="editEmail" name="editEmail"
+                                                   th:value="${userDto.email()}"
+                                                   type="tel">
                                         </div>
                                     </div>
 
@@ -324,18 +300,20 @@
                                 <!-- deactivateUser Form -->
                                 <div class="form mb-3" id="form-deactivate-user">
                                     <div class="row mb-4">
-                                        <h5>Desactivar Usuario</h5>
+                                        <h5>Cambiar Estado De Usuario</h5>
                                         <p>Si un usuario deja de ser empleado, es útil desactivarlo en vez de borrarlo.
-                                            De esta manera, mantienes todos sus registros asociados. Un usuario
+                                            De esta manera, mantienes todos sus registros asociados. Si regresa, puedes
+                                            volver a activarlo. Un usuario
                                             desactivado no puede iniciar sesión.
-                                            <br>Necesitas tener rol de administrador para poder desactivar a un usuario
+                                            <br>Necesitas tener rol de administrador para poder desactivar o activar a
+                                            un usuario
                                         </p>
                                         <div class="col-md-8 col-lg-9">
                                             <div class="form-check">
                                                 <input class="form-check-input"
                                                        id="securityNotifyDeactivateUser" type="checkbox">
                                                 <label class="form-check-label" for="securityNotifyDeactivateUser">
-                                                    Entiendo lo que representa desactivar a un usuario.
+                                                    Entiendo lo que representa desactivar o activar a un usuario.
                                                 </label>
                                             </div>
                                         </div>
@@ -344,13 +322,40 @@
                                         <p class="text-muted" sec:authorize="hasAuthority('SUPERVISOR')">No
                                             autorizado</p>
                                         <button class="btn btn-warning" disabled
-                                                id="btn-deactivate-user" sec:authorize="hasAuthority('ADMIN')">
-                                            <i class="bi bi-exclamation-triangle pe-2"></i>Desactivar Usuario
+                                                id="btn-toggle-status-user" sec:authorize="hasAuthority('ADMIN')">
+                                            <i class="bi bi-exclamation-triangle pe-2"></i>Cambiar Estado De Usuario
                                         </button>
                                         <button class="btn btn-warning" disabled
-                                                id="dummy-btn-deactivate" sec:authorize="hasAuthority('SUPERVISOR')">
-                                            <i class="bi bi-exclamation-triangle pe-2"></i>Desactivar Usuario
+                                                id="dummy-btn-toggle-status-user"
+                                                sec:authorize="hasAuthority('SUPERVISOR')">
+                                            <i class="bi bi-exclamation-triangle pe-2"></i>Cambiar Estado De Usuario
                                         </button>
+                                    </div>
+                                    <div class="alert alert-success mt-3 alert-dismissible fade show"
+                                         id="toggleStatusUserOkInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-check-circle"></i> Se cambió correctamente el estado
+                                        usuario. Refresca la página para ver el cambio.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                    </div>
+                                    <div class="alert alert-warning mt-3 alert-dismissible fade show"
+                                         id="toggleStatusUserSameUserInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-x-circle"></i> No puedes cambiar el estado a tu propio
+                                        usuario!.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                    </div>
+                                    <div class="alert alert-danger mt-3 alert-dismissible fade show"
+                                         id="toggleStatusUserErrorInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-x-circle"></i> Hubo un error al intentar cambiar el estado
+                                        del usuario.
+                                        Refresca la página y vuelve a intentar. Si el error persiste, pide ayuda al
+                                        personal de IT.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
                                     </div>
                                 </div><!-- End deactivateUser Form -->
                                 <!-- deleteUser Form -->
@@ -383,6 +388,34 @@
                                             <i class="bi bi-exclamation-triangle pe-2"></i>Eliminar Usuario
                                         </button>
                                     </div>
+                                    <div class="alert alert-success mt-3 alert-dismissible fade show"
+                                         id="deleteUserOkInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-check-circle"></i> Se eliminó correctamente al usuario.
+                                        Serás redirigido al listado en unos segundos.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                    </div>
+                                    <div class="alert alert-warning mt-3 alert-dismissible fade show"
+                                         id="deleteUserSameUserInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-x-circle"></i> No puedes eliminar a tu propio usuario!.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                    </div>
+                                    <div class="alert alert-danger mt-3 alert-dismissible fade show"
+                                         id="deleteUserErrorInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-x-circle"></i> Hubo un error al intentar eliminar al
+                                        usuario.
+                                        Refresca la página y vuelve a intentar. Si el error persiste, pide ayuda al
+                                        personal de IT.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                        <!-- Next line is hidden field to get the new profile image"-->
+                                        <input accept=".jpg, .png, .jpeg" hidden="hidden" id="profilePictureSelector"
+                                               type="file">
+                                    </div>
                                 </div><!-- End deleteUser Form -->
 
                             </div>
@@ -399,12 +432,16 @@
                                                    type="password">
                                         </div>
                                     </div>
-
+                                    <div class="row mb-3" sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')">
+                                        <p>En caso de olvido o perdida, los administradores pueden cambiar
+                                            la contraseña de cualquier usuario. Esta opción debe ser utilizada con mucho
+                                            cuidado.</p>
+                                    </div>
                                     <div class="row mb-3">
                                         <label class="col-md-4 col-lg-3 col-form-label" for="newPassword">Nueva
                                             Contraseña</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="newPassword" name="newpassword"
+                                            <input class="form-control" id="newPassword" name="newPassword"
                                                    type="password">
                                             <div class="form-text" id="passwordHelp">Debe contener al menos 4
                                                 caracteres, no especiales.
@@ -416,7 +453,7 @@
                                         <label class="col-md-4 col-lg-3 col-form-label" for="renewPassword">Reingresa la
                                             nueva contraseña</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="renewPassword" name="renewpassword"
+                                            <input class="form-control" id="renewPassword" name="renewPassword"
                                                    type="password">
                                         </div>
                                     </div>
@@ -426,21 +463,24 @@
                                             Contraseña
                                         </button>
                                     </div>
-                                    <div class="alert alert-success mt-3 alert-dismissible fade show" id="passwordChangedOkInfo"
+                                    <div class="alert alert-success mt-3 alert-dismissible fade show"
+                                         id="passwordChangedOkInfo"
                                          role="alert">
                                         <i class="pe-1 bi bi-check-circle"></i> La contraseña se cambió con éxito. Vas a
                                         tener que <strong>reiniciar tu sesión</strong>.
                                         <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
                                                 type="button"></button>
                                     </div>
-                                    <div class="alert alert-warning mt-3 alert-dismissible fade show" id="passwordChangedBadPwdInfo"
+                                    <div class="alert alert-warning mt-3 alert-dismissible fade show"
+                                         id="passwordChangedBadPwdInfo"
                                          role="alert">
                                         <i class="pe-1 bi bi-exclamation-triangle"></i> La contraseña actual es
                                         incorrecta.
                                         <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
                                                 type="button"></button>
                                     </div>
-                                    <div class="alert alert-danger mt-3 alert-dismissible fade show" id="passwordChangedErrorInfo"
+                                    <div class="alert alert-danger mt-3 alert-dismissible fade show"
+                                         id="passwordChangedErrorInfo"
                                          role="alert">
                                         <i class="pe-1 bi bi-exclamation-triangle"></i> Ocurrió un error. ¿Tienes
                                         internet? Comunícate con un administrador.

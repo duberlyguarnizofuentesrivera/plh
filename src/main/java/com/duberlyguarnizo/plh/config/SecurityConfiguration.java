@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -14,6 +15,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
+    private static final String ADMIN_AUTHORITY = "ADMIN";
+    private static final String SUPERVISOR_AUTHORITY = "SUPERVISOR";
+    private static final String DISTPATCHER_AUTHORITY = "DISPATCHER";
+    private static final String TRANSPORTER_AUTHORITY = "TRANSPORTER";
 
     private final String rememberKey;
 
@@ -28,11 +33,12 @@ public class SecurityConfiguration {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/admin/").hasAnyRole("ADMIN", "SUPERVISOR")
-                .requestMatchers("/system/transporter").hasAnyRole("ADMIN", "SUPERVISOR", "TRANSPORTER")
-                .requestMatchers("/system/dispatcher").hasAnyRole("ADMIN", "SUPERVISOR", "DISPATCHER")
-                .requestMatchers("/system/user/crud/**").hasAnyRole("ADMIN", "SUPERVISOR")
-                .requestMatchers("/system/**", "/auth/**", "/system-assets/**").authenticated()
+                .requestMatchers(HttpMethod.TRACE).denyAll()
+                .requestMatchers("/admin/").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
+                .requestMatchers("/system/transporter").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY, TRANSPORTER_AUTHORITY)
+                .requestMatchers("/system/dispatcher").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY, DISTPATCHER_AUTHORITY)
+                .requestMatchers("/system/users/crud/**").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
+                .requestMatchers("/system/**", "/auth/**", "/system-assets/**", "/uploads/profilePics/**").authenticated()
                 .anyRequest()
                 .permitAll()
                 .and()

@@ -2,7 +2,7 @@ package com.duberlyguarnizo.plh.user;
 
 import com.duberlyguarnizo.plh.enums.UserRole;
 import com.duberlyguarnizo.plh.enums.UserStatus;
-import com.duberlyguarnizo.plh.generators.CurrentUserAuditorAware;
+import com.duberlyguarnizo.plh.util.CurrentUserAuditorAware;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +29,8 @@ public class UserService {
     }
 
     //-------CRUD methods-----------------------------------------
-    public Page<UserBasicDto> findAll(Integer page, Integer size) {
-        Page<User> userList = repository.findAll(PageRequest.of(page, size));
+    public Page<UserBasicDto> getAll(Integer page, Integer size) {
+        Page<User> userList = repository.findAll(PageRequest.of(page - 1, size));
         return userList.map(mapper::toBasicDto);
     }
 
@@ -39,13 +39,13 @@ public class UserService {
         return user.map(mapper::toBasicDto);
     }
 
-    public Page<UserBasicDto> findByRole(UserRole role, Integer page, Integer size) {
-        Page<User> userList = repository.findByRole(role, PageRequest.of(page, size));
+    public Page<UserBasicDto> getByRole(UserRole role, Integer page, Integer size) {
+        Page<User> userList = repository.findByRole(role, PageRequest.of(page - 1, size));
         return userList.map(mapper::toBasicDto);
     }
 
-    public Page<UserBasicDto> findByStatus(UserStatus status, Integer page, Integer size) {
-        Page<User> userList = repository.findByStatus(status, PageRequest.of(page, size));
+    public Page<UserBasicDto> getByStatus(UserStatus status, Integer page, Integer size) {
+        Page<User> userList = repository.findByStatus(status, PageRequest.of(page - 1, size));
         return userList.map(mapper::toBasicDto);
     }
 
@@ -54,8 +54,8 @@ public class UserService {
         if (user.isEmpty()) { //user doesn't exist
             User newUser = mapper.toRegisterEntity(userRegisterDto);
             newUser.setPassword(encoder.encode(userRegisterDto.password())); //secure password
-            log.info("UserService - Save: User " + newUser.getUsername().toUpperCase() + " created successfully!");
             repository.save(newUser);
+            log.info("UserService - Save: User " + newUser.getUsername().toUpperCase() + " created successfully!");
             return true;
         }
         log.warn("UserService: Attempt to save user " + userRegisterDto.username().toUpperCase() + " failed!");
@@ -67,7 +67,11 @@ public class UserService {
         if (user.isPresent()) { //user does exist, so we update
             User updateUser = user.get();
             updateUser = mapper.partialRegisterUpdate(userRegisterDto, updateUser);
-            updateUser.setPassword(encoder.encode(updateUser.getPassword())); //secure password
+            String password = userRegisterDto.password();
+            if (password != null && !password.isEmpty()) {
+                //if password was on body of request, change it to encoded value
+                updateUser.setPassword(encoder.encode(password)); //secure password
+            }
             log.info("UserService - Update: User " + updateUser.getUsername().toUpperCase() + " updated successfully!");
             repository.save(updateUser);
             return true;
@@ -110,13 +114,13 @@ public class UserService {
         }
     }
 
-    public Page<UserBasicDto> findByStatusAndRole(UserStatus userStatus, UserRole userRole, Integer page, Integer size) {
-        Page<User> result = repository.findByStatusAndRole(userStatus, userRole, PageRequest.of(page, size));
+    public Page<UserBasicDto> getByStatusAndRole(UserStatus userStatus, UserRole userRole, Integer page, Integer size) {
+        Page<User> result = repository.findByStatusAndRole(userStatus, userRole, PageRequest.of(page - 1, size));
         return result.map(mapper::toBasicDto);
     }
 
 
-    public Page<UserBasicDto> findWithFilters(String userStatus, String userRole, String search, Integer page, Integer size) {
+    public Page<UserBasicDto> getWithFilters(String userStatus, String userRole, String search, Integer page, Integer size) {
         UserRole roleValue;
         UserStatus statusValue;
         Page<User> result;
@@ -130,35 +134,11 @@ public class UserService {
                 result = repository.findByFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(search, search, PageRequest.of(page - 1, size));
             }
         } else {
-            log.warn("case: any of rol and status not null");
-            if (search.isEmpty()) {
-                log.warn("search is empty");
-                if (statusValue != null && roleValue != null) {
-                    result = repository.findByStatusAndRole(statusValue, roleValue, PageRequest.of(page - 1, size));
-                } else {
-                    if (statusValue == null) {
-                        result = repository.findByRole(roleValue, PageRequest.of(page - 1, size));
-                    } else {
-                        result = repository.findByStatus(statusValue, PageRequest.of(page - 1, size));
-                    }
-                }
-            } else {
-                log.warn("search is NOT empty");
-                if (statusValue != null && roleValue != null) {
-                    result = repository.findByRoleAndStatusAndFirstNameContainsIgnoreCaseOrLastNameNotContainsIgnoreCase(roleValue, statusValue, search, search, PageRequest.of(page - 1, size));
-                } else {
-                    if (statusValue != null) {
-                        result = repository.findByStatusAndFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(statusValue, search, search, PageRequest.of(page - 1, size));
-                    } else {
-                        result = repository.findByRoleAndFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(roleValue, search, search, PageRequest.of(page - 1, size));
-                    }
-                }
-            }
+            result = iterateFilters(search, page, size, roleValue, statusValue);
         }
-        System.out.println("FIND WITH FILTERS:");
-        System.out.println(result.getContent());
         return result.map(mapper::toBasicDto);
     }
+
 
     public boolean verifyCurrentUserPassword(String oldPassword) {
         Optional<User> currentUser = auditorAware.getCurrentAuditor();
@@ -182,6 +162,35 @@ public class UserService {
     }
 
     //-------------Utility methods--------------------------------
+    private Page<User> iterateFilters(String search, Integer page, Integer size, UserRole roleValue, UserStatus statusValue) {
+        Page<User> result;
+        log.warn("case: any of rol and status not null");
+        if (search.isEmpty()) {
+            log.warn("search is empty");
+            if (statusValue != null && roleValue != null) {
+                result = repository.findByStatusAndRole(statusValue, roleValue, PageRequest.of(page - 1, size));
+            } else {
+                if (statusValue == null) {
+                    result = repository.findByRole(roleValue, PageRequest.of(page - 1, size));
+                } else {
+                    result = repository.findByStatus(statusValue, PageRequest.of(page - 1, size));
+                }
+            }
+        } else {
+            log.warn("search is NOT empty");
+            if (statusValue != null && roleValue != null) {
+                result = repository.findByRoleAndStatusAndFirstNameContainsIgnoreCaseOrLastNameNotContainsIgnoreCase(roleValue, statusValue, search, search, PageRequest.of(page - 1, size));
+            } else {
+                if (statusValue != null) {
+                    result = repository.findByStatusAndFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(statusValue, search, search, PageRequest.of(page - 1, size));
+                } else {
+                    result = repository.findByRoleAndFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(roleValue, search, search, PageRequest.of(page - 1, size));
+                }
+            }
+        }
+        return result;
+    }
+
     private boolean changePasswordForAnyUser(String newPassword, Optional<User> currentUser) {
         if (currentUser.isEmpty()) {
             log.warn("User Service - ChangePassword: Current auditor requested, but no user currently logged in!");
@@ -192,6 +201,24 @@ public class UserService {
             repository.save(currentUser.get());
             log.info("User Service - ChangePassword: User " + currentUser.get().getUsername().toUpperCase() + " password changed successfully!");
             return true;
+        }
+    }
+
+    public boolean setStatus(String username) {
+        if (username.isEmpty()) {
+            return false;
+        } else {
+            Optional<User> user = repository.findByUsername(username);
+            if (user.isPresent()) {
+                User currentUser = user.get();
+                currentUser.setStatus(currentUser.getStatus() == UserStatus.INACTIVE ? UserStatus.ACTIVE : UserStatus.INACTIVE);
+                repository.save(currentUser);
+                log.info("User Service - setStatus: User " + currentUser.getUsername().toUpperCase() + " status changed successfully!");
+                return true;
+            } else {
+                //no user with username
+                return false;
+            }
         }
     }
 }

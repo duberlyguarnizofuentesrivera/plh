@@ -1,4 +1,4 @@
-package com.duberlyguarnizo.plh.generators;
+package com.duberlyguarnizo.plh.util;
 
 import com.duberlyguarnizo.plh.user.User;
 import com.duberlyguarnizo.plh.user.UserRepository;
