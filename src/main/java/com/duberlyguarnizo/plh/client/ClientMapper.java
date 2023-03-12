@@ -31,7 +31,7 @@ public interface ClientMapper {
     ClientDetailDto toDetailDto(Client client);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    Client partialUpdate1(ClientDetailDto clientDetailDto, @MappingTarget Client client);
+    Client partialUpdate(ClientDetailDto clientDetailDto, @MappingTarget Client client);
 
     default Set<Long> pickUpAddressesToPickUpAddressIds(Set<Address> pickUpAddresses) {
         return pickUpAddresses.stream().map(Address::getId).collect(Collectors.toSet());

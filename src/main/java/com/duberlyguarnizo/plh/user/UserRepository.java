@@ -14,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    Optional<User> findByUsername(String username);
+    Optional<User> findByUsernameIgnoreCase(String username);
 
     Page<User> findByStatus(UserStatus systemUserStatus, Pageable pageable);
 

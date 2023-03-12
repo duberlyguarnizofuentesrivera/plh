@@ -42,7 +42,7 @@ public class ClientService {
                 repository.save(mapper.toEntity(client));
                 return true;
             } catch (Exception e) {
-                log.warn("ClientService: save(): Failed to save entity in repository");
+                log.warn("ClientService: save(): Failed to save entity in repository. Message: {}", e.getMessage());
                 return false;
             }
         } else {
@@ -58,7 +58,7 @@ public class ClientService {
                 repository.deleteById(result.get().getId());
                 return true;
             } catch (Exception e) {
-                log.warn("ClientService: delete(): Failed to delete entity in repository with id number {}", idNumber);
+                log.warn("ClientService: delete(): Failed to delete entity in repository with id number {}, with message: {}", idNumber, e.getMessage());
                 return false;
             }
         } else {
@@ -87,7 +87,7 @@ public class ClientService {
      * @return List of basic Dto for clients with a matching name
      */
     public Page<ClientBasicDto> getClientsByName(String name, int page, int size) {
-        Page<Client> result = repository.findByNamesContaining(name, PageRequest.of(page - 1, size));
+        Page<Client> result = repository.findByNamesContainingIgnoreCase(name, PageRequest.of(page - 1, size));
         return result.map(mapper::toBasicDto);
     }
 
@@ -142,7 +142,7 @@ public class ClientService {
             return getAllClients(page, size); //we do not rest 1 to the page bc the getAllClients function already does
         } else if (typeValue != null && statusValue != null && !name.isEmpty()) {
             //all values are set, so we search with all 3 parameters
-            return repository.findByTypeAndStatusAndNamesContaining(typeValue,
+            return repository.findByTypeAndStatusAndNamesContainingIgnoreCase(typeValue,
                     statusValue,
                     name,
                     PageRequest.of(page - 1, size)).map(mapper::toBasicDto);
@@ -183,10 +183,10 @@ public class ClientService {
         } else {
             if (typeValue == null && statusValue != null) {
                 //search for status
-                return repository.findByStatusAndNamesContains(statusValue, name, pageRequest).map(mapper::toBasicDto);
+                return repository.findByStatusAndNamesContainsIgnoreCase(statusValue, name, pageRequest).map(mapper::toBasicDto);
             } else {
                 //search for type
-                return repository.findByTypeAndNamesContains(typeValue, name, pageRequest).map(mapper::toBasicDto);
+                return repository.findByTypeAndNamesContainsIgnoreCase(typeValue, name, pageRequest).map(mapper::toBasicDto);
             }
         }
     }

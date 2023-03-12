@@ -1,8 +1,14 @@
 package com.duberlyguarnizo.plh.receiver;
 
+import com.duberlyguarnizo.plh.enums.PersonType;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -65,5 +71,65 @@ public class ReceiverService {
             log.warn("ReceiverService: delete(): Receiver with id number: {} doesn't exists", idNumber);
             return false;
         }
+    }
+
+    public Optional<ReceiverDto> getReceiver(String idNumber) {
+        var receiverExists = repository.findByIdNumber(idNumber);
+        if (receiverExists.isPresent()) {
+            return Optional.of(mapper.toDto(receiverExists.get()));
+        } else {
+            log.warn("ReceiverService: getReceiver(): Receiver with id number: {} doesn't exists", idNumber);
+            return Optional.empty();
+        }
+    }
+
+    public Optional<ReceiverDetailDto> getDetailReceiver(String idNumber) {
+        var receiverExists = repository.findByIdNumber(idNumber);
+        if (receiverExists.isPresent()) {
+            return Optional.of(mapper.toDetailDto(receiverExists.get()));
+        } else {
+            log.warn("ReceiverService: getReceiver(): Receiver with id number: {} doesn't exists", idNumber);
+            return Optional.empty();
+        }
+    }
+
+    public Page<ReceiverBasicDto> getWithFilters(String type, String names, int page, int size) {
+        PersonType personType;
+        try {
+            personType = PersonType.valueOf(type);
+        } catch (Exception e) {
+            personType = null;
+        }
+        if (personType == null && names.isEmpty()) {
+            //no filters applied
+            return repository.findAll(PageRequest.of(page - 1, size)).map(mapper::toBasicDto);
+        } else if (personType != null && !names.isEmpty()) {
+            //both filters applied
+            return repository.findByTypeAndNamesContainingIgnoreCase(personType, names, PageRequest.of(page - 1, size)).map(mapper::toBasicDto);
+        } else {
+            //one filter applied
+            if (personType != null) {
+                //filtering by type
+                return repository.findByType(personType, PageRequest.of(page - 1, size)).map(mapper::toBasicDto);
+            } else {
+                //filtering by names
+                return repository.findByNamesContainingIgnoreCase(names, PageRequest.of(page - 1, size)).map(mapper::toBasicDto);
+            }
+        }
+
+    }
+
+    public Page<ReceiverBasicDto> getByDate(LocalDate date, int page, int size) {
+        return repository.findByLastModifiedDateBetween(date.atStartOfDay(),
+                        date.plusDays(1).atStartOfDay(),
+                        PageRequest.of(page - 1, size))
+                .map(mapper::toBasicDto);
+    }
+
+    public Page<ReceiverBasicDto> getByDateInterval(LocalDate date1, LocalDate date2, int page, int size) {
+        return repository.findByLastModifiedDateBetween(date1.atStartOfDay(),
+                        date2.plusDays(1).atStartOfDay(),
+                        PageRequest.of(page - 1, size))
+                .map(mapper::toBasicDto);
     }
 }

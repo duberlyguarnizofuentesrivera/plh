@@ -33,7 +33,7 @@ public class AuditorAwareImpl implements AuditorAware<Long> {
                     (User) authentication
                             .getPrincipal();
             String username = principal.getUsername();
-            Optional<User> currentUser = repository.findByUsername(username);
+            Optional<User> currentUser = repository.findByUsernameIgnoreCase(username);
             return currentUser.map(User::getId);
         }
     }

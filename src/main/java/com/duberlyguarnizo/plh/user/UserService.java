@@ -50,7 +50,7 @@ public class UserService {
     }
 
     public boolean save(UserRegisterDto userRegisterDto) {
-        Optional<User> user = repository.findByUsername(userRegisterDto.username());
+        Optional<User> user = repository.findByUsernameIgnoreCase(userRegisterDto.username());
         if (user.isEmpty()) { //user doesn't exist
             User newUser = mapper.toRegisterEntity(userRegisterDto);
             newUser.setPassword(encoder.encode(userRegisterDto.password())); //secure password
@@ -63,7 +63,7 @@ public class UserService {
     }
 
     public boolean update(UserRegisterDto userRegisterDto, boolean createIfNotFound) {
-        Optional<User> user = repository.findByUsername(userRegisterDto.username());
+        Optional<User> user = repository.findByUsernameIgnoreCase(userRegisterDto.username());
         if (user.isPresent()) { //user does exist, so we update
             User updateUser = user.get();
             updateUser = mapper.partialRegisterUpdate(userRegisterDto, updateUser);
@@ -88,14 +88,14 @@ public class UserService {
 
     public boolean deleteByUserName(String username) {
         final boolean[] result = {true};
-        Optional<User> user = repository.findByUsername(username);
+        Optional<User> user = repository.findByUsernameIgnoreCase(username);
         user.ifPresentOrElse(value -> repository.deleteById(value.getId()), () -> result[0] = false);
         return result[0];
     }
 
     //-----End of CRUD ---------------------------------------
     public Optional<UserDto> getByUsername(String username) {
-        Optional<User> user = repository.findByUsername(username);
+        Optional<User> user = repository.findByUsernameIgnoreCase(username);
         if (user.isPresent()) {
             User resultUser = user.get();
             UserDto resultUserDto = mapper.toDto(resultUser);
@@ -157,36 +157,33 @@ public class UserService {
 
 
     public boolean changeOtherUserPassword(String userName, String newPassword) {
-        Optional<User> userToChangePassword = repository.findByUsername(userName);
+        Optional<User> userToChangePassword = repository.findByUsernameIgnoreCase(userName);
         return changePasswordForAnyUser(newPassword, userToChangePassword);
     }
 
     //-------------Utility methods--------------------------------
     private Page<User> iterateFilters(String search, Integer page, Integer size, UserRole roleValue, UserStatus statusValue) {
         Page<User> result;
-        log.warn("case: any of rol and status not null");
-        if (search.isEmpty()) {
-            log.warn("search is empty");
-            if (statusValue != null && roleValue != null) {
+        if (statusValue != null && roleValue != null) {
+            if (search.isEmpty()) {
                 result = repository.findByStatusAndRole(statusValue, roleValue, PageRequest.of(page - 1, size));
             } else {
-                if (statusValue == null) {
-                    result = repository.findByRole(roleValue, PageRequest.of(page - 1, size));
-                } else {
-                    result = repository.findByStatus(statusValue, PageRequest.of(page - 1, size));
-                }
+                result = repository.findByRoleAndStatusAndFirstNameContainsIgnoreCaseOrLastNameNotContainsIgnoreCase(roleValue, statusValue, search, search, PageRequest.of(page - 1, size));
+            }
+        } else if (statusValue != null) {
+            if (search.isEmpty()) {
+                result = repository.findByStatus(statusValue, PageRequest.of(page - 1, size));
+            } else {
+                result = repository.findByStatusAndFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(statusValue, search, search, PageRequest.of(page - 1, size));
+            }
+        } else if (roleValue != null) {
+            if (search.isEmpty()) {
+                result = repository.findByRole(roleValue, PageRequest.of(page - 1, size));
+            } else {
+                result = repository.findByRoleAndFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(roleValue, search, search, PageRequest.of(page - 1, size));
             }
         } else {
-            log.warn("search is NOT empty");
-            if (statusValue != null && roleValue != null) {
-                result = repository.findByRoleAndStatusAndFirstNameContainsIgnoreCaseOrLastNameNotContainsIgnoreCase(roleValue, statusValue, search, search, PageRequest.of(page - 1, size));
-            } else {
-                if (statusValue != null) {
-                    result = repository.findByStatusAndFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(statusValue, search, search, PageRequest.of(page - 1, size));
-                } else {
-                    result = repository.findByRoleAndFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(roleValue, search, search, PageRequest.of(page - 1, size));
-                }
-            }
+            throw new IllegalArgumentException("Both statusValue and roleValue cannot be null.");
         }
         return result;
     }
@@ -208,7 +205,7 @@ public class UserService {
         if (username.isEmpty()) {
             return false;
         } else {
-            Optional<User> user = repository.findByUsername(username);
+            Optional<User> user = repository.findByUsernameIgnoreCase(username);
             if (user.isPresent()) {
                 User currentUser = user.get();
                 currentUser.setStatus(currentUser.getStatus() == UserStatus.INACTIVE ? UserStatus.ACTIVE : UserStatus.INACTIVE);

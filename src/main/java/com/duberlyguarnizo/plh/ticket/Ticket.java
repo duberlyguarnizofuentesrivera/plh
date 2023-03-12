@@ -25,7 +25,7 @@ public class Ticket extends AuditableEntity {
     @Id
     @GeneratedValue
     private Long id;
-    private String code;
+    private String code; //generated on frontend
     @OneToMany
     @ToString.Exclude
     private List<Shipment> shipments = new ArrayList<>();

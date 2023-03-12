@@ -30,11 +30,11 @@ public class CurrentUserAuditorAware implements AuditorAware<User> {
         Object result = authentication.getPrincipal();
         log.warn("AUDITOR AWARE: Current principal is: " + result);
         if (result instanceof String) {
-            return repository.findByUsername((String) authentication.getPrincipal());
+            return repository.findByUsernameIgnoreCase((String) authentication.getPrincipal());
         } else {
             User userDetail =
                     (User) result;
-            return repository.findByUsername(userDetail.getUsername());
+            return repository.findByUsernameIgnoreCase(userDetail.getUsername());
         }
 
     }

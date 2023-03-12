@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface ClientRepository extends JpaRepository<Client, Long> {
     Optional<Client> findByIdNumber(String clientIdNumber);
 
-    Page<Client> findByNamesContaining(String clientNames, Pageable pageable);
+    Page<Client> findByNamesContainingIgnoreCase(String clientNames, Pageable pageable);
 
     Page<Client> findByStatus(UserStatus clientStatus, Pageable pageable);
 
@@ -22,12 +22,12 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     Page<Client> findByLastModifiedDateBetween(LocalDateTime startDateTime, LocalDateTime endDateTime, Pageable pageable);
 
-    Page<Client> findByTypeAndStatusAndNamesContaining(PersonType type, UserStatus status, String name, Pageable pageable);
+    Page<Client> findByTypeAndStatusAndNamesContainingIgnoreCase(PersonType type, UserStatus status, String name, Pageable pageable);
 
     Page<Client> findByTypeAndStatus(PersonType type, UserStatus status, Pageable pageable);
 
-    Page<Client> findByTypeAndNamesContains(PersonType type, String name, Pageable pageable);
+    Page<Client> findByTypeAndNamesContainsIgnoreCase(PersonType type, String name, Pageable pageable);
 
-    Page<Client> findByStatusAndNamesContains(UserStatus status, String name, Pageable pageable);
+    Page<Client> findByStatusAndNamesContainsIgnoreCase(UserStatus status, String name, Pageable pageable);
 
 }

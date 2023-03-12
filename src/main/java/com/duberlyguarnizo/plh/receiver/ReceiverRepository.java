@@ -17,6 +17,10 @@ public interface ReceiverRepository extends JpaRepository<Receiver, Long> {
 
     Page<Receiver> findByType(PersonType type, Pageable pageable);
 
+    Page<Receiver> findByTypeAndNamesContainingIgnoreCase(PersonType type, String names, Pageable pageable);
+
+    Page<Receiver> findByNamesContainingIgnoreCase(String names, Pageable pageable);
+
     Page<Receiver> findByLastModifiedDateBetween(LocalDateTime startDateTime, LocalDateTime endDateTime, Pageable pageable);
 
 }

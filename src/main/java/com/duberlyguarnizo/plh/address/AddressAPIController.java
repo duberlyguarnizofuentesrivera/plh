@@ -41,7 +41,6 @@ public class AddressAPIController {
                                                                          @RequestParam(defaultValue = "all") String district,
                                                                          @RequestParam(defaultValue = "1") int page,
                                                                          @RequestParam(defaultValue = "10") int size) {
-
         if (!"all".equals(district) && !"all".equals(province) && !"all".equals(region)) {
             //all 3 parameters were passed
             var result = service.getAllByRegionAndProvinceAndDistrict(region, province, district, page - 1, size);

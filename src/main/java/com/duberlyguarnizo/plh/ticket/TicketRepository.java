@@ -2,27 +2,41 @@ package com.duberlyguarnizo.plh.ticket;
 
 import com.duberlyguarnizo.plh.enums.TicketPaymentStatus;
 import com.duberlyguarnizo.plh.enums.TicketStatus;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
-    List<Ticket> findByCode(String ticketCode);
+    Optional<Ticket> findByCode(String ticketCode);
 
-    List<Ticket> findByClient_Id(Long clientId);//NOSONAR
+    Page<Ticket> findByClient_IdNumber(String clientIdNumber, Pageable pageable);//NOSONAR
 
-    List<Ticket> findByClient_IdNumber(String clientIdNumber);//NOSONAR
+    Page<Ticket> findByUser_IdNumber(String userIdNumber, Pageable pageable);//NOSONAR
 
-    List<Ticket> findByUser_Id(Long systemUserId, PageRequest pageRequest);//NOSONAR
+    Page<Ticket> findByStatus(TicketStatus ticketStatus, Pageable pageable);
 
-    List<Ticket> findByStatus(TicketStatus ticketStatus, PageRequest pageRequest);
+    Page<Ticket> findByPaymentStatus(TicketPaymentStatus ticketPaymentStatus, Pageable pageable);
 
-    List<Ticket> findByPaymentStatus(TicketPaymentStatus ticketPaymentStatus, PageRequest pageRequest);
 
-    List<Ticket> findByLastModifiedDateBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
+    Page<Ticket> findByClient_NamesContainsIgnoreCaseAndUser_FirstNameContainsIgnoreCase(
+            String userName,
+            String clientName,
+            Pageable pageable);
+
+    Page<Ticket> findByUser_FirstNameContainsIgnoreCase(
+            String userName,
+            Pageable pageable);
+
+    Page<Ticket> findByClient_NamesContainsIgnoreCase(
+            String userName,
+            Pageable pageable);
+
+
+    Page<Ticket> findByLastModifiedDateBetween(LocalDateTime startDateTime, LocalDateTime endDateTime, Pageable pageable);
 
 }

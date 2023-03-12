@@ -65,7 +65,7 @@ public class AddressService {
             repository.save(mapper.toEntity(address));
             return true;
         } catch (Exception e) {
-            log.warn(e.fillInStackTrace().getMessage());
+            log.warn("AddressService: save(): Failed to save address with id: {} and message: {}", address.id(), e.getMessage());
             return false;
         }
     }

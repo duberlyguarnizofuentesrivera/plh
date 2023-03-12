@@ -19,7 +19,7 @@ public interface AddressMapper {
     AddressBasicDto toBasicDto(Address address);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    Address partialUpdate1(AddressBasicDto addressBasicDto, @MappingTarget Address address);
+    Address partialUpdate(AddressBasicDto addressBasicDto, @MappingTarget Address address);
 
 
     default Set<Long> pickUpAddressesToPickUpAddressIds(Set<Address> pickUpAddresses) {
