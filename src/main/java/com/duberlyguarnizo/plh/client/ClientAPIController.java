@@ -2,10 +2,14 @@ package com.duberlyguarnizo.plh.client;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -25,12 +29,22 @@ public class ClientAPIController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ClientBasicDto>> getWithFilters(@RequestParam(defaultValue = "all") String type,
+    public ResponseEntity<List<ClientBasicDto>> getWithFilters(@RequestParam(defaultValue = "") String name,
+                                                               @RequestParam(defaultValue = "all") String type,
                                                                @RequestParam(defaultValue = "all") String status,
-                                                               @RequestParam(defaultValue = "") String query,
+                                                               @RequestParam @DateTimeFormat(pattern = "dd-MM-yy") LocalDate start,
+                                                               @RequestParam @DateTimeFormat(pattern = "dd-MM-yy") LocalDate end,
+                                                               @RequestParam(defaultValue = "names") String sort,
                                                                @RequestParam(defaultValue = "1") int page,
                                                                @RequestParam(defaultValue = "10") int size) {
-        var result = service.getWithFilters(type, status, query, page, size);
+        PageRequest paging = PageRequest.of(page - 1, size, Sort.by(sort));
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = LocalDate.now().minusDays(7);
+        if (start != null && end != null) {
+            startDate = start;
+            endDate = end;
+        }
+        var result = service.getWithFilters(name, type, status, startDate, endDate, paging);
         if (result.getContent().isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {

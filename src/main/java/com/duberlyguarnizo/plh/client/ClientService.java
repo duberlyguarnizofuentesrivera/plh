@@ -6,10 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Optional;
+
+import static com.duberlyguarnizo.plh.client.ClientRepository.*;
+import static org.springframework.data.jpa.domain.Specification.where;
 
 @Slf4j
 @Service
@@ -73,8 +77,11 @@ public class ClientService {
         return result.map(mapper::toDetailDto);
     }
 
-    public Page<ClientBasicDto> getAllClients(int page, int size) {
-        Page<Client> result = repository.findAll(PageRequest.of(page - 1, size));
+    public Page<ClientBasicDto> getAllClients(PageRequest paging) {
+        if (paging == null) {
+            paging = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "names"));
+        }
+        Page<Client> result = repository.findAll(paging);
         return result.map(mapper::toBasicDto);
     }
 
@@ -113,81 +120,40 @@ public class ClientService {
         }
     }
 
-    /**
-     * Returns a Page of basic Client DTO that matches all or some of the parameters.
-     *
-     * @param type   The type of person, in string. Either "COMPANY", "PERSON", or  "all" must be passed.
-     * @param status The status of the user, in string. Either "ACTIVE", "INACTIVE", or  "all" must be passed.
-     * @param name   The query name, to be matched against the full name of the client.
-     * @param page   The page of the request, starting from 1.
-     * @param size   The number of elements per page.
-     * @return Page of ClientBasicDto objects.
-     */
-    public Page<ClientBasicDto> getWithFilters(String type, String status, String name, int page, int size) {
+    public Page<ClientBasicDto> getWithFilters(String name,
+                                               String type,
+                                               String status,
+                                               LocalDate startDate,
+                                               LocalDate endDate,
+                                               PageRequest paging) {
         PersonType typeValue;
         UserStatus statusValue;
+        if (paging == null) {
+            paging = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "names"));
+        }
         try {
             typeValue = PersonType.valueOf(type);
-        } catch (IllegalArgumentException e) {
+
+        } catch (Exception e) {
             typeValue = null;
         }
         try {
             statusValue = UserStatus.valueOf(status);
-        } catch (IllegalArgumentException e) {
+
+        } catch (Exception e) {
             statusValue = null;
         }
-
-        if (typeValue == null && statusValue == null && name.isEmpty()) {
-            //all values are null, so we return complete list
-            return getAllClients(page, size); //we do not rest 1 to the page bc the getAllClients function already does
-        } else if (typeValue != null && statusValue != null && !name.isEmpty()) {
-            //all values are set, so we search with all 3 parameters
-            return repository.findByTypeAndStatusAndNamesContainingIgnoreCase(typeValue,
-                    statusValue,
-                    name,
-                    PageRequest.of(page - 1, size)).map(mapper::toBasicDto);
-        } else {
-            //analyze case by case
-            return getIterationResult(name, page, size, typeValue, statusValue);
+        try {
+            return repository.findAll(where(isType(typeValue))
+                    .and(hasUserStatus(statusValue))
+                    .and(nameContains(name))
+                    .and(dateIsBetween(startDate, endDate)), paging).map(mapper::toBasicDto);
+        } catch (Exception e) {
+            log.warn("ClientService: getWithFilters2(): Failed to get clients with filters. Message: {}", e.getMessage());
+            return Page.empty();
         }
     }
-
-    public Page<ClientBasicDto> getByDate(LocalDate date, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page - 1, size);
-        return repository.findByLastModifiedDateBetween(date.atStartOfDay(),
-                        date.plusDays(1).atStartOfDay(), pageRequest)
-                .map(mapper::toBasicDto);
-    }
-
-    public Page<ClientBasicDto> getByDateInterval(LocalDate date1, LocalDate date2, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page - 1, size);
-        return repository.findByLastModifiedDateBetween(date1.atStartOfDay(),
-                        date2.plusDays(1).atStartOfDay(), pageRequest)
-                .map(mapper::toBasicDto);
-    }
-
 
     //-------Utility methods-------------------------
-    private Page<ClientBasicDto> getIterationResult(String name, int page, int size, PersonType typeValue, UserStatus statusValue) {
-        PageRequest pageRequest = PageRequest.of(page - 1, size); //always rest 1 for repository index starts at 0
-        if (name.isEmpty()) {
-            if (typeValue == null && statusValue != null) {
-                //search for status
-                return repository.findByStatus(statusValue, pageRequest).map(mapper::toBasicDto);
-            } else if (typeValue != null && statusValue == null) {
-                //search for type
-                return repository.findByType(typeValue, pageRequest).map(mapper::toBasicDto);
-            } else {
-                return repository.findByTypeAndStatus(typeValue, statusValue, pageRequest).map(mapper::toBasicDto);
-            }
-        } else {
-            if (typeValue == null && statusValue != null) {
-                //search for status
-                return repository.findByStatusAndNamesContainsIgnoreCase(statusValue, name, pageRequest).map(mapper::toBasicDto);
-            } else {
-                //search for type
-                return repository.findByTypeAndNamesContainsIgnoreCase(typeValue, name, pageRequest).map(mapper::toBasicDto);
-            }
-        }
-    }
+
 }

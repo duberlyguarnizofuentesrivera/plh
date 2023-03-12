@@ -13,8 +13,8 @@ import java.util.Optional;
 @Service
 @Slf4j
 public class AddressService {
-    AddressRepository repository;
-    AddressMapper mapper = Mappers.getMapper(AddressMapper.class);
+    private final AddressRepository repository;
+    private final AddressMapper mapper = Mappers.getMapper(AddressMapper.class);
 
     public AddressService(AddressRepository repository) {
         this.repository = repository;

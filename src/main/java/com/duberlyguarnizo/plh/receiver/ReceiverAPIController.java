@@ -1,6 +1,8 @@
 package com.duberlyguarnizo.plh.receiver;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,36 +27,29 @@ public class ReceiverAPIController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReceiverBasicDto>> getWithFilters(@RequestParam(defaultValue = "all") String type,
+    public ResponseEntity<List<ReceiverBasicDto>> getWithFilters(@RequestParam(defaultValue = "") String type,
                                                                  @RequestParam(defaultValue = "") String names,
+                                                                 @RequestParam(defaultValue = "") String idNumber,
+                                                                 @RequestParam @DateTimeFormat(pattern = "dd-MM-yy") LocalDate start,
+                                                                 @RequestParam @DateTimeFormat(pattern = "dd-MM-yy") LocalDate end,
+                                                                 @RequestParam(defaultValue = "names") String sort,
                                                                  @RequestParam(defaultValue = "1") int page,
                                                                  @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(service.getWithFilters(type, names, page, size).getContent(), HttpStatus.OK);
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = LocalDate.now().minusDays(7);
+        if (start != null && end != null) {
+            startDate = start;
+            endDate = end;
+        }
+        PageRequest paging = PageRequest.of(page - 1, size, Sort.by(sort));
+        var result = service.getWithFilters(type, names, idNumber, startDate, endDate, paging);
+        if (result.getContent().isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(result.getContent(), HttpStatus.OK);
+        }
     }
 
-    @GetMapping("/date")
-    public ResponseEntity<List<ReceiverBasicDto>> getByDate(@RequestParam @DateTimeFormat LocalDate date,
-                                                            @RequestParam(defaultValue = "1") int page,
-                                                            @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(service.getByDate(date, page, size).getContent(), HttpStatus.OK);
-    }
-
-    @GetMapping("/date-interval")
-    public ResponseEntity<List<ReceiverBasicDto>> getByDateInterval(@RequestParam @DateTimeFormat LocalDate date1,
-                                                                    @RequestParam @DateTimeFormat LocalDate date2,
-                                                                    @RequestParam(defaultValue = "1") int page,
-                                                                    @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(service.getByDateInterval(date1, date2, page, size).getContent(), HttpStatus.OK);
-    }
-
-    @GetMapping("/date-days-ago")
-    public ResponseEntity<List<ReceiverBasicDto>> getByDateDaysAgo(@RequestParam(defaultValue = "7") int days,
-                                                                   @RequestParam(defaultValue = "1") int page,
-                                                                   @RequestParam(defaultValue = "10") int size) {
-        var today = LocalDate.now();
-        var daysAgo = LocalDate.now().minusDays(days);
-        return new ResponseEntity<>(service.getByDateInterval(today, daysAgo, page, size).getContent(), HttpStatus.OK);
-    }
 
     @PostMapping
     public ResponseEntity<Boolean> createReceiver(@Valid @RequestBody ReceiverDetailDto receiver) {

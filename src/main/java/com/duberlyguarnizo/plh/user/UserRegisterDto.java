@@ -10,7 +10,7 @@ import org.hibernate.validator.constraints.Length;
 import java.io.Serializable;
 
 @Builder
-/**
+/*
  * A DTO for the {@link User} entity
  */
 public record UserRegisterDto(@NotBlank String firstName,
