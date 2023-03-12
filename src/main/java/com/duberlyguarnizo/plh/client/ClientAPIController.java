@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -44,7 +45,7 @@ public class ClientAPIController {
             startDate = start;
             endDate = end;
         }
-        var result = service.getWithFilters(name, type, status, startDate, endDate, paging);
+        var result = service.getAll(name, type, status, startDate, endDate, paging);
         if (result.getContent().isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
@@ -69,6 +70,7 @@ public class ClientAPIController {
     }
 
     @DeleteMapping("{idNumber}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERVISOR')")
     public ResponseEntity<Boolean> delete(@PathVariable String idNumber) {
         var user = service.getBasicClientByIdNumber(idNumber);
         if (user.isEmpty()) {

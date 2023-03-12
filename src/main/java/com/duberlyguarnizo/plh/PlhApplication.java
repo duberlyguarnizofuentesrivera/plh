@@ -67,6 +67,7 @@ public class PlhApplication implements CommandLineRunner {
             }
         } else {
             log.warn("There was an unsuccessful attempt to create an existing first admin user!");
+            throw new RuntimeException("Could not create");
         }
     }
 

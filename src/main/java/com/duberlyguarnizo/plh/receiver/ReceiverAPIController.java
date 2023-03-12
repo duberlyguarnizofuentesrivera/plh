@@ -6,6 +6,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -66,6 +67,7 @@ public class ReceiverAPIController {
     }
 
     @DeleteMapping("{idNumber}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERVISOR')")
     public ResponseEntity<Boolean> deleteReceiver(@PathVariable String idNumber) {
         boolean result = service.delete(idNumber);
         return result ? new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK) :

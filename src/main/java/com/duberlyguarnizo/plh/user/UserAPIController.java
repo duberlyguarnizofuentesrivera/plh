@@ -87,11 +87,12 @@ public class UserAPIController {
 
     @DeleteMapping("/{username}")
     @PreAuthorize("hasAuthority('ADMIN')")
+    //TODO: Refactor to use only HTTP responses and not maps.
     public ResponseEntity<Map<String, String>> deleteUser(@PathVariable String username) {
         var currentUser = userService.getCurrentUser();
         if (currentUser.isPresent() && (currentUser.get().username().equals(username))) {
             //You are trying to delete your own user!!!
-            return new ResponseEntity<>(Map.of(RESULT_TEXT, "CANNOT_DELETE_SAME_USER"), HttpStatus.OK);
+            return new ResponseEntity<>(Map.of(RESULT_TEXT, "CANNOT_DELETE_SAME_USER"), HttpStatus.FORBIDDEN);
         }
 
         boolean result = userService.deleteByUserName(username);
@@ -99,7 +100,7 @@ public class UserAPIController {
         if (result) {
             return new ResponseEntity<>(Map.of(RESULT_TEXT, "USER_DELETED"), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(Map.of(RESULT_TEXT, ERROR_CUSTOM_STATUS), HttpStatus.OK);
+            return new ResponseEntity<>(Map.of(RESULT_TEXT, ERROR_CUSTOM_STATUS), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

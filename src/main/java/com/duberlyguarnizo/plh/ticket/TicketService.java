@@ -1,5 +1,7 @@
 package com.duberlyguarnizo.plh.ticket;
 
+import com.duberlyguarnizo.plh.enums.TicketPaymentStatus;
+import com.duberlyguarnizo.plh.enums.TicketStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.data.domain.Page;
@@ -11,6 +13,9 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
+
+import static com.duberlyguarnizo.plh.ticket.TicketRepository.*;
+import static org.springframework.data.jpa.domain.Specification.where;
 
 @Service
 @Slf4j
@@ -32,37 +37,40 @@ public class TicketService {
         return repoTicket.map(mapper::toDetailDto);
     }
 
-    public Page<TicketBasicDto> getWithFilters(String userName, String clientName, String sort, int page, int size) {
-
-        PageRequest pagination = PageRequest.of(page - 1, size, Sort.by(sort));
-
-        if (clientName.isEmpty() && userName.isEmpty()) {
-            return repository.findAll(pagination).map(mapper::toBasicDto);
-        } else if (!clientName.isEmpty() && !userName.isEmpty()) {
-            return repository.findByClient_NamesContainsIgnoreCaseAndUser_FirstNameContainsIgnoreCase(clientName,
-                            userName,
-                            pagination)
+    public Page<TicketBasicDto> getWIthFilters(String userFirstName,
+                                               String clientName,
+                                               String ticketStatus,
+                                               String paymentStatus,
+                                               LocalDate startDate,
+                                               LocalDate endDate,
+                                               PageRequest paging) {
+        TicketPaymentStatus paymentStatusValue;
+        TicketStatus statusValue;
+        try {
+            paymentStatusValue = TicketPaymentStatus.valueOf(paymentStatus);
+        } catch (Exception e) {
+            paymentStatusValue = null;
+        }
+        try {
+            statusValue = TicketStatus.valueOf(ticketStatus);
+        } catch (Exception e) {
+            statusValue = null;
+        }
+        if (paging == null) {
+            paging = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "lastModifiedDate"));
+        }
+        try {
+            return repository.findAll(where(hasStatus(statusValue))
+                            .and(hasPaymentStatus(paymentStatusValue))
+                            .and(hasUserName(userFirstName))
+                            .and(hasClientName(clientName))
+                            .and(dateIsBetween(startDate, endDate)), paging)
                     .map(mapper::toBasicDto);
-        } else if (clientName.isEmpty()) {
-            return repository.findByUser_FirstNameContainsIgnoreCase(userName, pagination).map(mapper::toBasicDto);
-        } else {
-            return repository.findByClient_NamesContainsIgnoreCase(clientName, pagination).map(mapper::toBasicDto);
+        } catch (Exception e) {
+            log.error("TicketService: getWithFilters(): Could not query the repository. Error: {}", e.getMessage());
+            return Page.empty();
         }
     }
-
-    public Page<TicketBasicDto> findByDate(LocalDate date, String sort, int page, int size) {
-        PageRequest pagination = PageRequest.of(page - 1, size, Sort.by(sort));
-        return repository.findByLastModifiedDateBetween(date.atStartOfDay(),
-                date.plusDays(1).atStartOfDay(), pagination).map(mapper::toBasicDto);
-    }
-
-    public Page<TicketBasicDto> findByDateInterval(LocalDate date1, LocalDate date2, String sort, int page, int size) {
-        PageRequest pagination = PageRequest.of(page - 1, size, Sort.by(sort));
-        return repository.findByLastModifiedDateBetween(date1.atStartOfDay(),
-                date2.plusDays(1).atStartOfDay(), pagination).map(mapper::toBasicDto);
-    }
-
-    //TODO: implement get by ticket status and payment status
 
     public boolean create(TicketDetailDto dto) {
         try {

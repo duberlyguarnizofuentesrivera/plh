@@ -131,7 +131,7 @@ public class ReceiverService {
                             .and(dateIsBetween(start, end)), paging)
                     .map(mapper::toBasicDto);
         } catch (Exception e) {
-            log.error("ReceiverService: getWithFilters(): Error trying to find list from repository. Error is: {}", e.getMessage());
+            log.error("ReceiverService: getWithFilters(): Error trying to query from repository. Error is: {}", e.getMessage());
             return Page.empty();
         }
     }

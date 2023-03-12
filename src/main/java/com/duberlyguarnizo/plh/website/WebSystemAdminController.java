@@ -23,7 +23,7 @@ public class WebSystemAdminController {
         model.addAttribute("statusList", UserStatus.values());
         model.addAttribute("userDto", userRegisterDto);
 
-        return "/system/user/crud/create";
+        return "/system/users/crud/create";
     }
 
 

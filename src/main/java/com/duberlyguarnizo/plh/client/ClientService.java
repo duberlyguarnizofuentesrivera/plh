@@ -77,13 +77,6 @@ public class ClientService {
         return result.map(mapper::toDetailDto);
     }
 
-    public Page<ClientBasicDto> getAllClients(PageRequest paging) {
-        if (paging == null) {
-            paging = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "names"));
-        }
-        Page<Client> result = repository.findAll(paging);
-        return result.map(mapper::toBasicDto);
-    }
 
     /**
      * Get list of clients whose name matches a query.
@@ -120,12 +113,12 @@ public class ClientService {
         }
     }
 
-    public Page<ClientBasicDto> getWithFilters(String name,
-                                               String type,
-                                               String status,
-                                               LocalDate startDate,
-                                               LocalDate endDate,
-                                               PageRequest paging) {
+    public Page<ClientBasicDto> getAll(String name,
+                                       String type,
+                                       String status,
+                                       LocalDate startDate,
+                                       LocalDate endDate,
+                                       PageRequest paging) {
         PersonType typeValue;
         UserStatus statusValue;
         if (paging == null) {
