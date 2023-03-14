@@ -27,7 +27,6 @@ public class UserHTMLController {
     @GetMapping("/current-user")
     public UserBasicDto loggedUser() {
         return userService.getCurrentUser().orElse(null);
-
     }
 
     //CRUD methods
@@ -42,9 +41,9 @@ public class UserHTMLController {
         }
     }
 
-    @PostMapping("/update")
+    @PatchMapping("/update")
     public boolean updateUser(@RequestBody UserRegisterDto userRegister) {
-        return userService.update(userRegister, true);
+        return userService.update(userRegister);
     }
 
     @GetMapping("/delete/{username}")

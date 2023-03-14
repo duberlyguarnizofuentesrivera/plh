@@ -13,15 +13,17 @@ import java.io.Serializable;
 /*
  * A DTO for the {@link User} entity
  */
-public record UserRegisterDto(@NotBlank String firstName,
-                              @NotBlank String lastName,
-                              @NotBlank String idNumber,
-                              String phone,
-                              String phone2,
-                              @Email String email,
-                              UserStatus status,
-                              UserRole role,
-                              @NotBlank @Length(min = 5) String username,
-                              @NotBlank String password
+public record UserRegisterDto(
+        Long id,
+        @NotBlank String firstName,
+        @NotBlank String lastName,
+        @NotBlank String idNumber,
+        String phone,
+        String phone2,
+        @Email String email,
+        UserStatus status,
+        UserRole role,
+        @NotBlank @Length(min = 5) String username,
+        @NotBlank String password
 ) implements Serializable {
 }

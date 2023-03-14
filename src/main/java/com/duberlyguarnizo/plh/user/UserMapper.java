@@ -9,14 +9,14 @@ public interface UserMapper {
     UserBasicDto toBasicDto(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    User partialBasicUpdate(UserBasicDto userBasicDto, @MappingTarget User user);
+    User partialUpdate(UserBasicDto userBasicDto, @MappingTarget User user);
 
     User toRegisterEntity(UserRegisterDto userRegisterDto);
 
     UserRegisterDto toRegisterDto(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    User partialRegisterUpdate(UserRegisterDto userRegisterDto, @MappingTarget User user);
+    User partialUpdate(UserRegisterDto userRegisterDto, @MappingTarget User user);
 
     User toEntity(UserDto userDto);
 

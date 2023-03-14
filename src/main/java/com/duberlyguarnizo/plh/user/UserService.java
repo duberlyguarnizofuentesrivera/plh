@@ -8,10 +8,14 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+
+import static com.duberlyguarnizo.plh.user.UserRepository.*;
+import static org.springframework.data.jpa.domain.Specification.where;
 
 @Service
 @Slf4j
@@ -29,24 +33,30 @@ public class UserService {
     }
 
     //-------CRUD methods-----------------------------------------
-    public Page<UserBasicDto> getAll(Integer page, Integer size) {
-        Page<User> userList = repository.findAll(PageRequest.of(page - 1, size));
-        return userList.map(mapper::toBasicDto);
+    public Page<UserBasicDto> getWithFilters(String search, String status, String role, PageRequest paging) {
+        UserRole roleValue;
+        UserStatus userStatusValue;
+        try {
+            roleValue = UserRole.valueOf(role);
+        } catch (Exception e) {
+            roleValue = null;
+        }
+        try {
+            userStatusValue = UserStatus.valueOf(status);
+        } catch (Exception e) {
+            userStatusValue = null;
+        }
+        if (paging == null) {
+            paging = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "firstName"));
+        }
+        return repository.findAll(where(hasRole(roleValue))
+                .and(hasStatus(userStatusValue))
+                .and(firstNameContains(search).or(lastNameContains(search))), paging).map(mapper::toBasicDto);
     }
 
-    public Optional<UserBasicDto> getById(Long id) {
+    public Optional<UserDto> getById(Long id) {
         Optional<User> user = repository.findById(id);
-        return user.map(mapper::toBasicDto);
-    }
-
-    public Page<UserBasicDto> getByRole(UserRole role, Integer page, Integer size) {
-        Page<User> userList = repository.findByRole(role, PageRequest.of(page - 1, size));
-        return userList.map(mapper::toBasicDto);
-    }
-
-    public Page<UserBasicDto> getByStatus(UserStatus status, Integer page, Integer size) {
-        Page<User> userList = repository.findByStatus(status, PageRequest.of(page - 1, size));
-        return userList.map(mapper::toBasicDto);
+        return user.map(mapper::toDto);
     }
 
     public boolean save(UserRegisterDto userRegisterDto) {
@@ -62,11 +72,13 @@ public class UserService {
         return false;
     }
 
-    public boolean update(UserRegisterDto userRegisterDto, boolean createIfNotFound) {
-        Optional<User> user = repository.findByUsernameIgnoreCase(userRegisterDto.username());
+
+    public boolean update(UserRegisterDto userRegisterDto) {
+        Optional<User> user = repository.findById(userRegisterDto.id());
         if (user.isPresent()) { //user does exist, so we update
             User updateUser = user.get();
-            updateUser = mapper.partialRegisterUpdate(userRegisterDto, updateUser);
+            mapper.partialUpdate(userRegisterDto, updateUser);
+            //update password if needed
             String password = userRegisterDto.password();
             if (password != null && !password.isEmpty()) {
                 //if password was on body of request, change it to encoded value
@@ -76,14 +88,9 @@ public class UserService {
             repository.save(updateUser);
             return true;
         } else {
-            if (createIfNotFound) {
-                save(userRegisterDto);//if not exists, save the DTO
-                log.info("UserService - Update: User " + userRegisterDto.username().toUpperCase() + " not found, can't update. Trying to create instead.");
-                return true;
-            }
+            log.warn("UserService Update: Attempt to update user " + userRegisterDto.username().toUpperCase() + " failed!... no such id: {}", userRegisterDto.id());
+            return false;
         }
-        log.warn("UserService Update: Attempt to update user " + userRegisterDto.username().toUpperCase() + " failed!");
-        return false;
     }
 
     public boolean deleteByUserName(String username) {
@@ -91,6 +98,17 @@ public class UserService {
         Optional<User> user = repository.findByUsernameIgnoreCase(username);
         user.ifPresentOrElse(value -> repository.deleteById(value.getId()), () -> result[0] = false);
         return result[0];
+    }
+
+    public boolean deleteById(Long id) {
+        Optional<User> user = repository.findById(id);
+        if (user.isPresent()) {
+            repository.deleteById(id);
+            return true;
+        } else {
+            log.error("UseService: deleteById(): Error deleting user with id: {}.", id);
+            return false;
+        }
     }
 
     //-----End of CRUD ---------------------------------------
@@ -104,6 +122,7 @@ public class UserService {
         return Optional.empty();
     }
 
+
     public Optional<UserBasicDto> getCurrentUser() {
         Optional<User> currentUser = auditorAware.getCurrentAuditor();
         if (currentUser.isEmpty()) {
@@ -112,31 +131,6 @@ public class UserService {
         } else {
             return Optional.of(mapper.toBasicDto(currentUser.get()));
         }
-    }
-
-    public Page<UserBasicDto> getByStatusAndRole(UserStatus userStatus, UserRole userRole, Integer page, Integer size) {
-        Page<User> result = repository.findByStatusAndRole(userStatus, userRole, PageRequest.of(page - 1, size));
-        return result.map(mapper::toBasicDto);
-    }
-
-
-    public Page<UserBasicDto> getWithFilters(String userStatus, String userRole, String search, Integer page, Integer size) {
-        UserRole roleValue;
-        UserStatus statusValue;
-        Page<User> result;
-        statusValue = "all".equals(userStatus) ? null : UserStatus.valueOf(userStatus);
-        roleValue = "all".equals(userRole) ? null : UserRole.valueOf(userRole);
-        if (statusValue == null && roleValue == null) {
-            log.warn("case: rol and status null");
-            if (search.isEmpty()) {
-                result = repository.findAll(PageRequest.of(page - 1, size));
-            } else {
-                result = repository.findByFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(search, search, PageRequest.of(page - 1, size));
-            }
-        } else {
-            result = iterateFilters(search, page, size, roleValue, statusValue);
-        }
-        return result.map(mapper::toBasicDto);
     }
 
 
@@ -162,31 +156,7 @@ public class UserService {
     }
 
     //-------------Utility methods--------------------------------
-    private Page<User> iterateFilters(String search, Integer page, Integer size, UserRole roleValue, UserStatus statusValue) {
-        Page<User> result;
-        if (statusValue != null && roleValue != null) {
-            if (search.isEmpty()) {
-                result = repository.findByStatusAndRole(statusValue, roleValue, PageRequest.of(page - 1, size));
-            } else {
-                result = repository.findByRoleAndStatusAndFirstNameContainsIgnoreCaseOrLastNameNotContainsIgnoreCase(roleValue, statusValue, search, search, PageRequest.of(page - 1, size));
-            }
-        } else if (statusValue != null) {
-            if (search.isEmpty()) {
-                result = repository.findByStatus(statusValue, PageRequest.of(page - 1, size));
-            } else {
-                result = repository.findByStatusAndFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(statusValue, search, search, PageRequest.of(page - 1, size));
-            }
-        } else if (roleValue != null) {
-            if (search.isEmpty()) {
-                result = repository.findByRole(roleValue, PageRequest.of(page - 1, size));
-            } else {
-                result = repository.findByRoleAndFirstNameContainsIgnoreCaseOrLastNameContainsIgnoreCase(roleValue, search, search, PageRequest.of(page - 1, size));
-            }
-        } else {
-            throw new IllegalArgumentException("Both statusValue and roleValue cannot be null.");
-        }
-        return result;
-    }
+
 
     private boolean changePasswordForAnyUser(String newPassword, Optional<User> currentUser) {
         if (currentUser.isEmpty()) {

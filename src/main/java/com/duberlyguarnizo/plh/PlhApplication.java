@@ -36,7 +36,7 @@ public class PlhApplication implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         SimpleCommandLinePropertySource propertySource = new SimpleCommandLinePropertySource(args);
         imageService.init();
         if (propertySource.containsProperty("create-admin") &&
@@ -67,7 +67,6 @@ public class PlhApplication implements CommandLineRunner {
             }
         } else {
             log.warn("There was an unsuccessful attempt to create an existing first admin user!");
-            throw new RuntimeException("Could not create");
         }
     }
 

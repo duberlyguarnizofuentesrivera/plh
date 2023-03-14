@@ -11,6 +11,7 @@ import java.io.Serializable;
  * A DTO for the {@link User} entity
  */
 public record UserBasicDto(
+        Long id,
         @NotBlank String firstName,
         @NotBlank String lastName,
         @NotBlank String idNumber,
