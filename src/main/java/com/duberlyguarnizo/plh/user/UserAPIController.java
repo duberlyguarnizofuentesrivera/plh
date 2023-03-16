@@ -1,5 +1,6 @@
 package com.duberlyguarnizo.plh.user;
 
+import com.duberlyguarnizo.plh.enums.UserRole;
 import com.duberlyguarnizo.plh.util.ImageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -12,25 +13,45 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/users")
 
 public class UserAPIController {
+    private final UserRepository userRepository;
     private final UserService userService;
     private final ImageService imageService;
 
-    public UserAPIController(UserService userService, ImageService imageService) {
+    public UserAPIController(UserService userService, ImageService imageService,
+                             UserRepository userRepository) {
         this.userService = userService;
         this.imageService = imageService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("{username}")
     public ResponseEntity<UserDto> getUser(@PathVariable String username) {
         Optional<UserDto> user = userService.getByUsername(username);
+        if (user.isPresent()) {
+            UserDto result = user.get();
+            result.add(linkTo(methodOn(UserAPIController.class)
+                    .getUser(username))
+                    .withSelfRel());
+            result.add(linkTo(methodOn(UserAPIController.class)
+                    .deleteUser(username))
+                    .withRel("DELETE"));
+            result.add(linkTo(methodOn(UserAPIController.class)
+                    .updateUser(null))
+                    .withRel("PATCH"));
+
+            result.add(linkTo(UserAPIController.class).slash("?search=" + username)
+                    .withRel("search"));
+        }
         return user.map(userDto -> new ResponseEntity<>(userDto, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -40,9 +61,8 @@ public class UserAPIController {
         return user.map(userDto -> new ResponseEntity<>(userDto, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.FORBIDDEN));
     }
 
-    //TODO: Refactor frontend to accept the new booleans returned by methods
     @GetMapping
-    public ResponseEntity<List<UserBasicDto>> getUserListWithFilters(
+    public ResponseEntity<List<UserBasicDto>> getAll(
             @RequestParam(defaultValue = "") String search,
             @RequestParam(defaultValue = "all") String status,
             @RequestParam(defaultValue = "all") String role,
@@ -55,58 +75,12 @@ public class UserAPIController {
                 .getContent());
     }
 
-    @PostMapping(value = "/change-password",
-            produces = MediaType.APPLICATION_JSON_VALUE,
-            consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> changeMyUserPassword(@RequestBody Map<String, String> pwds) {
-        boolean result;
-        log.warn("received data: ");
-        log.warn(pwds.toString());
-        if (userService.verifyCurrentUserPassword(pwds.get("currentPassword"))) {
-            result = userService.changeCurrentUserPassword(pwds.get("newPassword"));
-            if (result) {
-                log.warn("User password changed");
-                return new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK);
-            } else {
-                log.warn("User password not changed due to error");
-                return new ResponseEntity<>(Boolean.FALSE, HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        } else {
-            log.warn("Current password is incorrect");
-            return new ResponseEntity<>(Boolean.FALSE, HttpStatus.BAD_REQUEST);
-        }
-
-    }
-
-    @PostMapping(value = "/change-any-password",
-            produces = MediaType.APPLICATION_JSON_VALUE,
-            consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> changeOtherUserPassword(@RequestBody Map<String, String> pwds) {
-        boolean result;
-        log.warn("received data: ");
-        log.warn(pwds.toString());
-        String newPassword = pwds.get("newPassword");
-        String userName = pwds.get("username");
-        if (newPassword != null && !newPassword.isEmpty()) {
-            result = userService.changeOtherUserPassword(userName, newPassword);
-            if (result) {
-                log.warn("UserAPIController: changeOtherUserPassword(): Other user password changed");
-                return new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(Boolean.FALSE, HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        } else {
-            log.warn("UserAPIController: changeOtherUserPassword(): Other user password not changed due to error in parameters");
-            return new ResponseEntity<>(Boolean.FALSE, HttpStatus.BAD_REQUEST);
-        }
-    }
 
     @DeleteMapping("/{username}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    //TODO: Refactor to use only HTTP responses and not maps.
     public ResponseEntity<Boolean> deleteUser(@PathVariable String username) {
         var currentUser = userService.getCurrentUser();
-        if (currentUser.isPresent() && (currentUser.get().username().equals(username))) {
+        if (currentUser.isPresent() && (currentUser.get().getUsername().equals(username))) {
             //You are trying to delete your own user!!!
             return new ResponseEntity<>(Boolean.FALSE, HttpStatus.FORBIDDEN);
         }
@@ -120,16 +94,18 @@ public class UserAPIController {
         }
     }
 
-    @PatchMapping("/status")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Boolean> changeUserStatus(@RequestBody Map<String, String> data) {
-        String username = data.get("username");
+    @PatchMapping("/update")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERVISOR')")
+    public ResponseEntity<Boolean> updateUser(@RequestBody UserDetailDto data) {
         var currentUser = userService.getCurrentUser();
-        if (currentUser.isPresent() && (currentUser.get().username().equals(username))) {
-            //You are trying to change status of your own user!!!
-            return new ResponseEntity<>(Boolean.FALSE, HttpStatus.FORBIDDEN);
+        if (currentUser.isPresent()) {
+            UserRole currentRole = currentUser.get().getRole();
+            boolean notAdminModifyingAdmin = (data.getRole() == UserRole.ADMIN && currentRole != UserRole.ADMIN);
+            if (notAdminModifyingAdmin) {
+                return new ResponseEntity<>(Boolean.FALSE, HttpStatus.FORBIDDEN);
+            }
         }
-        boolean result = userService.setStatus(username);
+        boolean result = userService.update(data);
         if (result) {
             return new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK);
         } else {
@@ -138,7 +114,8 @@ public class UserAPIController {
     }
 
     @PostMapping(value = "/upload-profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Boolean> uploadProfilePicture(@RequestParam("file") MultipartFile file, @RequestParam("username") String username) {
+    public ResponseEntity<Boolean> uploadProfilePicture(@RequestParam("file") MultipartFile
+                                                                file, @RequestParam("username") String username) {
         log.warn("UploadProfilePicture");
         log.warn("received username= " + username);
         log.warn("received file: " + file.toString());

@@ -16,7 +16,7 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
     static Specification<User> firstNameContains(String name) {
-        if (name.isEmpty()) {
+        if (name == null) {
             return null;
         } else {
             return (user, query, cb) -> cb.like(cb.lower(user.get("firstName")), "%" + name.toLowerCase() + "%");
@@ -24,7 +24,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     }
 
     static Specification<User> lastNameContains(String lastName) {
-        if (lastName.isEmpty()) {
+        if (lastName == null) {
             return null;
         } else {
             return (user, query, cb) -> cb.like(cb.lower(user.get("lastName")), "%" + lastName.toLowerCase() + "%");

@@ -4,19 +4,19 @@ import org.mapstruct.*;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface UserMapper {
-    User toBasicEntity(UserBasicDto userBasicDto);
+    User toEntity(UserBasicDto userBasicDto);
 
     UserBasicDto toBasicDto(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     User partialUpdate(UserBasicDto userBasicDto, @MappingTarget User user);
 
-    User toRegisterEntity(UserRegisterDto userRegisterDto);
+    User toEntity(UserDetailDto userDetailDto);
 
-    UserRegisterDto toRegisterDto(User user);
+    UserDetailDto toDetailDto(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    User partialUpdate(UserRegisterDto userRegisterDto, @MappingTarget User user);
+    User partialUpdate(UserDetailDto userDetailDto, @MappingTarget User user);
 
     User toEntity(UserDto userDto);
 

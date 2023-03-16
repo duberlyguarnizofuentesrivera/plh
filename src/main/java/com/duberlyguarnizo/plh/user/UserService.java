@@ -1,7 +1,11 @@
 package com.duberlyguarnizo.plh.user;
 
+import com.duberlyguarnizo.plh.enums.EntityType;
+import com.duberlyguarnizo.plh.enums.EventType;
 import com.duberlyguarnizo.plh.enums.UserRole;
 import com.duberlyguarnizo.plh.enums.UserStatus;
+import com.duberlyguarnizo.plh.event.Event;
+import com.duberlyguarnizo.plh.event.EventRepository;
 import com.duberlyguarnizo.plh.util.CurrentUserAuditorAware;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
@@ -9,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,13 +26,15 @@ import static org.springframework.data.jpa.domain.Specification.where;
 @Slf4j
 public class UserService {
     private final UserRepository repository;
+    private final EventRepository eventRepository;
     private final PasswordEncoder encoder;
     private final UserMapper mapper = Mappers.getMapper(UserMapper.class);
     private final CurrentUserAuditorAware auditorAware;
 
     @Autowired
-    public UserService(UserRepository repository, PasswordEncoder encoder, CurrentUserAuditorAware auditorAware) {
+    public UserService(UserRepository repository, EventRepository eventRepository, PasswordEncoder encoder, CurrentUserAuditorAware auditorAware) {
         this.repository = repository;
+        this.eventRepository = eventRepository;
         this.encoder = encoder;
         this.auditorAware = auditorAware;
     }
@@ -49,9 +56,16 @@ public class UserService {
         if (paging == null) {
             paging = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "firstName"));
         }
-        return repository.findAll(where(hasRole(roleValue))
-                .and(hasStatus(userStatusValue))
-                .and(firstNameContains(search).or(lastNameContains(search))), paging).map(mapper::toBasicDto);
+        if (search != null) {
+            return repository.findAll(where(hasRole(roleValue))
+                    .and(hasStatus(userStatusValue))
+                    .and(firstNameContains(search).or(lastNameContains(search))), paging).map(mapper::toBasicDto);
+        } else {
+            return repository.findAll(where(hasRole(roleValue))
+                            .and(hasStatus(userStatusValue)), paging)
+                    .map(mapper::toBasicDto);
+        }
+
     }
 
     public Optional<UserDto> getById(Long id) {
@@ -59,39 +73,61 @@ public class UserService {
         return user.map(mapper::toDto);
     }
 
-    public boolean save(UserRegisterDto userRegisterDto) {
-        Optional<User> user = repository.findByUsernameIgnoreCase(userRegisterDto.username());
+    @PreAuthorize("isAuthenticated()")
+    public boolean save(UserDetailDto userDetailDto) {
+        Optional<User> user = repository.findByUsernameIgnoreCase(userDetailDto.getUsername());
+        Event event;
         if (user.isEmpty()) { //user doesn't exist
-            User newUser = mapper.toRegisterEntity(userRegisterDto);
-            newUser.setPassword(encoder.encode(userRegisterDto.password())); //secure password
-            repository.save(newUser);
+            User newUser = mapper.toEntity(userDetailDto);
+            newUser.setPassword(encoder.encode(userDetailDto.getPassword())); //secure password
+            User result = repository.save(newUser);
+            event = Event.builder()
+                    .entityId(result.getId())
+                    .entityType(EntityType.ENTITY_USER)
+                    .eventType(EventType.NEW_USER)
+                    .build();
+            eventRepository.save(event);
             log.info("UserService - Save: User " + newUser.getUsername().toUpperCase() + " created successfully!");
             return true;
         }
-        log.warn("UserService: Attempt to save user " + userRegisterDto.username().toUpperCase() + " failed!");
+        log.warn("UserService: Attempt to save user " + userDetailDto.getUsername().toUpperCase() + " failed!");
         return false;
     }
 
 
-    public boolean update(UserRegisterDto userRegisterDto) {
-        Optional<User> user = repository.findById(userRegisterDto.id());
+    public boolean update(UserDetailDto userDetailDto) {
+        Optional<User> currentUser = auditorAware.getCurrentAuditor();
+        Optional<User> user = repository.findById(userDetailDto.getId());
         if (user.isPresent()) { //user does exist, so we update
             User updateUser = user.get();
-            mapper.partialUpdate(userRegisterDto, updateUser);
+            mapper.partialUpdate(userDetailDto, updateUser);
             //update password if needed
-            String password = userRegisterDto.password();
-            if (password != null && !password.isEmpty()) {
-                //if password was on body of request, change it to encoded value
-                updateUser.setPassword(encoder.encode(password)); //secure password
+            if (currentUser.isPresent()) {
+                var currentExistingUser = currentUser.get();
+                if (currentExistingUser.getRole() == UserRole.ADMIN) {
+                    changePassword(userDetailDto, updateUser);
+                } else {
+                    //If not admin, only change password for current user
+                    if (currentExistingUser.getUsername().equals(userDetailDto.getUsername()) && verifyCurrentUserPassword(userDetailDto.getPassword())) {
+                        changePassword(userDetailDto, updateUser);
+                    }
+                }
+                eventRepository.save(Event.builder()
+                        .entityId(updateUser.getId())
+                        .entityType(EntityType.ENTITY_USER)
+                        .eventType(EventType.USER_PROFILE_CHANGE)
+                        .build());
             }
+
             log.info("UserService - Update: User " + updateUser.getUsername().toUpperCase() + " updated successfully!");
             repository.save(updateUser);
             return true;
         } else {
-            log.warn("UserService Update: Attempt to update user " + userRegisterDto.username().toUpperCase() + " failed!... no such id: {}", userRegisterDto.id());
+            log.warn("UserService Update: Attempt to update user " + userDetailDto.getUsername().toUpperCase() + " failed!... no such id: {}", userDetailDto.getId());
             return false;
         }
     }
+
 
     public boolean deleteByUserName(String username) {
         final boolean[] result = {true};
@@ -103,7 +139,13 @@ public class UserService {
     public boolean deleteById(Long id) {
         Optional<User> user = repository.findById(id);
         if (user.isPresent()) {
+            String userNames = user.get().getFirstName() + " " + user.get().getLastName();
             repository.deleteById(id);
+            eventRepository.save(Event.builder()
+                    .entityType(EntityType.DELETED_ENTITY)
+                    .eventType(EventType.USER_DELETED)
+                    .referer(userNames)
+                    .build());
             return true;
         } else {
             log.error("UseService: deleteById(): Error deleting user with id: {}.", id);
@@ -134,6 +176,15 @@ public class UserService {
     }
 
 
+    //-------------Utility methods--------------------------------
+    private void changePassword(UserDetailDto userDetailDto, User updateUser) {
+        String password = userDetailDto.getPassword();
+        if (password != null && !password.isEmpty()) {
+            //if password was on body of request, change it to encoded value
+            updateUser.setPassword(encoder.encode(password)); //secure password
+        }
+    }
+
     public boolean verifyCurrentUserPassword(String oldPassword) {
         Optional<User> currentUser = auditorAware.getCurrentAuditor();
         if (currentUser.isEmpty()) {
@@ -144,48 +195,5 @@ public class UserService {
         }
     }
 
-    public boolean changeCurrentUserPassword(String newPassword) {
-        Optional<User> currentUser = auditorAware.getCurrentAuditor();
-        return changePasswordForAnyUser(newPassword, currentUser);
-    }
 
-
-    public boolean changeOtherUserPassword(String userName, String newPassword) {
-        Optional<User> userToChangePassword = repository.findByUsernameIgnoreCase(userName);
-        return changePasswordForAnyUser(newPassword, userToChangePassword);
-    }
-
-    //-------------Utility methods--------------------------------
-
-
-    private boolean changePasswordForAnyUser(String newPassword, Optional<User> currentUser) {
-        if (currentUser.isEmpty()) {
-            log.warn("User Service - ChangePassword: Current auditor requested, but no user currently logged in!");
-            return false;
-        } else {
-
-            currentUser.get().setPassword(encoder.encode(newPassword));
-            repository.save(currentUser.get());
-            log.info("User Service - ChangePassword: User " + currentUser.get().getUsername().toUpperCase() + " password changed successfully!");
-            return true;
-        }
-    }
-
-    public boolean setStatus(String username) {
-        if (username.isEmpty()) {
-            return false;
-        } else {
-            Optional<User> user = repository.findByUsernameIgnoreCase(username);
-            if (user.isPresent()) {
-                User currentUser = user.get();
-                currentUser.setStatus(currentUser.getStatus() == UserStatus.INACTIVE ? UserStatus.ACTIVE : UserStatus.INACTIVE);
-                repository.save(currentUser);
-                log.info("User Service - setStatus: User " + currentUser.getUsername().toUpperCase() + " status changed successfully!");
-                return true;
-            } else {
-                //no user with username
-                return false;
-            }
-        }
-    }
 }
