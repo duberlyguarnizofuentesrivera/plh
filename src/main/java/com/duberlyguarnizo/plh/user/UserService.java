@@ -41,6 +41,7 @@ public class UserService {
 
     //-------CRUD methods-----------------------------------------
     public Page<UserBasicDto> getWithFilters(String search, String status, String role, PageRequest paging) {
+        //TODO: implement search string to be firstName + Lastname
         UserRole roleValue;
         UserStatus userStatusValue;
         try {
@@ -56,14 +57,17 @@ public class UserService {
         if (paging == null) {
             paging = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "firstName"));
         }
-        if (search != null) {
+        if (!search.isEmpty()) {
+            log.warn("userService: getWithFilters(): search string is not empty");
             return repository.findAll(where(hasRole(roleValue))
                     .and(hasStatus(userStatusValue))
                     .and(firstNameContains(search).or(lastNameContains(search))), paging).map(mapper::toBasicDto);
         } else {
-            return repository.findAll(where(hasRole(roleValue))
-                            .and(hasStatus(userStatusValue)), paging)
-                    .map(mapper::toBasicDto);
+            log.warn("userService: getWithFilters(): search string is empty");
+
+            var result = repository.findAll(where(hasRole(roleValue))
+                    .and(hasStatus(userStatusValue)), paging);
+            return result.map(mapper::toBasicDto);
         }
 
     }

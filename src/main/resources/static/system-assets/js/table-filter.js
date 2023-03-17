@@ -22,8 +22,8 @@ function fetchUsersWithFilters() {
     });
     loadingIndicator.style.visibility = "visible";
     console.log(loadingIndicator.style.visibility);
-    console.log("/api/v1/users/list?" + params.toString());
-    fetch("/api/v1/users/list?" + params.toString())
+    console.log("/api/v1/users?" + params.toString());
+    fetch("/api/v1/users?" + params.toString())
         .then((response) => response.json()
             .then((data) => {
                 console.log("Received data")
@@ -45,10 +45,13 @@ function fetchUsersWithFilters() {
                         }
                         tr.innerHTML =
                             "<td>" + user.idNumber + "</td>" +
-                            "<td><a href='/system/users/crud/by-username/"
-                            + user.username + "'><i class='bi bi-person-fill pe-1'></i> "
+                            "<td><a href="
+                            + user.links[0].href + "><i class='bi bi-person-fill pe-1'></i> "
                             + user.username + "</a></td>" +
                             "<td>" + user.firstName + " " + user.lastName + "</td>" +
+                            "<td><a href="
+                            + user.links[1].href + "><i class='bi bi-ticket-detailed pe-1'></i> "
+                            + "Tickets</a></td>" +
                             "<td>" + user.role.label + "</td>" +
                             "<td>" + statusLabel + "</td>";
                     table.appendChild(tr);
@@ -74,18 +77,18 @@ function fetchClientsWithFilters() {
     });
     loadingIndicator.style.visibility = "visible";
     console.log(loadingIndicator.style.visibility);
-    console.log("/api/v1/users/list?" + params.toString());
-    fetch("/api/v1/users/list?" + params.toString())
+    console.log("/api/v1/clients?" + params.toString());
+    fetch("/api/v1/clients?" + params.toString())
         .then((response) => response.json()
             .then((data) => {
-                    console.log("Received data")
-                    console.log(data);
-                    table.innerHTML = "";
-                    data.forEach((user) => {
-                        const tr = document.createElement("tr");
-                        let statusLabel;
-                        if (user.status.label === "Activo") {
-                            statusLabel = "<span class='badge rounded-pill text-bg-success'>" +
+                console.log("Received data")
+                console.log(data);
+                table.innerHTML = "";
+                data.forEach((user) => {
+                    const tr = document.createElement("tr");
+                    let statusLabel;
+                    if (user.status.label === "Activo") {
+                        statusLabel = "<span class='badge rounded-pill text-bg-success'>" +
                                 "<i class='bi bi-check-circle-fill pe-1'></i> " +
                                 user.status.label +
                                 "</span>";
@@ -131,8 +134,10 @@ function doFilter() {
     switch (entity) {
         case "users":
             fetchUsersWithFilters();
+            break;
         case "clients":
             fetchClientsWithFilters()
+            break;
     }
 }
 

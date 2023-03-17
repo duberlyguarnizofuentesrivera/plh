@@ -23,15 +23,13 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping("/api/v1/users")
 
 public class UserAPIController {
-    private final UserRepository userRepository;
+
     private final UserService userService;
     private final ImageService imageService;
 
-    public UserAPIController(UserService userService, ImageService imageService,
-                             UserRepository userRepository) {
+    public UserAPIController(UserService userService, ImageService imageService) {
         this.userService = userService;
         this.imageService = imageService;
-        this.userRepository = userRepository;
     }
 
     @GetMapping("{username}")
@@ -44,12 +42,15 @@ public class UserAPIController {
                     .withSelfRel());
             result.add(linkTo(methodOn(UserAPIController.class)
                     .deleteUser(username))
-                    .withRel("DELETE"));
+                    .withRel("delete"));
             result.add(linkTo(methodOn(UserAPIController.class)
                     .updateUser(null))
-                    .withRel("PATCH"));
+                    .withRel("patch"));
+            result.add(linkTo(methodOn(UserAPIController.class)
+                    .uploadProfilePicture(null, result.username))
+                    .withRel("uploadProfilePicture"));
 
-            result.add(linkTo(UserAPIController.class).slash("?search=" + username)
+            result.add(linkTo(UserAPIController.class).slash("?search=" + result.getLastName())
                     .withRel("search"));
         }
         return user.map(userDto -> new ResponseEntity<>(userDto, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -58,6 +59,23 @@ public class UserAPIController {
     @GetMapping("/current")
     public ResponseEntity<UserBasicDto> getCurrentUser() {
         Optional<UserBasicDto> user = userService.getCurrentUser();
+        if (user.isPresent()) {
+            UserBasicDto result = user.get();
+            result.add(linkTo(methodOn(UserAPIController.class)
+                    .getUser(result.getUsername()))
+                    .withSelfRel());
+            result.add(linkTo(methodOn(UserAPIController.class)
+                    .deleteUser(result.getUsername()))
+                    .withRel("delete"));
+            result.add(linkTo(methodOn(UserAPIController.class)
+                    .updateUser(null))
+                    .withRel("patch"));
+            result.add(linkTo(methodOn(UserAPIController.class)
+                    .uploadProfilePicture(null, result.username))
+                    .withRel("uploadProfilePicture"));
+            result.add(linkTo(UserAPIController.class).slash("?search=" + result.getLastName())
+                    .withRel("search"));
+        }
         return user.map(userDto -> new ResponseEntity<>(userDto, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.FORBIDDEN));
     }
 
@@ -69,12 +87,25 @@ public class UserAPIController {
             @RequestParam(defaultValue = "firstName") String sort,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        PageRequest paging = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sort));
+        //Controllers have the task to rest 1 to the page number
+        PageRequest paging = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, sort));
         return ResponseEntity.ok(userService
-                .getWithFilters(search, status, role, paging)
+                .getWithFilters(search, status, role, paging).map(user -> user
+                        .add(linkTo(methodOn(UserAPIController.class)
+                                .getUser(user.getUsername()))
+                                .withSelfRel())
+                        //TODO: implement search ticket by user and replace this
+                        .add(linkTo(UserAPIController.class)
+                                .slash("?search=" + user.getLastName())
+                                .withRel("search")))
                 .getContent());
     }
 
+    @PostMapping
+    public ResponseEntity<Boolean> createUser(@RequestBody UserDetailDto dto) {
+        var result = userService.save(dto);
+        return result ? new ResponseEntity<>(HttpStatus.CREATED) : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     @DeleteMapping("/{username}")
     @PreAuthorize("hasAuthority('ADMIN')")
