@@ -40,19 +40,27 @@ public class UserService {
     }
 
     //-------CRUD methods-----------------------------------------
-    public Page<UserBasicDto> getWithFilters(String search, String status, String role, PageRequest paging) {
+    public Page<UserBasicDto> getWithFilters(String search, String status, String role, PageRequest paging) throws IllegalArgumentException {
         //TODO: implement search string to be firstName + Lastname
         UserRole roleValue;
         UserStatus userStatusValue;
         try {
             roleValue = UserRole.valueOf(role);
         } catch (Exception e) {
-            roleValue = null;
+            if ("all".equals(role)) {
+                roleValue = null;
+            } else {
+                throw new IllegalArgumentException();
+            }
         }
         try {
             userStatusValue = UserStatus.valueOf(status);
         } catch (Exception e) {
-            userStatusValue = null;
+            if ("all".equals(status)) {
+                userStatusValue = null;
+            } else {
+                throw new IllegalArgumentException();
+            }
         }
         if (paging == null) {
             paging = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "firstName"));

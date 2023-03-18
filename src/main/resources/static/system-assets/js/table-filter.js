@@ -7,14 +7,22 @@ function sleep(ms) {
 
 const params = new URLSearchParams();
 const fields = document.querySelectorAll('.filter-form');
+const sortingFields = document.querySelectorAll('.dataTable-sorter');
 const table = document.getElementById("table-body");
 const loadingIndicator = document.getElementById("loading-indicator");
+const pagination = document.getElementById("pagination");
+const paginationInfo = document.getElementById("pagination-info");
+let currentPage = 1;
+let currentSortOrder = "asc";
+let currentSort = "firstName";
 //add change listener to each field
 fields.forEach(field => {
     field.addEventListener('change', doFilter);
 });
 
 function fetchUsersWithFilters() {
+    initializeSort();
+    clearPagination();
     console.log('Fetching users with filters')
     //disable fields until fetch is complete
     fields.forEach(field => {
@@ -22,50 +30,112 @@ function fetchUsersWithFilters() {
     });
     loadingIndicator.style.visibility = "visible";
     console.log(loadingIndicator.style.visibility);
-    console.log("/api/v1/users?" + params.toString());
-    fetch("/api/v1/users?" + params.toString())
-        .then((response) => response.json()
-            .then((data) => {
-                console.log("Received data")
-                console.log(data);
-                table.innerHTML = "";
-                data.forEach((user) => {
-                    const tr = document.createElement("tr");
-                    let statusLabel;
-                    if (user.status.label === "Activo") {
-                        statusLabel = "<span class='badge rounded-pill text-bg-success'>" +
-                                "<i class='bi bi-check-circle-fill pe-1'></i> " +
-                                user.status.label +
-                                "</span>";
-                        } else {
-                            statusLabel = "<span class='badge rounded-pill text-bg-danger'>" +
-                                "<i class='bi bi bi-x-circle-fill pe-1'></i> " +
-                                user.status.label +
-                                "</span>";
-                        }
-                        tr.innerHTML =
-                            "<td>" + user.idNumber + "</td>" +
-                            "<td><a href="
-                            + user.links[0].href + "><i class='bi bi-person-fill pe-1'></i> "
-                            + user.username + "</a></td>" +
-                            "<td>" + user.firstName + " " + user.lastName + "</td>" +
-                            "<td><a href="
-                            + user.links[1].href + "><i class='bi bi-ticket-detailed pe-1'></i> "
-                            + "Tickets</a></td>" +
-                            "<td>" + user.role.label + "</td>" +
-                            "<td>" + statusLabel + "</td>";
-                    table.appendChild(tr);
+    console.log("/api/v1/users?" + params.toString() + "&page=" + currentPage + "&sort=" + currentSort + "&order=" + currentSortOrder);
+    fetch("/api/v1/users?" + params.toString() + "&page=" + currentPage + "&sort=" + currentSort + "&order=" + currentSortOrder)
+        .then((response) => {
 
-                })
-                    //enable fields and hide spinner, but wait half a second to give a "loading" effect
-                    fields.forEach(field => {
-                        field.disabled = false;
-                    });
-                    loadingIndicator.style.visibility = "hidden";
+                if (response.status === 200) {
+                    response.json()
+                        .then((data) => {
+                                console.log("Received data")
+                                console.log(data['_embedded']['userBasicDtoList']);
+                                console.log(data['page']);
+
+                                table.innerHTML = "";
+                                data['_embedded']['userBasicDtoList'].forEach((user) => {
+                                    const tr = document.createElement("tr");
+                                    let statusLabel;
+                                    if (user.status.label === "Activo") {
+                                        statusLabel = "<span class='badge rounded-pill text-bg-success'>" +
+                                            "<i class='bi bi-check-circle-fill pe-1'></i> " +
+                                            user.status.label +
+                                            "</span>";
+                                    } else {
+                                        statusLabel = "<span class='badge rounded-pill text-bg-danger'>" +
+                                            "<i class='bi bi bi-x-circle-fill pe-1'></i> " +
+                                            user.status.label +
+                                            "</span>";
+                                    }
+                                    tr.innerHTML =
+                                        "<td>" + user.idNumber + "</td>" +
+                                        "<td><a href="
+                                        + user._links.self.href + "><i class='bi bi-person-fill pe-1'></i> "
+                                        + user.username + "</a></td>" +
+                                        "<td>" + user.firstName + " " + user.lastName + "</td>" +
+                                        "<td><a href="
+                                        + user._links.search.href + "><i class='bi bi-ticket-detailed pe-1'></i> "
+                                        + "Tickets</a></td>" +
+                                        "<td>" + user.role.label + "</td>" +
+                                        "<td>" + statusLabel + "</td>";
+                                    table.appendChild(tr);
+
+                                })
+
+                                //pagination
+                                const numberOfPages = data['page']['totalPages'];
+                                const activePage = data['page']['number'] + 1;
+                                const pageSize = data['page']['size'];
+                                const totalElements = data['page']['totalElements'];
+                                const paginationFooter = "Mostrando página " + activePage + " de " + numberOfPages + ". Total: " + totalElements + " registros.";
+
+                                const firstPageListItem = document.createElement('li');
+                                const firstPageLink = document.createElement('a');
+                                firstPageLink.href = "#";
+                                firstPageLink.innerHTML = "Anterior";
+                                firstPageListItem.appendChild(firstPageLink);
+                                firstPageListItem.className = 'page-item'
+                                pagination.appendChild(firstPageListItem)
+                                for (let i = 0; i < numberOfPages; i++) {
+                                    const pageListItem = document.createElement('li');
+                                    const pageLink = document.createElement('a');
+                                    pageLink.addEventListener("click", () => {
+                                        currentPage = i + 1;
+                                        fetchUsersWithFilters();
+                                    });
+                                    pageLink.innerHTML = (i + 1).toString();
+                                    if (i === activePage - 1) {
+                                        pageLink.className = 'page-link active';
+                                    }
+                                    pageListItem.appendChild(pageLink);
+                                    pageListItem.className = 'page-item'
+                                    pagination.appendChild(pageListItem)
+                                    paginationInfo.innerHTML = paginationFooter;
+                                }
+                                const nextPageListItem = document.createElement('li');
+                                const nextPageLink = document.createElement('a');
+                                nextPageLink.href = "#";
+                                nextPageLink.innerHTML = "Siguiente";
+                                nextPageListItem.appendChild(nextPageLink);
+                                nextPageListItem.className = 'page-item'
+                                pagination.appendChild(nextPageListItem)
+                                fields.forEach(field => {
+                                    field.disabled = false;
+                                });
+                                loadingIndicator.style.visibility = "hidden";
+                                console.log(loadingIndicator.style.visibility);
+                            }
+                        )
+                } else if (response.status === 204) {
+                    console.log("No content found matching the filters")
+                    sleep(1000).then(r =>
+                        fields.forEach(field => {
+                            field.disabled = false;
+                            loadingIndicator.style.visibility = "hidden";
+                            table.innerHTML = "";
+                        }));
+
                     console.log(loadingIndicator.style.visibility);
-
+                } else if (response.status === 400) {
+                    console.log("Invalid parameters...")
+                    sleep(1000).then(r =>
+                        fields.forEach(field => {
+                            field.disabled = false;
+                            loadingIndicator.style.visibility = "hidden";
+                            table.innerHTML = "";
+                        }));
+                    console.log(loadingIndicator.style.visibility);
                 }
-            )
+            }
         )
 }
 
@@ -81,14 +151,14 @@ function fetchClientsWithFilters() {
     fetch("/api/v1/clients?" + params.toString())
         .then((response) => response.json()
             .then((data) => {
-                console.log("Received data")
-                console.log(data);
-                table.innerHTML = "";
-                data.forEach((user) => {
-                    const tr = document.createElement("tr");
-                    let statusLabel;
-                    if (user.status.label === "Activo") {
-                        statusLabel = "<span class='badge rounded-pill text-bg-success'>" +
+                    console.log("Received data")
+                    console.log(data);
+                    table.innerHTML = "";
+                    data.forEach((user) => {
+                        const tr = document.createElement("tr");
+                        let statusLabel;
+                        if (user.status.label === "Activo") {
+                            statusLabel = "<span class='badge rounded-pill text-bg-success'>" +
                                 "<i class='bi bi-check-circle-fill pe-1'></i> " +
                                 user.status.label +
                                 "</span>";
@@ -121,10 +191,39 @@ function fetchClientsWithFilters() {
         )
 }
 
+function clearPagination() {
+    pagination.innerHTML = "";
+}
+
+function initializeSort() {
+    function setup(field) {
+        try {
+            currentSort = field.getAttribute("data-sorter");
+            if (currentSortOrder === "asc") {
+                currentSortOrder = "desc";
+            } else {
+                currentSortOrder = "asc";
+            }
+            clearPagination();
+            doFilter();
+        } catch (e) {
+            //nothing here...
+        }
+    }
+
+    sortingFields.forEach(field => {
+        field.removeEventListener("click", setup);
+    });
+    sortingFields.forEach(field => {
+        field.addEventListener("click", setup);
+    })
+}
+
 function doFilter() {
     fields.forEach(field => {
         params.set(field.id, field.value)
     });
+
     //call the filter function
     //now we filter by entity to do the fetch operation
     const currentEntityUrl = window.location.pathname;
