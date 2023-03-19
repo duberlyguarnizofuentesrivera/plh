@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 
@@ -31,16 +32,19 @@ public class UserHTMLController {
         return "/system/users/list";
     }
 
+    @GetMapping("/create-user")
+    public String createUser() {
+        return "/system/users/create";
+    }
 
-    @GetMapping("/crud/by-username/{username}")
-    public String getUsersByUserName() {
-
-        return "/system/users/crud/detail";
+    @GetMapping("{username}")
+    public String getUsersByUserName(@PathVariable String username) {
+        return "/system/users/detail";
     }
 
     @GetMapping("/profile")
     @PreAuthorize("isAuthenticated()")
     public String getProfile() {
-        return "/system/profile";
+        return "/system/users/detail";
     }
 }

@@ -3,12 +3,15 @@ package com.duberlyguarnizo.plh.user;
 import com.duberlyguarnizo.plh.enums.UserRole;
 import com.duberlyguarnizo.plh.util.ImageService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +19,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -53,7 +58,8 @@ public class UserAPIController {
             result.add(linkTo(methodOn(UserAPIController.class)
                     .uploadProfilePicture(null, result.username))
                     .withRel("uploadProfilePicture"));
-
+            result.add(Link.of("/uploads/profilePics/" + result.username + ".jpg")
+                    .withRel("profilePictureUrl"));
             result.add(linkTo(UserAPIController.class).slash("?search=" + result.getLastName())
                     .withRel("search"));
         }
@@ -84,7 +90,7 @@ public class UserAPIController {
     }
 
     @GetMapping
-//    @Cacheable(cacheNames = "listOfUsers")
+    @Cacheable(cacheNames = "listOfUsers")
     public ResponseEntity<PagedModel<EntityModel<UserBasicDto>>> getAll(
             @RequestParam(defaultValue = "") String search,
             @RequestParam(defaultValue = "all") String status,
@@ -110,13 +116,20 @@ public class UserAPIController {
                 //TODO: implement message indicator for this error
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             } else {
-                return new ResponseEntity<>(pagedModel, HttpStatus.OK);
+                return ResponseEntity.ok()
+                        .cacheControl(CacheControl.maxAge(60, TimeUnit.SECONDS))
+                        .body(pagedModel);
             }
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+    }
 
-
+    @PostMapping("/verify-password")
+    public ResponseEntity<Boolean> verifyPassword(@RequestBody Map<String, String> passwordBody) {
+        var oldPassword = passwordBody.get("oldPassword");
+        var result = userService.verifyCurrentUserPassword(oldPassword);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @PostMapping
@@ -143,7 +156,7 @@ public class UserAPIController {
         }
     }
 
-    @PatchMapping("/update")
+    @PatchMapping
     @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERVISOR')")
     public ResponseEntity<Boolean> updateUser(@RequestBody UserDetailDto data) {
         if (data == null) {

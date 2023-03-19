@@ -46,27 +46,17 @@
 
                 <div class="card">
                     <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
-                        <img alt="Profile" class="rounded-circle"
-                             th:src="@{${'/uploads/profilePics/' + userDto.username() + '.jpg'}}">
-                        <h2><span class="text-capitalize"
-                                  th:text="${userDto.firstName() +' '+ userDto.lastName()}"></span></h2>
-                        <h3><span class="text-capitalize" th:text="${userDto.role().toString().toLowerCase()}"></span>
+                        <img alt="Profile" class="rounded-circle" id="profilePictureImage" src="">
+                        <h2><span class="text-capitalize" id="fieldUserNames"></span></h2>
+                        <h3><span class="text-capitalize" id="fieldUserRole"></span>
                         </h3>
                         <h3>
-                            <span class="text-capitalize badge text-bg-danger"
-                                  th:if="${userDto.status().toString()=='INACTIVE'}"
-                                  th:text="${userDto.status()}"></span>
-                            <span class="text-capitalize badge text-bg-secondary"
-                                  th:if="${userDto.status().toString()=='ACTIVE'}" th:text="${userDto.status()}"></span>
+                            <span class="text-capitalize badge" id="fieldUserStatus"></span>
                         </h3>
                         <div class="social-links mt-2">
-                            <a class="" th:href="${'tel:' + userDto.phone()}"
-                               th:unless="${#strings.isEmpty(userDto.phone())}"><i class="bi bi-phone"></i></a>
-                            <a class="" th:href="${'mailto:'+ userDto.email()}"
-                               th:unless="${#strings.isEmpty(userDto.email())}"><i class="bi bi-at"></i></a>
-                            <a class=""
-                               th:href="${'https://wa.me/51' + userDto.phone()}"
-                               th:unless="${#strings.isEmpty(userDto.phone())}"><i class="bi bi-whatsapp"></i></a>
+                            <a class="" href="#" id="fieldSocialLinksPhone"></a>
+                            <a class="" href="#" id="fieldSocialLinksWhatsApp"></a>
+                            <a class="" href="#" id="fieldSocialLinksEmail"></a>
                         </div>
                     </div>
                 </div>
@@ -75,30 +65,26 @@
                         <h5 class="card-title">Auditoría</h5>
                         <div class="row">
                             <div class="col-lg-5 col-md-4 label ">Creación</div>
-                            <div class="col-lg-7 col-md-8"><span class="text-capitalize"
-                                                                 th:text="${#temporals.format(userDto.createdDate(), 'dd-MM-yyyy HH:mm')}"></span>
+                            <div class="col-lg-7 col-md-8">
+                                <span class="text-capitalize" id="fieldCreationDate"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-lg-5 col-md-4 label ">Creado Por</div>
                             <div class="col-lg-7 col-md-8">
-                                <span class="text-capitalize" th:if="${createdByUser!=null}"
-                                      th:text="${createdByUser.firstName() + ' ' + createdByUser.lastName()}"></span>
-                                <span class="text-muted" th:if="${createdByUser==null}">Sin datos</span>
+                                <span class="text-capitalize" id="fieldCreatedBy"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-lg-5 col-md-4 label ">Modificación</div>
-                            <div class="col-lg-7 col-md-8"><span class="text-capitalize"
-                                                                 th:text="${#temporals.format(userDto.lastModifiedDate(), 'dd-MM-yyyy HH:mm')}"></span>
+                            <div class="col-lg-7 col-md-8">
+                                <span class="text-capitalize" id="fieldLastModifiedDate"></span>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-lg-5 col-md-4 label ">Modificado Por</div>
                             <div class="col-lg-7 col-md-8">
-                                <span class="text-capitalize" th:if="${modifiedByUser!=null}"
-                                      th:text="${createdByUser.firstName() + ' ' + createdByUser.lastName()}"></span>
-                                <span class="text-muted" th:if="${modifiedByUser==null}">Sin datos</span>
+                                <span class="text-capitalize" id="fieldLastModifiedBy"></span>
                             </div>
                         </div>
                     </div>
@@ -142,66 +128,56 @@
 
                             <div class="tab-pane fade show active profile-overview" id="profile-overview">
                                 <h5 class="card-title">Notas</h5>
-                                <!--                                <--TODO: add notes to entities-->
-                                <p class="small fst-italic" th:text="${userDto.notes()}"></p>
+                                <p class="small fst-italic" id="fieldUserNotes"></p>
 
                                 <h5 class="card-title">Detalles de usuario</h5>
 
-                                <div class="row">
-                                    <div class="col-lg-4 col-md-5 label ">Nombres Completos</div>
-                                    <div class="col-lg-8 col-md-7"><span class="text-capitalize"
-                                                                         th:text="${userDto.firstName() +' '+ userDto.lastName()}"></span>
-                                    </div>
-                                </div>
+                                <!--                                <div class="row">-->
+                                <!--                                    <div class="col-lg-4 col-md-5 label ">Nombres Completos</div>-->
+                                <!--                                    <div class="col-lg-8 col-md-7"><span class="text-capitalize"-->
+                                <!--                                                                         th:text="${userDto.firstName() +' '+ userDto.lastName()}"></span>-->
+                                <!--                                    </div>-->
+                                <!--                                </div>-->
 
                                 <div class="row">
                                     <div class="col-lg-4 col-md-5 label">DNI</div>
-                                    <div class="col-lg-8 col-md-7"><span th:text="${userDto.idNumber()}"></span></div>
+                                    <div class="col-lg-8 col-md-7"><span id="fieldUserIdNumber"></span></div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-lg-4 col-md-5 label">Usuario</div>
-                                    <div class="col-lg-8 col-md-7"><span th:text="${userDto.username()}"></span></div>
+                                    <div class="col-lg-8 col-md-7"><span id="fieldUserUserName"></span></div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-lg-4 col-md-5 label">Celular</div>
                                     <div class="col-lg-8 col-md-7">
-                                        <span th:text="${userDto.phone()}"
-                                              th:unless="${#strings.isEmpty(userDto.phone())}"></span>
-                                        <span class="text-muted"
-                                              th:if="${#strings.isEmpty(userDto.phone())}">Sin datos</span>
+                                        <span id="fieldUserPhone"></span>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-lg-4 col-md-5 label">2do teléfono</div>
                                     <div class="col-lg-8 col-md-7">
-                                        <span th:text="${userDto.phone2()}"
-                                              th:unless="${#strings.isEmpty(userDto.phone2())}"></span>
-                                        <span class="text-muted"
-                                              th:if="${#strings.isEmpty(userDto.phone2())}">Sin datos</span>
+                                        <span id="fieldUserPhone2"></span>
                                     </div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-lg-4 col-md-5 label">Email</div>
                                     <div class="col-lg-8 col-md-7">
-                                        <span th:text="${userDto.email()}"
-                                              th:unless="${#strings.isEmpty(userDto.email())}"></span>
-                                        <span class="text-muted"
-                                              th:if="${#strings.isEmpty(userDto.email())}">Sin datos</span>
+                                        <span id="fieldUserEmail"></span>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-lg-4 col-md-5 label">Estado</div>
-                                    <div class="col-lg-8 col-md-7">
-                                        <span class="badge rounded-pill text-bg-danger" th:text="${userDto.status()}"
-                                              th:unless="${userDto.status().name()=='ACTIVE'}"></span>
-                                        <span class="badge rounded-pill text-bg-success"
-                                              th:if="${userDto.status().name()=='ACTIVE'}"
-                                              th:text="${userDto.status()}"></span>
-                                    </div>
-                                </div>
+                                <!--                                <div class="row">-->
+                                <!--                                    <div class="col-lg-4 col-md-5 label">Estado</div>-->
+                                <!--                                    <div class="col-lg-8 col-md-7">-->
+                                <!--                                        <span class="badge rounded-pill text-bg-danger" th:text="${userDto.status()}"-->
+                                <!--                                              th:unless="${userDto.status().name()=='ACTIVE'}"></span>-->
+                                <!--                                        <span class="badge rounded-pill text-bg-success"-->
+                                <!--                                              th:if="${userDto.status().name()=='ACTIVE'}"-->
+                                <!--                                              th:text="${userDto.status()}"></span>-->
+                                <!--                                    </div>-->
+                                <!--                                </div>-->
 
                             </div>
 
@@ -213,10 +189,9 @@
                                         <label class="col-md-4 col-lg-3 col-form-label" for="profileImage">Profile
                                             Image</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <img alt="Profile" id="profileImage"
-                                                 th:src="@{/common-assets/img/profile-img.jpg}">
+                                            <img alt="Profile" id="profileImage" src="">
                                             <div class="pt-2">
-                                                <!--                                                TODO: Fix case when admin is viewing its own profile-->
+                                                <!--TODO: Fix case when admin is viewing its own profile-->
                                                 <button class="btn btn-primary btn-sm" id="btnUploadProfilePicture"
                                                         title="Cargar nueva imagen"><i class="bi bi-upload"></i>
                                                 </button>
@@ -230,8 +205,7 @@
                                         <label class="col-md-4 col-lg-3 col-form-label"
                                                for="editNotes">Notas</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="editNotes" name="editNotes"
-                                                   th:value="${userDto.notes()}"
+                                            <input class="form-control editUserForm" id="editNotes" name="notes"
                                                    type="text">
                                         </div>
                                     </div>
@@ -240,8 +214,7 @@
                                         <label class="col-md-4 col-lg-3 col-form-label"
                                                for="editFirstName">Nombres</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="editFirstName" name="editFirstName"
-                                                   th:value="${userDto.firstName()}"
+                                            <input class="form-control editUserForm" id="editFirstName" name="firstName"
                                                    type="text">
                                         </div>
                                     </div>
@@ -249,8 +222,7 @@
                                         <label class="col-md-4 col-lg-3 col-form-label"
                                                for="editLastName">Apellidos</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="editLastName" name="editLastName"
-                                                   th:value="${userDto.lastName()}"
+                                            <input class="form-control editUserForm" id="editLastName" name="lastName"
                                                    type="text">
                                         </div>
                                     </div>
@@ -258,16 +230,14 @@
                                         <label class="col-md-4 col-lg-3 col-form-label"
                                                for="editIdNumber">DNI/CE</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="editIdNumber" name="editIdNumber"
-                                                   th:value="${userDto.idNumber()}"
+                                            <input class="form-control editUserForm" id="editIdNumber" name="idNumber"
                                                    type="text">
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-md-4 col-lg-3 col-form-label" for="editPhone">Celular</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="editPhone" name="editPhone"
-                                                   th:value="${userDto.phone()}"
+                                            <input class="form-control editUserForm" id="editPhone" name="phone"
                                                    type="tel">
                                         </div>
                                     </div>
@@ -275,22 +245,20 @@
                                         <label class="col-md-4 col-lg-3 col-form-label" for="editPhone2">2do
                                             teléfono</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="editPhone2" name="editPhone2"
-                                                   th:value="${userDto.phone2()}"
+                                            <input class="form-control editUserForm" id="editPhone2" name="phone2"
                                                    type="tel">
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <label class="col-md-4 col-lg-3 col-form-label" for="editEmail">Email</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control" id="editEmail" name="editEmail"
-                                                   th:value="${userDto.email()}"
+                                            <input class="form-control editUserForm" id="editEmail" name="email"
                                                    type="tel">
                                         </div>
                                     </div>
 
                                     <div class="text-center">
-                                        <button class="btn btn-primary">Save Changes</button>
+                                        <button class="btn btn-primary" id="btnEditProfile">Save Changes</button>
                                     </div>
                                 </div><!-- End Profile Edit Form -->
 

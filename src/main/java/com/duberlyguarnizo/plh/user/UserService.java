@@ -206,6 +206,4 @@ public class UserService {
             return encoder.matches(oldPassword, currentUser.get().getPassword());
         }
     }
-
-
 }

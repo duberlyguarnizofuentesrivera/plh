@@ -21,7 +21,6 @@ fields.forEach(field => {
 });
 
 function fetchUsersWithFilters() {
-    initializeSort();
     clearPagination();
     console.log('Fetching users with filters')
     //disable fields until fetch is complete
@@ -78,13 +77,23 @@ function fetchUsersWithFilters() {
                                 const totalElements = data['page']['totalElements'];
                                 const paginationFooter = "Mostrando página " + activePage + " de " + numberOfPages + ". Total: " + totalElements + " registros.";
 
-                                const firstPageListItem = document.createElement('li');
-                                const firstPageLink = document.createElement('a');
-                                firstPageLink.href = "#";
-                                firstPageLink.innerHTML = "Anterior";
-                                firstPageListItem.appendChild(firstPageLink);
-                                firstPageListItem.className = 'page-item'
-                                pagination.appendChild(firstPageListItem)
+                                //First page link creation (starting from 1)
+
+                                if (activePage > 1) {
+                                    const firstPageListItem = document.createElement('li');
+                                    const firstPageLink = document.createElement('a');
+                                    firstPageLink.href = "#";
+                                    firstPageLink.innerHTML = "Anterior";
+                                    firstPageLink.addEventListener("click", () => {
+                                        currentPage = activePage - 1;
+                                        fetchUsersWithFilters();
+                                    });
+                                    firstPageListItem.appendChild(firstPageLink);
+                                    firstPageListItem.className = 'page-item'
+                                    pagination.appendChild(firstPageListItem)
+                                }
+
+                                // Numbered page links creation
                                 for (let i = 0; i < numberOfPages; i++) {
                                     const pageListItem = document.createElement('li');
                                     const pageLink = document.createElement('a');
@@ -97,17 +106,27 @@ function fetchUsersWithFilters() {
                                         pageLink.className = 'page-link active';
                                     }
                                     pageListItem.appendChild(pageLink);
-                                    pageListItem.className = 'page-item'
+                                    pageListItem.className = 'page-item';
                                     pagination.appendChild(pageListItem)
                                     paginationInfo.innerHTML = paginationFooter;
                                 }
-                                const nextPageListItem = document.createElement('li');
-                                const nextPageLink = document.createElement('a');
-                                nextPageLink.href = "#";
-                                nextPageLink.innerHTML = "Siguiente";
-                                nextPageListItem.appendChild(nextPageLink);
-                                nextPageListItem.className = 'page-item'
-                                pagination.appendChild(nextPageListItem)
+
+                                // Next page link creation
+                                if (currentPage < numberOfPages) {
+                                    const nextPageListItem = document.createElement('li');
+                                    const nextPageLink = document.createElement('a');
+                                    nextPageLink.href = "#";
+                                    nextPageLink.innerHTML = "Siguiente";
+                                    nextPageLink.addEventListener("click", () => {
+                                        currentPage = activePage + 1;
+                                        fetchUsersWithFilters();
+                                    });
+                                    nextPageListItem.appendChild(nextPageLink);
+                                    nextPageListItem.className = 'page-item';
+                                    pagination.appendChild(nextPageListItem)
+                                }
+
+                                //re-enable fields
                                 fields.forEach(field => {
                                     field.disabled = false;
                                 });
@@ -195,35 +214,36 @@ function clearPagination() {
     pagination.innerHTML = "";
 }
 
-function initializeSort() {
-    function setup(field) {
-        try {
-            currentSort = field.getAttribute("data-sorter");
-            if (currentSortOrder === "asc") {
-                currentSortOrder = "desc";
-            } else {
-                currentSortOrder = "asc";
-            }
-            clearPagination();
-            doFilter();
-        } catch (e) {
-            //nothing here...
-        }
-    }
 
+function initializeSort() {
     sortingFields.forEach(field => {
-        field.removeEventListener("click", setup);
-    });
-    sortingFields.forEach(field => {
-        field.addEventListener("click", setup);
+        field.addEventListener("click", (event) => {
+            console.log("entering setup!")
+            try {
+                currentSort = event.target.getAttribute("data-sorter");
+                console.log("currentSort: " + currentSort)
+                if (currentSortOrder === "asc") {
+                    currentSortOrder = "desc";
+                } else {
+                    currentSortOrder = "asc";
+                }
+                clearPagination();
+                doFilter();
+            } catch (e) {
+                //nothing here...
+                console.log("exception caught")
+                console.log(e)
+            }
+        });
     })
 }
 
 function doFilter() {
+    currentPage = 1;
+    console.log("doing filter")
     fields.forEach(field => {
         params.set(field.id, field.value)
     });
-
     //call the filter function
     //now we filter by entity to do the fetch operation
     const currentEntityUrl = window.location.pathname;
@@ -242,4 +262,5 @@ function doFilter() {
 
 window.onload = () => {
     doFilter();
+    initializeSort();
 }
