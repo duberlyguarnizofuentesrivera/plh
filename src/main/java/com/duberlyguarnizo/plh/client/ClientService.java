@@ -2,6 +2,7 @@ package com.duberlyguarnizo.plh.client;
 
 import com.duberlyguarnizo.plh.enums.PersonType;
 import com.duberlyguarnizo.plh.enums.UserStatus;
+import com.duberlyguarnizo.plh.util.PlhException;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.data.domain.Page;
@@ -25,29 +26,29 @@ public class ClientService {
         this.repository = repository;
     }
 
-    public boolean update(ClientDetailDto client, boolean create) {
-        var userExists = repository.findByIdNumber(client.idNumber());
+    public boolean update(ClientDetailDto client) throws PlhException {
+        var userExists = repository.findById(client.getId());
         if (userExists.isEmpty()) {
-            if (create) {
-                return save(client);
-            } else {
-                log.warn("ClientService: update(): client does not exists... can't update, and *create* argument is false, so no save action occurs.");
-                return false;
-            }
+            log.warn("ClientService: update(): client does not exists... can't update.");
+            return false;
         } else {
-            return save(client);
+            try {
+                repository.save(mapper.partialUpdate(client, userExists.get()));
+                return true;
+            } catch (Exception e) {
+                throw new PlhException("ClientService: update(): Error updating entity in repository. Message: " + e.getMessage());
+            }
         }
     }
 
-    public boolean save(ClientDetailDto client) {
-        var userExists = repository.findByIdNumber(client.idNumber());
+    public boolean save(ClientDetailDto client) throws PlhException {
+        var userExists = repository.findByIdNumber(client.getIdNumber());
         if (userExists.isEmpty()) {
             try {
                 repository.save(mapper.toEntity(client));
                 return true;
             } catch (Exception e) {
-                log.warn("ClientService: save(): Failed to save entity in repository. Message: {}", e.getMessage());
-                return false;
+                throw new PlhException("ClientService: save(): Error saving entity in repository. Message: " + e.getMessage());
             }
         } else {
             log.warn("ClientService: save(): Failed to save entity in repository, client already exist.");
@@ -55,61 +56,28 @@ public class ClientService {
         }
     }
 
-    public boolean delete(String idNumber) {
-        Optional<Client> result = repository.findByIdNumber(idNumber);
+    public boolean delete(Long id) throws PlhException {
+        Optional<Client> result = repository.findById(id);
         if (result.isPresent()) {
             try {
                 repository.deleteById(result.get().getId());
                 return true;
             } catch (Exception e) {
-                log.warn("ClientService: delete(): Failed to delete entity in repository with id number {}, with message: {}", idNumber, e.getMessage());
-                return false;
+                throw new PlhException("ClientService: delete(): Error deleting entity in repository. Message: " + e.getMessage());
             }
         } else {
-            log.warn("ClientService: delete(): Entity with id number {} does not exist, so cannot be deleted.", idNumber);
+            log.warn("ClientService: delete(): Entity with id  {} does not exist, so cannot be deleted.", id);
             return false;
         }
-
     }
 
-    public Optional<ClientDetailDto> getClientById(Long id) {
-        Optional<Client> result = repository.findById(id);
-        return result.map(mapper::toDetailDto);
-    }
-
-
-    /**
-     * Get list of clients whose name matches a query.
-     *
-     * @param name the name to search for. It may be some letters to be matched against the compete names of the client
-     * @param page the number of the page requested (starting from 1)
-     * @param size the number of elements per page
-     * @return List of basic Dto for clients with a matching name
-     */
-    public Page<ClientBasicDto> getClientsByName(String name, int page, int size) {
-        Page<Client> result = repository.findByNamesContainingIgnoreCase(name, PageRequest.of(page - 1, size));
-        return result.map(mapper::toBasicDto);
-    }
-
-    public Optional<ClientBasicDto> getBasicClientByIdNumber(String idNumber) {
-        var result = repository.findByIdNumber(idNumber);
-        if (result.isEmpty()) {
-            //There should be only one client with same idNumber
-            log.warn("ClientService: getClientByIdNumber(): Can't find client with id: {}", idNumber);
-            return Optional.empty();
-        } else {
-            return Optional.of(mapper.toBasicDto(result.get()));
-        }
-    }
-
-    public Optional<ClientDto> getClientByIdNumber(String idNumber) {
-        var result = repository.findByIdNumber(idNumber);
-        if (result.isEmpty()) {
-            //There should be only one client with same idNumber
-            log.warn("ClientService: getClientByIdNumber(): Can't find client with id: {}", idNumber);
-            return Optional.empty();
-        } else {
-            return Optional.of(mapper.toDto(result.get()));
+    public Optional<ClientDto> getClientById(Long id) throws PlhException {
+        try {
+            Optional<Client> result = repository.findById(id);
+            return result.map(mapper::toDto);
+        } catch (Exception e) {
+            throw new PlhException("ClientService: getClientById(): " +
+                    "error with argument or error mapping optional. Message: " + e.getMessage());
         }
     }
 
@@ -118,7 +86,7 @@ public class ClientService {
                                        String status,
                                        LocalDate startDate,
                                        LocalDate endDate,
-                                       PageRequest paging) {
+                                       PageRequest paging) throws PlhException {
         PersonType typeValue;
         UserStatus statusValue;
         if (paging == null) {
@@ -127,14 +95,22 @@ public class ClientService {
         try {
             typeValue = PersonType.valueOf(type);
 
-        } catch (Exception e) {
-            typeValue = null;
+        } catch (IllegalArgumentException e) {
+            if (type.equals("all")) {
+                typeValue = null;
+            } else {
+                throw new PlhException("ClientService: getAll(): 'type' argument is not a valid PersonType, nor 'all'. Message: " + e.getMessage());
+            }
         }
         try {
             statusValue = UserStatus.valueOf(status);
 
-        } catch (Exception e) {
-            statusValue = null;
+        } catch (IllegalArgumentException e) {
+            if (status.equals("all")) {
+                statusValue = null;
+            } else {
+                throw new PlhException("ClientService: getAll(): 'status' argument is not a valid UserStatus, nor 'all'. Message: " + e.getMessage());
+            }
         }
         try {
             return repository.findAll(where(isType(typeValue))
@@ -142,8 +118,7 @@ public class ClientService {
                     .and(nameContains(name))
                     .and(dateIsBetween(startDate, endDate)), paging).map(mapper::toBasicDto);
         } catch (Exception e) {
-            log.warn("ClientService: getWithFilters2(): Failed to get clients with filters. Message: {}", e.getMessage());
-            return Page.empty();
+            throw new PlhException("ClientService: getAll(): Failed to get list of clients with filters. Message: " + e.getMessage());
         }
     }
 

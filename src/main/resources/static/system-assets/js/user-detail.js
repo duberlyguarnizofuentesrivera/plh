@@ -25,6 +25,7 @@ const deleteUserErrorInfo = document.getElementById("deleteUserErrorInfo");
 
 //-----Images--------------------------------
 const profilePictureImage = document.getElementById("profilePictureImage");
+const profilePictureEditImage = document.getElementById("profilePictureEditImage");
 
 //--------Event Handlers--------------------------------
 checkDeleteUser.addEventListener("change", () => {
@@ -288,6 +289,7 @@ function loadUserDetails() {
                 console.log("Entity found...")
                 console.log(data)
                 profilePictureImage.setAttribute("src", data["_links"]["profilePictureUrl"]["href"])
+                profilePictureEditImage.setAttribute("src", data["_links"]["profilePictureUrl"]["href"])
                 const fieldUserNames = document.getElementById("fieldUserNames");
                 const fieldUserRole = document.getElementById("fieldUserRole");
                 const fieldUserStatus = document.getElementById("fieldUserStatus");
@@ -314,9 +316,35 @@ function loadUserDetails() {
                 const fieldLastModifiedDate = document.getElementById("fieldLastModifiedDate");
                 const fieldCreatedBy = document.getElementById("fieldCreatedBy");
                 const fieldLastModifiedBy = document.getElementById("fieldLastModifiedBy");
+                //auditing card: fetch usernames for createdBy and lastModifiedBy
+                if (data["createdBy"] == null) {
+                    fieldCreatedBy.innerHTML = "Sin datos";
+                } else {
+                    fetch("/api/v1/users/" + data["createdBy"]).then(response => {
+                        if (response.status === 200) {
+                            response.json().then(data => {
+                                fieldCreatedBy.innerHTML = data["firstName"] + " " + data["lastName"];
+                            })
+                        } else {
+                            fieldCreatedBy.innerHTML = "Usuario eliminado";
+                        }
+                    })
+                }
+                if (data["lastModifiedBy"] == null) {
+                    fieldLastModifiedBy.innerHTML = "Sin datos";
+                } else {
+                    fetch("/api/v1/users/" + data["lastModifiedBy"]).then(response => {
+                        if (response.status === 200) {
+                            response.json().then(data => {
+                                fieldLastModifiedBy.innerHTML = data["firstName"] + " " + data["lastName"];
+                            })
+                        } else {
+                            fieldLastModifiedBy.innerHTML = "Usuario eliminado";
+                        }
+                    })
+                }
                 fieldCreationDate.innerHTML = new Date(data["createdDate"]).toLocaleDateString();
                 fieldLastModifiedDate.innerHTML = new Date(data["lastModifiedDate"]).toLocaleDateString();
-                fieldCreatedBy.innerHTML = data["createdBy"];
                 fieldLastModifiedBy.innerHTML = data["lastModifiedBy"];
 
                 //details tab

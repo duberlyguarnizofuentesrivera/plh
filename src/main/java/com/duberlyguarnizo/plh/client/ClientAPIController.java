@@ -1,5 +1,6 @@
 package com.duberlyguarnizo.plh.client;
 
+import com.duberlyguarnizo.plh.util.PlhException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -23,10 +24,14 @@ public class ClientAPIController {
         this.service = service;
     }
 
-    @GetMapping("{idNumber}")
-    public ResponseEntity<ClientDto> getClient(@PathVariable String idNumber) {
-        var user = service.getClientByIdNumber(idNumber);
-        return user.map(clientDto -> new ResponseEntity<>(clientDto, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    @GetMapping("{id}")
+    public ResponseEntity<ClientDto> getClient(@PathVariable Long id) {
+        try {
+            var user = service.getClientById(id);
+            return user.map(clientDto -> new ResponseEntity<>(clientDto, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        } catch (PlhException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping
@@ -39,17 +44,21 @@ public class ClientAPIController {
                                                                @RequestParam(defaultValue = "1") int page,
                                                                @RequestParam(defaultValue = "10") int size) {
         PageRequest paging = PageRequest.of(page - 1, size, Sort.by(sort));
-        LocalDate startDate = LocalDate.now();
-        LocalDate endDate = LocalDate.now().minusDays(7);
+        LocalDate startDate = LocalDate.now().minusDays(7);
+        LocalDate endDate = LocalDate.now();
         if (start != null && end != null) {
             startDate = start;
             endDate = end;
         }
-        var result = service.getAll(name, type, status, startDate, endDate, paging);
-        if (result.getContent().isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(result.getContent(), HttpStatus.OK);
+        try {
+            var result = service.getAll(name, type, status, startDate, endDate, paging);
+            if (result.getContent().isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            } else {
+                return new ResponseEntity<>(result.getContent(), HttpStatus.OK);
+            }
+        } catch (PlhException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -59,25 +68,24 @@ public class ClientAPIController {
         return result ? new ResponseEntity<>(Boolean.TRUE, HttpStatus.CREATED) : new ResponseEntity<>(Boolean.FALSE, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @PutMapping
+    @PatchMapping
     public ResponseEntity<Boolean> update(@Valid @RequestBody ClientDetailDto dto) {
-        var user = service.getBasicClientByIdNumber(dto.idNumber());
-        if (user.isEmpty()) {
-            return new ResponseEntity<>(Boolean.FALSE, HttpStatus.NOT_FOUND);
+        try {
+            var result = service.update(dto);
+            return result ? new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK) : new ResponseEntity<>(Boolean.FALSE, HttpStatus.NOT_FOUND);
+        } catch (PlhException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        var result = service.save(dto);
-        return result ? new ResponseEntity<>(Boolean.TRUE, HttpStatus.CREATED) : new ResponseEntity<>(Boolean.FALSE, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @DeleteMapping("{idNumber}")
+    @DeleteMapping("{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERVISOR')")
-    public ResponseEntity<Boolean> delete(@PathVariable String idNumber) {
-        var user = service.getBasicClientByIdNumber(idNumber);
-        if (user.isEmpty()) {
-            return new ResponseEntity<>(Boolean.FALSE, HttpStatus.NOT_FOUND);
-        } else {
-            var result = service.delete(idNumber);
-            return result ? new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK) : new ResponseEntity<>(Boolean.FALSE, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<Boolean> delete(@PathVariable Long id) {
+        try {
+            var result = service.delete(id);
+            return result ? new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK) : new ResponseEntity<>(Boolean.FALSE, HttpStatus.NOT_FOUND);
+        } catch (PlhException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

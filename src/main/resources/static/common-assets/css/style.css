@@ -1262,3 +1262,11 @@ h6 {
 .same-size-btn {
     min-width: 159px;
 }
+
+.start-no-display {
+    display: none;
+}
+
+.start-hidden {
+    visibility: hidden;
+}

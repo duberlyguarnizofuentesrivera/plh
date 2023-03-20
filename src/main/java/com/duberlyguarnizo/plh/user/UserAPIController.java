@@ -2,6 +2,7 @@ package com.duberlyguarnizo.plh.user;
 
 import com.duberlyguarnizo.plh.enums.UserRole;
 import com.duberlyguarnizo.plh.util.ImageService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -35,22 +36,36 @@ public class UserAPIController {
     private final ImageService imageService;
     private final PagedResourcesAssembler<UserBasicDto> pagedResourcesAssembler;
 
-    public UserAPIController(UserService userService, ImageService imageService, PagedResourcesAssembler<UserBasicDto> pagedResourcesAssembler) {
+    public UserAPIController(UserService userService,
+                             ImageService imageService,
+                             PagedResourcesAssembler<UserBasicDto> pagedResourcesAssembler) {
         this.userService = userService;
         this.imageService = imageService;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
-    @GetMapping("{username}")
-    public ResponseEntity<UserDto> getUser(@PathVariable String username) {
-        Optional<UserDto> user = userService.getByUsername(username);
+    @GetMapping("{usernameOrId}")
+    public ResponseEntity<UserDto> getUser(@PathVariable String usernameOrId) {
+        //verify that this is username or id number, but first, check that usernameOrId is not "current", for that is managed by other endpoint
+        if (usernameOrId.equals("current")) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        long id;
+        Optional<UserDto> user;
+        try {
+            id = Long.parseLong(usernameOrId);
+            user = userService.getById(id);
+        } catch (NumberFormatException e) {
+            //it's not a number
+            user = userService.getByUsername(usernameOrId);
+        }
         if (user.isPresent()) {
             UserDto result = user.get();
             result.add(linkTo(methodOn(UserAPIController.class)
-                    .getUser(username))
+                    .getUser(usernameOrId))
                     .withSelfRel());
             result.add(linkTo(methodOn(UserAPIController.class)
-                    .deleteUser(username))
+                    .deleteUser(usernameOrId))
                     .withRel("delete"));
             result.add(linkTo(methodOn(UserAPIController.class)
                     .updateUser(null))
@@ -83,6 +98,8 @@ public class UserAPIController {
             result.add(linkTo(methodOn(UserAPIController.class)
                     .uploadProfilePicture(null, result.username))
                     .withRel("uploadProfilePicture"));
+            result.add(Link.of("/uploads/profilePics/" + result.username + ".jpg")
+                    .withRel("profilePictureUrl"));
             result.add(linkTo(UserAPIController.class).slash("?search=" + result.getLastName())
                     .withRel("search"));
         }
@@ -133,7 +150,7 @@ public class UserAPIController {
     }
 
     @PostMapping
-    public ResponseEntity<Boolean> createUser(@RequestBody UserDetailDto dto) {
+    public ResponseEntity<Boolean> createUser(@Valid @RequestBody UserDetailDto dto) {
         var result = userService.save(dto);
         return result ? new ResponseEntity<>(HttpStatus.CREATED) : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -158,7 +175,7 @@ public class UserAPIController {
 
     @PatchMapping
     @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERVISOR')")
-    public ResponseEntity<Boolean> updateUser(@RequestBody UserDetailDto data) {
+    public ResponseEntity<Boolean> updateUser(@Valid @RequestBody UserDetailDto data) {
         if (data == null) {
             return new ResponseEntity<>(Boolean.FALSE, HttpStatus.BAD_REQUEST);
         }

@@ -112,7 +112,7 @@ public class UserService {
         Optional<User> user = repository.findById(userDetailDto.getId());
         if (user.isPresent()) { //user does exist, so we update
             User updateUser = user.get();
-            mapper.partialUpdate(userDetailDto, updateUser);
+            repository.save(mapper.partialUpdate(userDetailDto, updateUser));
             //update password if needed
             if (currentUser.isPresent()) {
                 var currentExistingUser = currentUser.get();
