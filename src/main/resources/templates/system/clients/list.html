@@ -55,34 +55,49 @@
                         <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
                             <div class="dataTable-top d-flex justify-content-around row g-2">
                                 <div class="dataTable-dropdown col">
-                                    <label>
-                                        <select class="dataTable-selector filter-form" id="size">
-                                            <option value="5">5</option>
-                                            <option selected="" value="10">10</option>
-                                            <option value="15">15</option>
-                                            <option value="20">20</option>
-                                            <option value="25">25</option>
-                                        </select> entradas por página
-                                    </label>
+                                    <label for="size">Por página</label>
+                                    <select class="dataTable-selector filter-form" id="size">
+                                        <option value="5">5</option>
+                                        <option selected="" value="10">10</option>
+                                        <option value="15">15</option>
+                                        <option value="20">20</option>
+                                        <option value="25">25</option>
+                                    </select>
                                 </div>
                                 <div class="col">
-                                    <select class="dataTable-selector filter-form" id="role">
-                                        <option selected value="all">Filtrar Tipo (Todos)</option>
-                                        <option th:each="type: ${types}" th:text="${type.toString()}"
+                                    <label for="type">Tipo de cliente</label>
+                                    <select class="dataTable-selector filter-form" id="type">
+                                        <option selected value="all">Todos</option>
+                                        <option th:each="type: ${typesList}" th:text="${type.toString()}"
                                                 th:value="${type.name()}"></option>
                                     </select>
                                 </div>
                                 <div class="col">
+                                    <label for="status">Estado</label>
                                     <select class="dataTable-selector filter-form" id="status">
-                                        <option selected value="all">Filtrar Estado (todos)</option>
+                                        <option selected value="all">Todos</option>
                                         <option th:each="status: ${statusList}" th:text="${status.toString()}"
                                                 th:value="${status.name()}"></option>
                                     </select>
                                 </div>
                                 <div class="dataTable-search col">
+                                    <label for="search">Apellidos</label>
                                     <input class="dataTable-input filter-form" data-ms-editor="true" id="search"
                                            placeholder="Buscar..." spellcheck="false"
                                            type="text">
+                                </div>
+                                <div class="dataTable-search col">
+                                    <label for="start">Desde</label>
+                                    <input class="dataTable-input filter-form" data-ms-editor="true" id="start"
+                                           max="2022-01-01" min="2022-01-01" placeholder="Desde" type="date"
+                                           value="2022-01-01">
+                                </div>
+                                <!--TODO: set max value for calendars to today-->
+                                <div class="dataTable-search col">
+                                    <label for="end">Hasta</label>
+                                    <input class="dataTable-input filter-form" data-ms-editor="true" id="end"
+                                           max="2022-01-01" min="2022-01-01" placeholder="Hasta" type="date"
+                                           value="2022-01-01">
                                 </div>
                             </div>
                             <div class="dataTable-container table-responsive">
@@ -123,6 +138,22 @@
                                         <li class="page-item"><a class="page-link" href="#">Next</a></li>
                                     </ul>
                                 </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="section">
+        <div class="row d-flex justify-content-center">
+            <div class="col-lg-10">
+                <div class="card recent-sales overflow-auto">
+                    <div class="card-body"><h5 class="card-title">Acciones</h5>
+                        <div class="row justify-content-center">
+                            <div class="col">
+                                <a class="btn btn-primary" href="#">Nuevo cliente</a>
+                                <a class="btn btn-primary" href="#">Nuevo Ticket</a>
                             </div>
                         </div>
                     </div>

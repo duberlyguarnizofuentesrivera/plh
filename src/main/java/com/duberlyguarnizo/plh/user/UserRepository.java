@@ -2,9 +2,13 @@ package com.duberlyguarnizo.plh.user;
 
 import com.duberlyguarnizo.plh.enums.UserRole;
 import com.duberlyguarnizo.plh.enums.UserStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +16,44 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
+    Logger logger = LoggerFactory.getLogger(UserRepository.class);
+    static Specification<User> firstNameContains(String name) {
+        if (name == null) {
+            logger.warn("UserRepository: firstName is null");
+            return null;
+        } else {
+            return (user, query, cb) -> cb.like(cb.lower(user.get("firstName")), "%" + name.toLowerCase() + "%");
+        }
+    }
+
+    static Specification<User> lastNameContains(String lastName) {
+        if (lastName == null) {
+            logger.warn("UserRepository: lastname is null");
+            return null;
+        } else {
+            return (user, query, cb) -> cb.like(cb.lower(user.get("lastName")), "%" + lastName.toLowerCase() + "%");
+        }
+    }
+
+    static Specification<User> hasRole(UserRole role) {
+        if (role == null) {
+            logger.warn("UserRepository: role is null");
+            return null;
+        } else {
+            return (user, query, cb) -> cb.equal(user.get("role"), role);
+        }
+    }
+
+    static Specification<User> hasStatus(UserStatus status) {
+        if (status == null) {
+            logger.warn("UserRepository: status is null");
+            return null;
+        } else {
+            return (user, query, cb) -> cb.equal(user.get("status"), status);
+        }
+    }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     Optional<User> findByUsernameIgnoreCase(String username);
 

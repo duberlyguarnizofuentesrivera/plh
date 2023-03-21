@@ -1,6 +1,5 @@
 package com.duberlyguarnizo.plh.auditing;
 
-import com.duberlyguarnizo.plh.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,15 +7,15 @@ import org.springframework.data.domain.AuditorAware;
 
 @Configuration
 public class AuditingConf {
-    private final UserRepository repository;
+    private final AuditorAwareImpl implementation;
 
     @Autowired
-    public AuditingConf(UserRepository repository) {
-        this.repository = repository;
+    public AuditingConf(AuditorAwareImpl implementation) {
+        this.implementation = implementation;
     }
 
     @Bean
     public AuditorAware<Long> auditorAware() {
-        return new AuditorAwareImpl(repository);
+        return implementation;
     }
 }

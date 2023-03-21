@@ -12,7 +12,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("api/v1/addresses")
 public class AddressAPIController {
-    AddressService service;
+    private final AddressService service;
 
     public AddressAPIController(AddressService service) {
         this.service = service;

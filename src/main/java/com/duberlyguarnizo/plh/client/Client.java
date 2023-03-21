@@ -7,10 +7,7 @@ import com.duberlyguarnizo.plh.enums.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -20,6 +17,8 @@ import java.util.Set;
 @ToString
 @NoArgsConstructor
 @Entity
+@Builder
+@AllArgsConstructor
 public class Client extends AuditableEntity {
     @Id
     @GeneratedValue

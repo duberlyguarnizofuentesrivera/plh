@@ -2,8 +2,8 @@ package com.duberlyguarnizo.plh;
 
 import com.duberlyguarnizo.plh.enums.UserRole;
 import com.duberlyguarnizo.plh.enums.UserStatus;
+import com.duberlyguarnizo.plh.user.UserDetailDto;
 import com.duberlyguarnizo.plh.user.UserDto;
-import com.duberlyguarnizo.plh.user.UserRegisterDto;
 import com.duberlyguarnizo.plh.user.UserService;
 import com.duberlyguarnizo.plh.util.ImageService;
 import jakarta.annotation.Resource;
@@ -36,7 +36,7 @@ public class PlhApplication implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         SimpleCommandLinePropertySource propertySource = new SimpleCommandLinePropertySource(args);
         imageService.init();
         if (propertySource.containsProperty("create-admin") &&
@@ -50,7 +50,7 @@ public class PlhApplication implements CommandLineRunner {
                     if (newAdminPassword.isEmpty()) {
                         log.warn("There was an attempt to create a first admin user, but the password was invalid!");
                     } else {
-                        UserRegisterDto newUser = UserRegisterDto.builder()
+                        UserDetailDto newUser = UserDetailDto.builder()
                                 .firstName("Duberly")
                                 .lastName("Guarnizo")
                                 .idNumber("922618630")

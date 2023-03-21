@@ -4,7 +4,13 @@ import com.duberlyguarnizo.plh.enums.PersonType;
 import com.duberlyguarnizo.plh.enums.UserStatus;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.springframework.hateoas.RepresentationModel;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -12,8 +18,25 @@ import java.util.Set;
 /**
  * A DTO for the {@link Client} entity
  */
-public record ClientDto(String notes, Long createdBy, LocalDateTime createdDate, Long lastModifiedBy,
-                        LocalDateTime lastModifiedDate, Long id, @NotBlank String idNumber, PersonType type,
-                        @NotBlank String names, String contactNames, String phone, @Email String email,
-                        UserStatus status, Set<Long> pickUpAddressIds) implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+@Data
+@AllArgsConstructor
+@Builder
+public final class ClientDto extends RepresentationModel<ClientDto> implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 0L;
+    private final String notes;
+    private final Long createdBy;
+    private final LocalDateTime createdDate;
+    private final Long lastModifiedBy;
+    private final LocalDateTime lastModifiedDate;
+    private final Long id;
+    private final @NotBlank String idNumber;
+    private final PersonType type;
+    private final @NotBlank String names;
+    private final String contactNames;
+    private final String phone;
+    private final @Email String email;
+    private final UserStatus status;
+    private final Set<Long> pickUpAddressIds;
 }

@@ -57,6 +57,7 @@
                                 <div class="dataTable-dropdown col">
                                     <label>
                                         <select class="dataTable-selector filter-form" id="size">
+                                            <option value="1">1</option>
                                             <option value="5">5</option>
                                             <option selected="" value="10">10</option>
                                             <option value="15">15</option>
@@ -90,19 +91,22 @@
                                     <thead>
                                     <tr>
                                         <th data-sortable="" scope="col">
-                                            <a class="dataTable-sorter" href="#">Dni/CE</a>
+                                            <a class="" href="#">Dni/CE</a>
                                         </th>
                                         <th data-sortable="true" scope="col">
-                                            <a class="dataTable-sorter" href="#">Perfíl</a>
+                                            <a class="dataTable-sorter" data-sorter="username" href="#">Usuario</a>
                                         </th>
                                         <th data-sortable="true" scope="col">
-                                            <a class="dataTable-sorter" href="#">Nombres</a>
+                                            <a class="dataTable-sorter" data-sorter="firstName" href="#">Nombres</a>
+                                        </th>
+                                        <th data-sortable="true" scope="col">
+                                            <a class="" href="#">Tickets</a>
                                         </th>
                                         <th data-sortable="" scope="col">
-                                            <a class="dataTable-sorter" href="#">Rol</a>
+                                            <a class="dataTable-sorter" data-sorter="role" href="#">Rol</a>
                                         </th>
                                         <th data-sortable="" scope="col">
-                                            <a class="dataTable-sorter" href="#">Estado</a>
+                                            <a class="dataTable-sorter" data-sorter="status" href="#">Estado</a>
                                         </th>
                                     </tr>
                                     </thead>
@@ -112,12 +116,9 @@
                                 </table>
                             </div>
                             <div class="dataTable-bottom">
-                                <div class="dataTable-info">Showing 1 to 5 of 5 entries</div>
+                                <div class="dataTable-info" id="pagination-info">Showing 1 to 5 of 5 entries</div>
                                 <nav class="dataTable-pagination">
-                                    <ul class="dataTable-pagination-list">
-                                        <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-                                        <li class="page-item"><a class="page-link">1</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                                    <ul class="dataTable-pagination-list" id="pagination">
                                     </ul>
                                 </nav>
                             </div>

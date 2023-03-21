@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="es" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+          name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <title>RedXpress Soluciones - Mi Perfil</title>
+    <!-- Favicons -->
+    <link rel="icon" th:href="@{/common-assets/img/favicon.png}">
+    <link rel="apple-touch-icon" th:href="@{/common-assets/img/apple-touch-icon.png}">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+          rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/bootstrap-icons/bootstrap-icons.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/boxicons/css/boxicons.min.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/remixicon/remixicon.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/simple-datatables/style.css}">
+
+    <!-- Template Main CSS File -->
+    <link rel="stylesheet" th:href="@{/common-assets/css/style.css}">
+</head>
+<body>
+<header th:replace="~{fragments::header}">
+</header>
+<aside th:replace="~{fragments::aside}">
+</aside>
+<main class="main" id="main">
+    <div class="pagetitle">
+        <h1>Sistema RedXPress - Mi perfil</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">Principal</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/system}">Sistema</a></li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+    <section class="section profile">
+        <div class="row">
+            <div class="col-xl-4">
+                <div class="card">
+                    <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
+                        <img alt="Profile" class="rounded-circle" id="profilePictureImage" src="">
+                        <h2><span class="text-capitalize" id="fieldUserNames"></span></h2>
+                        <h3><span class="text-capitalize" id="fieldUserRole"></span>
+                        </h3>
+                        <h3>
+                            <span class="text-capitalize badge" id="fieldUserStatus"></span>
+                        </h3>
+                        <div class="social-links mt-2">
+                            <a class="" href="#" id="fieldSocialLinksPhone"></a>
+                            <a class="" href="#" id="fieldSocialLinksWhatsApp"></a>
+                            <a class="" href="#" id="fieldSocialLinksEmail"></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')">
+                    <div class="card-body profile-overview">
+                        <h5 class="card-title">Auditoría</h5>
+                        <div class="row">
+                            <div class="col-lg-5 col-md-4 label ">Creación</div>
+                            <div class="col-lg-7 col-md-8">
+                                <span class="text-capitalize" id="fieldCreationDate"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-5 col-md-4 label ">Creado Por</div>
+                            <div class="col-lg-7 col-md-8">
+                                <span class="text-capitalize" id="fieldCreatedBy"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-5 col-md-4 label ">Modificación</div>
+                            <div class="col-lg-7 col-md-8">
+                                <span class="text-capitalize" id="fieldLastModifiedDate"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-5 col-md-4 label ">Modificado Por</div>
+                            <div class="col-lg-7 col-md-8">
+                                <span class="text-capitalize" id="fieldLastModifiedBy"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-xl-8">
+
+                <div class="card">
+                    <div class="card-body pt-3">
+                        <!-- Bordered Tabs -->
+                        <ul class="nav nav-tabs nav-tabs-bordered">
+
+                            <li class="nav-item">
+                                <button class="nav-link active" data-bs-target="#profile-overview" data-bs-toggle="tab">
+                                    Resumen
+                                </button>
+                            </li>
+
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-target="#profile-change-password" data-bs-toggle="tab">
+                                    Cambiar Contraseña
+                                </button>
+                            </li>
+
+                        </ul>
+                        <div class="tab-content pt-2">
+
+                            <div class="tab-pane fade show active profile-overview" id="profile-overview">
+                                <h5 class="card-title">Edición</h5>
+                                <p class="small fst-italic">Cualquier cambio de los valores de tu perfil debe ser
+                                    realizado por un administrador. Si encuentras información equivocada, notifícalo
+                                    para que sea cambiada.</p>
+
+                                <h5 class="card-title">Detalles de usuario</h5>
+
+                                <!--                                <div class="row">-->
+                                <!--                                    <div class="col-lg-4 col-md-5 label ">Nombres Completos</div>-->
+                                <!--                                    <div class="col-lg-8 col-md-7"><span class="text-capitalize"-->
+                                <!--                                                                         th:text="${userDto.firstName() +' '+ userDto.lastName()}"></span>-->
+                                <!--                                    </div>-->
+                                <!--                                </div>-->
+
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label">DNI</div>
+                                    <div class="col-lg-8 col-md-7"><span id="fieldUserIdNumber"></span></div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label">Usuario</div>
+                                    <div class="col-lg-8 col-md-7"><span id="fieldUserUserName"></span></div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label">Celular</div>
+                                    <div class="col-lg-8 col-md-7">
+                                        <span id="fieldUserPhone"></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label">2do teléfono</div>
+                                    <div class="col-lg-8 col-md-7">
+                                        <span id="fieldUserPhone2"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label">Email</div>
+                                    <div class="col-lg-8 col-md-7">
+                                        <span id="fieldUserEmail"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade pt-3" id="profile-change-password">
+                                <!-- Change Password Form for regular users-->
+                                <div class="form" id="form-change-password">
+                                    <div class="row mb-3"
+                                         sec:authorize="hasAnyAuthority('DISPATCHER', 'TRANSPORTER', 'SUPERVISOR')">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="currentPassword">Contraseña
+                                            Actual</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="currentPassword" name="password"
+                                                   type="password">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3" sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')">
+                                        <p>Los administradores pueden cambiar sus contraseñas sin necesidad de ingresar
+                                            la anterior. Usa esto con mucho cuidado. Asimismo, desde el panel de
+                                            detalles, un administrador puede cambiar cualquier contraseña de cualquier
+                                            otro usuario.</p>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="newPassword">Nueva
+                                            Contraseña</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="newPassword" name="newPassword"
+                                                   type="password">
+                                            <div class="form-text" id="passwordHelp">Debe contener al menos 4
+                                                caracteres, no especiales.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="renewPassword">Reingresa la
+                                            nueva contraseña</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control" id="renewPassword" name="renewPassword"
+                                                   type="password">
+                                        </div>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <button class="btn btn-primary" disabled id="btnChangePassword">Cambiar
+                                            Contraseña
+                                        </button>
+                                    </div>
+                                    <div class="alert alert-success mt-3 alert-dismissible fade show"
+                                         id="passwordChangedOkInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-check-circle"></i> La contraseña se cambió con éxito. Vas a
+                                        tener que <strong>reiniciar tu sesión</strong>.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                    </div>
+                                    <div class="alert alert-warning mt-3 alert-dismissible fade show"
+                                         id="passwordChangedBadPwdInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-exclamation-triangle"></i> La contraseña actual es
+                                        incorrecta.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                    </div>
+                                    <div class="alert alert-danger mt-3 alert-dismissible fade show"
+                                         id="passwordChangedErrorInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-exclamation-triangle"></i> Ocurrió un error. ¿Tienes
+                                        internet? Comunícate con un administrador.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                    </div>
+                                </div><!-- End Change Password Form -->
+                            </div>
+
+                        </div><!-- End Bordered Tabs -->
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments::footer}"></footer>
+<a class="back-to-top d-flex align-items-center justify-content-center" href="#"><i
+        class="bi bi-arrow-up-short"></i></a>
+
+<!-- Vendor JS Files -->
+
+<script th:src="@{/common-assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+<script th:src="@{/common-assets/vendor/echarts/echarts.min.js}"></script>
+
+<script th:src="@{/common-assets/vendor/simple-datatables/simple-datatables.js}"></script>
+
+
+<!-- Template Main JS File -->
+<script th:src="@{/common-assets/js/main.js}"></script>
+<script th:src="@{/system-assets/js/profile-detail.js}"></script>
+</body>
+</html>

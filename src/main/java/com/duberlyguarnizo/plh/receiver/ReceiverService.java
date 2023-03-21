@@ -5,10 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Optional;
+
+import static com.duberlyguarnizo.plh.receiver.ReceiverRepository.*;
+import static org.springframework.data.jpa.domain.Specification.where;
 
 @Service
 @Slf4j
@@ -93,43 +97,43 @@ public class ReceiverService {
         }
     }
 
-    public Page<ReceiverBasicDto> getWithFilters(String type, String names, int page, int size) {
-        PersonType personType;
+    /**
+     * Gets a Page of ReceiverBasicDto filtered by some fields
+     *
+     * @param type     the type of person. Allowed values: "PERSON", "COMPANY". Other value suppresses this filter.
+     * @param names    the names or part of the name of the receiver. If empty, the filter is not applied.
+     * @param idNumber the id card number of the receiver. If empty, the filter is not applied.
+     * @param start    the start date of last modification/creation of the receiver. If null, default is 7 days ago
+     * @param end      the end date of last modification/creation of the receiver. If null, default is today.
+     * @param paging   the paging, composed of page number, elements per page and sort field. If null,
+     *                 defaults to first page of 10 elements and sort by receiver's names.
+     * @return the page with filters applied, or an empty page if there was an error querying the repository.
+     */
+    public Page<ReceiverBasicDto> getWithFilters(String type,
+                                                 String names,
+                                                 String idNumber,
+                                                 LocalDate start,
+                                                 LocalDate end,
+                                                 PageRequest paging) {
+        PersonType typeValue;
         try {
-            personType = PersonType.valueOf(type);
+            typeValue = PersonType.valueOf(type);
         } catch (Exception e) {
-            personType = null;
+            typeValue = null;
         }
-        if (personType == null && names.isEmpty()) {
-            //no filters applied
-            return repository.findAll(PageRequest.of(page - 1, size)).map(mapper::toBasicDto);
-        } else if (personType != null && !names.isEmpty()) {
-            //both filters applied
-            return repository.findByTypeAndNamesContainingIgnoreCase(personType, names, PageRequest.of(page - 1, size)).map(mapper::toBasicDto);
-        } else {
-            //one filter applied
-            if (personType != null) {
-                //filtering by type
-                return repository.findByType(personType, PageRequest.of(page - 1, size)).map(mapper::toBasicDto);
-            } else {
-                //filtering by names
-                return repository.findByNamesContainingIgnoreCase(names, PageRequest.of(page - 1, size)).map(mapper::toBasicDto);
-            }
+        if (paging == null) {
+            paging = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "names"));
         }
-
+        try {
+            return repository.findAll(where(hasType(typeValue))
+                            .and(nameContains(names))
+                            .and(idNumberIs(idNumber))
+                            .and(dateIsBetween(start, end)), paging)
+                    .map(mapper::toBasicDto);
+        } catch (Exception e) {
+            log.error("ReceiverService: getWithFilters(): Error trying to query from repository. Error is: {}", e.getMessage());
+            return Page.empty();
+        }
     }
 
-    public Page<ReceiverBasicDto> getByDate(LocalDate date, int page, int size) {
-        return repository.findByLastModifiedDateBetween(date.atStartOfDay(),
-                        date.plusDays(1).atStartOfDay(),
-                        PageRequest.of(page - 1, size))
-                .map(mapper::toBasicDto);
-    }
-
-    public Page<ReceiverBasicDto> getByDateInterval(LocalDate date1, LocalDate date2, int page, int size) {
-        return repository.findByLastModifiedDateBetween(date1.atStartOfDay(),
-                        date2.plusDays(1).atStartOfDay(),
-                        PageRequest.of(page - 1, size))
-                .map(mapper::toBasicDto);
-    }
 }

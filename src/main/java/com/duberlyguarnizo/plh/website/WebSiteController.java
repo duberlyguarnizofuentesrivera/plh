@@ -31,11 +31,7 @@ public class WebSiteController {
     @GetMapping("/")
     public String mainSite(Model model) {
         Optional<UserBasicDto> currentUser = service.getCurrentUser();
-        UserBasicDto user = null;
-        if (currentUser.isPresent()) {
-            user = currentUser.get();
-        }
-        model.addAttribute("user", user);
+        model.addAttribute("user", currentUser.orElse(null));
         return "index";
     }
 

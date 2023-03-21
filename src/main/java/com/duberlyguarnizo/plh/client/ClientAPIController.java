@@ -1,11 +1,17 @@
 package com.duberlyguarnizo.plh.client;
 
+import com.duberlyguarnizo.plh.util.PlhException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -18,23 +24,41 @@ public class ClientAPIController {
         this.service = service;
     }
 
-    @GetMapping("{idNumber}")
-    public ResponseEntity<ClientDto> getClient(@PathVariable String idNumber) {
-        var user = service.getClientByIdNumber(idNumber);
-        return user.map(clientDto -> new ResponseEntity<>(clientDto, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    @GetMapping("{id}")
+    public ResponseEntity<ClientDto> getClient(@PathVariable Long id) {
+        try {
+            var user = service.getClientById(id);
+            return user.map(clientDto -> new ResponseEntity<>(clientDto, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        } catch (PlhException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping
-    public ResponseEntity<List<ClientBasicDto>> getWithFilters(@RequestParam(defaultValue = "all") String type,
+    public ResponseEntity<List<ClientBasicDto>> getWithFilters(@RequestParam(defaultValue = "") String search,
+                                                               @RequestParam(defaultValue = "all") String type,
                                                                @RequestParam(defaultValue = "all") String status,
-                                                               @RequestParam(defaultValue = "") String query,
+                                                               @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate start,
+                                                               @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end,
+                                                               @RequestParam(defaultValue = "names") String sort,
                                                                @RequestParam(defaultValue = "1") int page,
                                                                @RequestParam(defaultValue = "10") int size) {
-        var result = service.getWithFilters(type, status, query, page, size);
-        if (result.getContent().isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(result.getContent(), HttpStatus.OK);
+        PageRequest paging = PageRequest.of(page - 1, size, Sort.by(sort));
+        LocalDate startDate = LocalDate.now().minusDays(7);
+        LocalDate endDate = LocalDate.now();
+        if (start != null && end != null) {
+            startDate = start;
+            endDate = end;
+        }
+        try {
+            var result = service.getAll(search, type, status, startDate, endDate, paging);
+            if (result.getContent().isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            } else {
+                return new ResponseEntity<>(result.getContent(), HttpStatus.OK);
+            }
+        } catch (PlhException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -44,24 +68,24 @@ public class ClientAPIController {
         return result ? new ResponseEntity<>(Boolean.TRUE, HttpStatus.CREATED) : new ResponseEntity<>(Boolean.FALSE, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @PutMapping
+    @PatchMapping
     public ResponseEntity<Boolean> update(@Valid @RequestBody ClientDetailDto dto) {
-        var user = service.getBasicClientByIdNumber(dto.idNumber());
-        if (user.isEmpty()) {
-            return new ResponseEntity<>(Boolean.FALSE, HttpStatus.NOT_FOUND);
+        try {
+            var result = service.update(dto);
+            return result ? new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK) : new ResponseEntity<>(Boolean.FALSE, HttpStatus.NOT_FOUND);
+        } catch (PlhException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        var result = service.save(dto);
-        return result ? new ResponseEntity<>(Boolean.TRUE, HttpStatus.CREATED) : new ResponseEntity<>(Boolean.FALSE, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @DeleteMapping("{idNumber}")
-    public ResponseEntity<Boolean> delete(@PathVariable String idNumber) {
-        var user = service.getBasicClientByIdNumber(idNumber);
-        if (user.isEmpty()) {
-            return new ResponseEntity<>(Boolean.FALSE, HttpStatus.NOT_FOUND);
-        } else {
-            var result = service.delete(idNumber);
-            return result ? new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK) : new ResponseEntity<>(Boolean.FALSE, HttpStatus.INTERNAL_SERVER_ERROR);
+    @DeleteMapping("{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'SUPERVISOR')")
+    public ResponseEntity<Boolean> delete(@PathVariable Long id) {
+        try {
+            var result = service.delete(id);
+            return result ? new ResponseEntity<>(Boolean.TRUE, HttpStatus.OK) : new ResponseEntity<>(Boolean.FALSE, HttpStatus.NOT_FOUND);
+        } catch (PlhException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

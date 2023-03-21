@@ -17,7 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfiguration {
     private static final String ADMIN_AUTHORITY = "ADMIN";
     private static final String SUPERVISOR_AUTHORITY = "SUPERVISOR";
-    private static final String DISTPATCHER_AUTHORITY = "DISPATCHER";
+    private static final String DISPATCHER_AUTHORITY = "DISPATCHER";
     private static final String TRANSPORTER_AUTHORITY = "TRANSPORTER";
 
     private final String rememberKey;
@@ -36,7 +36,7 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.TRACE).denyAll()
                 .requestMatchers("/admin/").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
                 .requestMatchers("/system/transporter").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY, TRANSPORTER_AUTHORITY)
-                .requestMatchers("/system/dispatcher").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY, DISTPATCHER_AUTHORITY)
+                .requestMatchers("/system/dispatcher").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY, DISPATCHER_AUTHORITY)
                 .requestMatchers("/system/users/crud/**").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
                 .requestMatchers("/system/**", "/auth/**", "/system-assets/**", "/uploads/profilePics/**").authenticated()
                 .anyRequest()
