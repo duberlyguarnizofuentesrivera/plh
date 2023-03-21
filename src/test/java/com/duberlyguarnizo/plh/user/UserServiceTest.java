@@ -3,7 +3,9 @@ package com.duberlyguarnizo.plh.user;
 
 import com.duberlyguarnizo.plh.enums.UserRole;
 import com.duberlyguarnizo.plh.enums.UserStatus;
+import com.duberlyguarnizo.plh.util.PlhException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -13,7 +15,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -74,6 +81,7 @@ class UserServiceTest {
 
 
     @Test
+    @DisplayName("UserService: getWithFilters throws exception with invalid arguments")
     void testGetWithFiltersWithInvalidParameters() {
         // Arrange
         PageRequest pageRequest = PageRequest.of(0, 10);
@@ -82,6 +90,24 @@ class UserServiceTest {
         assertThrows(IllegalArgumentException.class, () -> service.getWithFilters("", "ACTIVE", null, pageRequest));
         assertThrows(IllegalArgumentException.class, () -> service.getWithFilters("", null, "InvalidRole", pageRequest));
         assertThrows(IllegalArgumentException.class, () -> service.getWithFilters("", "ACTIVE", "InvalidRole", null));
+    }
+
+    @Test
+    void testGetByIdWithExceptionThrown() {
+        assertThrows(PlhException.class, () -> service.getById(null));
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void testGetByIdWithExistingClient() {
+        when(repository.findById(anyLong())).thenReturn(Optional.of(user1));
+        verify(repository).findById(anyLong());
+    }
+
+    @Test
+    void testGetByIdWithNonExistingClient() {
+        when(repository.findById(anyLong())).thenReturn(Optional.empty());
+        assertEquals(Optional.empty(), service.getById(anyLong()));
     }
 
 }

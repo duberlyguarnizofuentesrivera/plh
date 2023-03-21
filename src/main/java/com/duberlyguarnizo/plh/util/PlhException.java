@@ -4,9 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PlhException extends RuntimeException {
-    public PlhException(String message) {
+    public PlhException(Exception e, String message) {
         super(message);
-        log.error("PlhException: " + message, this);
+        log.error("PlhException: " + message, e);
         super.printStackTrace();
     }
 }

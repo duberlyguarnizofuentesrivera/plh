@@ -36,19 +36,19 @@ public class ClientService {
                 repository.save(mapper.partialUpdate(client, userExists.get()));
                 return true;
             } catch (Exception e) {
-                throw new PlhException("ClientService: update(): Error updating entity in repository. Message: " + e.getMessage());
+                throw new PlhException(e, "ClientService: update(): Error updating entity in repository. Message: " + e.getMessage());
             }
         }
     }
 
     public boolean save(ClientDetailDto client) throws PlhException {
-        var userExists = repository.findByIdNumber(client.getIdNumber());
+        var userExists = repository.findById(client.getId());
         if (userExists.isEmpty()) {
             try {
                 repository.save(mapper.toEntity(client));
                 return true;
             } catch (Exception e) {
-                throw new PlhException("ClientService: save(): Error saving entity in repository. Message: " + e.getMessage());
+                throw new PlhException(e, "ClientService: save(): Error saving entity in repository. Message: " + e.getMessage());
             }
         } else {
             log.warn("ClientService: save(): Failed to save entity in repository, client already exist.");
@@ -63,7 +63,7 @@ public class ClientService {
                 repository.deleteById(result.get().getId());
                 return true;
             } catch (Exception e) {
-                throw new PlhException("ClientService: delete(): Error deleting entity in repository. Message: " + e.getMessage());
+                throw new PlhException(e, "ClientService: delete(): Error deleting entity in repository. Message: " + e.getMessage());
             }
         } else {
             log.warn("ClientService: delete(): Entity with id  {} does not exist, so cannot be deleted.", id);
@@ -76,7 +76,7 @@ public class ClientService {
             Optional<Client> result = repository.findById(id);
             return result.map(mapper::toDto);
         } catch (Exception e) {
-            throw new PlhException("ClientService: getClientById(): " +
+            throw new PlhException(e, "ClientService: getClientById(): " +
                     "error with argument or error mapping optional. Message: " + e.getMessage());
         }
     }
@@ -94,31 +94,33 @@ public class ClientService {
         }
         try {
             typeValue = PersonType.valueOf(type);
-
         } catch (IllegalArgumentException e) {
             if (type.equals("all")) {
                 typeValue = null;
             } else {
-                throw new PlhException("ClientService: getAll(): 'type' argument is not a valid PersonType, nor 'all'. Message: " + e.getMessage());
+                throw new PlhException(e, "ClientService: getAll(): 'type' argument is not a valid PersonType, nor 'all'. Message: " + e.getMessage());
             }
         }
         try {
             statusValue = UserStatus.valueOf(status);
-
         } catch (IllegalArgumentException e) {
             if (status.equals("all")) {
                 statusValue = null;
             } else {
-                throw new PlhException("ClientService: getAll(): 'status' argument is not a valid UserStatus, nor 'all'. Message: " + e.getMessage());
+                throw new PlhException(e, "ClientService: getAll(): 'status' argument is not a valid UserStatus, nor 'all'. Message: " + e.getMessage());
             }
         }
         try {
-            return repository.findAll(where(isType(typeValue))
+            var result = repository.findAll(where(isType(typeValue))
                     .and(hasUserStatus(statusValue))
                     .and(nameContains(name))
-                    .and(dateIsBetween(startDate, endDate)), paging).map(mapper::toBasicDto);
+                    .and(dateIsBetween(startDate, endDate)), paging);
+            if (result == null) {
+                return Page.empty();
+            }
+            return result.map(mapper::toBasicDto);
         } catch (Exception e) {
-            throw new PlhException("ClientService: getAll(): Failed to get list of clients with filters. Message: " + e.getMessage());
+            throw new PlhException(e, "ClientService: getAll(): Failed to get list of clients with filters. Message: " + e.getMessage());
         }
     }
 

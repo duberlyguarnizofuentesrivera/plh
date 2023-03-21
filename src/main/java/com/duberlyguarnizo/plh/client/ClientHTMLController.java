@@ -13,7 +13,7 @@ public class ClientHTMLController {
 
     @GetMapping("/list")
     public String listAllClients(Model model) {
-        model.addAttribute("types", PersonType.values());
+        model.addAttribute("typesList", PersonType.values());
         model.addAttribute("statusList", UserStatus.values());
         return "system/clients/list";
     }

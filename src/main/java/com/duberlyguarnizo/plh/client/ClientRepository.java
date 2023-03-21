@@ -32,7 +32,7 @@ public interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecif
     }
 
     static Specification<Client> nameContains(String name) {
-        if (name.isEmpty()) {
+        if (name == null || name.isEmpty()) {
             return null;
         } else {
             return (client, query, cb) -> cb.like(client.get("names"), "%" + name + "%");

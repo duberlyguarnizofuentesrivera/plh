@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.io.Serial;
@@ -15,6 +16,7 @@ import java.util.Set;
 /**
  * A DTO for the {@link Client} entity
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 public final class ClientDetailDto extends RepresentationModel<ClientDetailDto> implements Serializable {

@@ -7,6 +7,7 @@ import com.duberlyguarnizo.plh.enums.UserStatus;
 import com.duberlyguarnizo.plh.event.Event;
 import com.duberlyguarnizo.plh.event.EventRepository;
 import com.duberlyguarnizo.plh.util.CurrentUserAuditorAware;
+import com.duberlyguarnizo.plh.util.PlhException;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,8 +82,12 @@ public class UserService {
     }
 
     public Optional<UserDto> getById(Long id) {
-        Optional<User> user = repository.findById(id);
-        return user.map(mapper::toDto);
+        try {
+            Optional<User> user = repository.findById(id);
+            return user.map(mapper::toDto);
+        } catch (Exception e) {
+            throw new PlhException(e, "UserService: getById(): failed to query user or map user to dto. Message: " + e.getMessage());
+        }
     }
 
     @PreAuthorize("isAuthenticated()")

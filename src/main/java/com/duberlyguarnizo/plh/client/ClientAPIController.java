@@ -35,11 +35,11 @@ public class ClientAPIController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ClientBasicDto>> getWithFilters(@RequestParam(defaultValue = "") String name,
+    public ResponseEntity<List<ClientBasicDto>> getWithFilters(@RequestParam(defaultValue = "") String search,
                                                                @RequestParam(defaultValue = "all") String type,
                                                                @RequestParam(defaultValue = "all") String status,
-                                                               @RequestParam @DateTimeFormat(pattern = "dd-MM-yy") LocalDate start,
-                                                               @RequestParam @DateTimeFormat(pattern = "dd-MM-yy") LocalDate end,
+                                                               @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate start,
+                                                               @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end,
                                                                @RequestParam(defaultValue = "names") String sort,
                                                                @RequestParam(defaultValue = "1") int page,
                                                                @RequestParam(defaultValue = "10") int size) {
@@ -51,7 +51,7 @@ public class ClientAPIController {
             endDate = end;
         }
         try {
-            var result = service.getAll(name, type, status, startDate, endDate, paging);
+            var result = service.getAll(search, type, status, startDate, endDate, paging);
             if (result.getContent().isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             } else {

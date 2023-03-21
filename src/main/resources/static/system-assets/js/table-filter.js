@@ -28,7 +28,6 @@ function fetchUsersWithFilters() {
         field.disabled = true;
     });
     loadingIndicator.style.visibility = "visible";
-    console.log(loadingIndicator.style.visibility);
     console.log("/api/v1/users?" + params.toString() + "&page=" + currentPage + "&sort=" + currentSort + "&order=" + currentSortOrder);
     fetch("/api/v1/users?" + params.toString() + "&page=" + currentPage + "&sort=" + currentSort + "&order=" + currentSortOrder)
         .then((response) => {
@@ -127,10 +126,8 @@ function fetchUsersWithFilters() {
                                 }
 
                                 //re-enable fields
-                                fields.forEach(field => {
-                                    field.disabled = false;
-                                });
-                                loadingIndicator.style.visibility = "hidden";
+                                enableFields();
+                            loadingIndicator.style.visibility = "hidden";
                                 console.log(loadingIndicator.style.visibility);
                             }
                         )
@@ -159,7 +156,7 @@ function fetchUsersWithFilters() {
 }
 
 function fetchClientsWithFilters() {
-    console.log('Fetching users with filters')
+    console.log('Fetching clients with filters')
     //disable fields until fetch is complete
     fields.forEach(field => {
         field.disabled = true;
@@ -168,52 +165,63 @@ function fetchClientsWithFilters() {
     console.log(loadingIndicator.style.visibility);
     console.log("/api/v1/clients?" + params.toString());
     fetch("/api/v1/clients?" + params.toString())
-        .then((response) => response.json()
-            .then((data) => {
-                    console.log("Received data")
-                    console.log(data);
+        .then(response => {
+                if (response.statusCode === 200) {
                     table.innerHTML = "";
-                    data.forEach((user) => {
-                        const tr = document.createElement("tr");
-                        let statusLabel;
-                        if (user.status.label === "Activo") {
-                            statusLabel = "<span class='badge rounded-pill text-bg-success'>" +
-                                "<i class='bi bi-check-circle-fill pe-1'></i> " +
-                                user.status.label +
-                                "</span>";
-                        } else {
-                            statusLabel = "<span class='badge rounded-pill text-bg-danger'>" +
-                                "<i class='bi bi bi-x-circle-fill pe-1'></i> " +
-                                user.status.label +
-                                "</span>";
+                    response.json().then((data) => {
+                            console.log("Received data")
+                            console.log(data);
+                            table.innerHTML = "";
+                            data.forEach((user) => {
+                                const tr = document.createElement("tr");
+                                let statusLabel;
+                                if (user.status.label === "Activo") {
+                                    statusLabel = "<span class='badge rounded-pill text-bg-success'>" +
+                                        "<i class='bi bi-check-circle-fill pe-1'></i> " +
+                                        user.status.label +
+                                        "</span>";
+                                } else {
+                                    statusLabel = "<span class='badge rounded-pill text-bg-danger'>" +
+                                        "<i class='bi bi bi-x-circle-fill pe-1'></i> " +
+                                        user.status.label +
+                                        "</span>";
+                                }
+                                tr.innerHTML =
+                                    "<td>" + user.idNumber + "</td>" +
+                                    "<td><a href='/system/users/crud/by-username/"
+                                    + user.username + "'><i class='bi bi-person-fill pe-1'></i> "
+                                    + user.username + "</a></td>" +
+                                    "<td>" + user.firstName + " " + user.lastName + "</td>" +
+                                    "<td>" + user.role.label + "</td>" +
+                                    "<td>" + statusLabel + "</td>";
+                                table.appendChild(tr);
+
+                            })
+                            //enable fields and hide spinner, but wait half a second to give a "loading" effect
+                            fields.forEach(field => {
+                                field.disabled = false;
+                            });
+                            loadingIndicator.style.visibility = "hidden";
+                            console.log(loadingIndicator.style.visibility);
+
                         }
-                        tr.innerHTML =
-                            "<td>" + user.idNumber + "</td>" +
-                            "<td><a href='/system/users/crud/by-username/"
-                            + user.username + "'><i class='bi bi-person-fill pe-1'></i> "
-                            + user.username + "</a></td>" +
-                            "<td>" + user.firstName + " " + user.lastName + "</td>" +
-                            "<td>" + user.role.label + "</td>" +
-                            "<td>" + statusLabel + "</td>";
-                        table.appendChild(tr);
-
-                    })
-                    //enable fields and hide spinner, but wait half a second to give a "loading" effect
-                    fields.forEach(field => {
-                        field.disabled = false;
-                    });
+                    )
+                } else if (response.status === 204) {
+                    table.innerHTML = "<p class='text-muted'>No hay coincidencias para los criterios seleccionados</p>"
                     loadingIndicator.style.visibility = "hidden";
-                    console.log(loadingIndicator.style.visibility);
-
+                    enableFields();
+                } else if (response.status === 500) {
+                    table.innerHTML = "<p class='text-muted'>Ocurrió un <strong>error</strong> en el servidor. Intenta recargar la página. Si el error persiste, comunícate con un administrador.</p>"
+                    loadingIndicator.style.visibility = "hidden";
+                    enableFields();
                 }
-            )
+            }
         )
 }
 
 function clearPagination() {
     pagination.innerHTML = "";
 }
-
 
 function initializeSort() {
     sortingFields.forEach(field => {
@@ -238,9 +246,14 @@ function initializeSort() {
     })
 }
 
+function enableFields() {
+    fields.forEach(field => {
+        field.disabled = false;
+    });
+}
+
 function doFilter() {
     currentPage = 1;
-    console.log("doing filter")
     fields.forEach(field => {
         params.set(field.id, field.value)
     });
@@ -260,7 +273,28 @@ function doFilter() {
     }
 }
 
+function initializeDateInputs() {
+    //we start with the start and end date fields...
+    const startDateInput = document.getElementById("start");
+    const endDateInput = document.getElementById("end");
+    //Only set fields in HTML pages that include this date related fields
+    if (startDateInput !== null && endDateInput !== null) {
+        let today = new Date();
+        let peruTime = today.toLocaleString("en-US", {timeZone: "America/Lima"});
+        let peruDate = new Date(peruTime);
+        //Fix to peruDate returning UTC datetime when toIsoString()
+        peruDate.setHours(peruDate.getHours() - 5);
+        endDateInput.value = peruDate.toISOString().substring(0, 10);
+        peruDate.setDate(peruDate.getDate() - 7);
+        startDateInput.value = peruDate.toISOString().substring(0, 10);
+        endDateInput.setAttribute("max", endDateInput.value)
+        startDateInput.setAttribute("max", endDateInput.value)
+    }
+}
+
 window.onload = () => {
+
+    initializeDateInputs(); //we need the dates before querying the API
     doFilter();
-    initializeSort();
+    initializeSort(); //after we get the API results, we can tell the API to sort
 }

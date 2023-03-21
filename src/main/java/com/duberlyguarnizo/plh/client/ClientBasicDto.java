@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.io.Serial;
@@ -14,6 +15,7 @@ import java.io.Serializable;
 /**
  * A DTO for the {@link Client} entity
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
 @Builder
