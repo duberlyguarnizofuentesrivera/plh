@@ -65,8 +65,8 @@
                                     </select>
                                 </div>
                                 <div class="col">
-                                    <label for="type">Tipo de cliente</label>
-                                    <select class="dataTable-selector filter-form" id="type">
+                                    <label for="clientType">Tipo de cliente</label>
+                                    <select class="dataTable-selector filter-form" id="clientType">
                                         <option selected value="all">Todos</option>
                                         <option th:each="type: ${typesList}" th:text="${type.toString()}"
                                                 th:value="${type.name()}"></option>
@@ -108,19 +108,16 @@
                                             <a class="dataTable-sorter" href="#">Dni/CE/RUC</a>
                                         </th>
                                         <th data-sortable="true" scope="col">
-                                            <a class="dataTable-sorter" href="#">Perfíl</a>
-                                        </th>
-                                        <th data-sortable="true" scope="col">
                                             <a class="dataTable-sorter" href="#">Nombres</a>
                                         </th>
                                         <th data-sortable="true" scope="col">
-                                            <a class="dataTable-sorter" href="#">Región</a>
-                                        </th>
-                                        <th data-sortable="" scope="col">
                                             <a class="dataTable-sorter" href="#">Tipo</a>
                                         </th>
-                                        <th data-sortable="" scope="col">
+                                        <th data-sortable="true" scope="col">
                                             <a class="dataTable-sorter" href="#">Estado</a>
+                                        </th>
+                                        <th data-sortable="" scope="col">
+                                            <a class="dataTable-sorter" href="#">Tickets</a>
                                         </th>
                                     </tr>
                                     </thead>
@@ -130,12 +127,9 @@
                                 </table>
                             </div>
                             <div class="dataTable-bottom">
-                                <div class="dataTable-info">Showing 1 to 5 of 5 entries</div>
+                                <div class="dataTable-info" id="pagination-info">Showing 1 to 5 of 5 entries</div>
                                 <nav class="dataTable-pagination">
-                                    <ul class="dataTable-pagination-list">
-                                        <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-                                        <li class="page-item"><a class="page-link">1</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                                    <ul class="dataTable-pagination-list" id="pagination">
                                     </ul>
                                 </nav>
                             </div>

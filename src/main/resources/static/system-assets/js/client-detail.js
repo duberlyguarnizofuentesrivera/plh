@@ -1,9 +1,8 @@
-const entityForm = document.getElementById("entityForm");
-const fields = entityForm.getElementsByClassName("form-control");
-const submitButton = document.getElementById("submitButton");
-const creationSuccessAlert = document.getElementById("creationSuccessAlert");
-const creationErrorAlert = document.getElementById("creationErrorAlert");
-const creationStatusSpinner = document.getElementById("creationStatusSpinner");
+const toggleStatusClientErrorInfo = document.getElementById("toggleStatusClientErrorInfo");
+const toggleStatusClientOkInfo = document.getElementById("toggleStatusClientOkInfo");
+const deleteClientOkInfo = document.getElementById("deleteClientOkInfo");
+const deleteClientErrorInfo = document.getElementById("deleteClientErrorInfo");
+const fields = document.getElementsByClassName("form-control");
 
 const regionSelector = document.getElementById("region");
 const provinceSelector = document.getElementById("province");
@@ -11,14 +10,19 @@ const districtSelector = document.getElementById("district");
 const btnSaveAddress = document.getElementById("btnSaveAddress");
 const addressLineInput = document.getElementById("addressLineInput");
 const addressObservationsInput = document.getElementById("addressObservationsInput");
-
+const btnEditClient = document.getElementById("btnEditClient");
+const deleteAddressLink = document.getElementsByClassName("deleteAddressLink");
+//Values from entity put in hidden fields
+const hiddenEntityName = document.getElementById("hiddenEntityName").value;
+const hiddenEntityId = document.getElementById("hiddenEntityId").value;
+console.log(hiddenEntityName);
+console.log(hiddenEntityId);
 const ubigeo = window.ubigeo;
-const jsonBody = {};
 const jsonAddress = [];
+const jsonBody = {};
+let formIsValid = false;
 
-submitButton.addEventListener("click", () => {
-    let formIsValid = true;
-    console.log(fields);
+btnEditClient.addEventListener("click", () => {
     Array.from(fields).forEach(field => {
         if (field.getAttribute("required") != null) {
             //required field
@@ -47,7 +51,7 @@ submitButton.addEventListener("click", () => {
         console.log(JSON.stringify(jsonBody));
 
         fetch("/api/v1/" + entity, {
-            method: "POST",
+            method: "PATCH",
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(jsonBody)
         }).then(response => {
@@ -65,19 +69,50 @@ submitButton.addEventListener("click", () => {
             creationStatusSpinner.style.visibility = "hidden";
         })
     }
-    console.log(JSON.stringify(jsonBody));
 })
+btnSaveAddress.addEventListener("click", () => {
+    const regionValue = ubigeo.departamentos[Number(regionSelector.selectedIndex)];
+    const provinceValue = ubigeo.provincias[Number(regionSelector.value)][provinceSelector.selectedIndex];
+    const districtValue = ubigeo.distritos[Number(provinceSelector.value)][districtSelector.selectedIndex];
+    const addressAddedList = document.getElementById("addressAddedList");
+    const addressLineText = addressLineInput.value;
+    const obs = addressObservationsInput.value;
+    const result = {
+        "region": regionValue["nombre_ubigeo"],
+        "province": provinceValue["nombre_ubigeo"],
+        "district": districtValue["nombre_ubigeo"],
+        "addressLine": addressLineText,
+        "observations": obs
+    };
+    console.log(result);
+    jsonAddress.push(result);
+    fetch("/api/v1/" + hiddenEntityName + "/" + hiddenEntityId + "/add-address", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(result)
+    }).then(response => {
+        let result = response.status;
+        switch (result) {
+            case 201:
+                //successful response (address created and added to client)
+                window.location.reload();
+                break;
+            case 404:
+                //todo
+                console.log("add-address: entity not found");
+                break;
+            case 500:
+                //error
+                console.log("add-address: internal server error");
+                break;
+        }
 
-/**
- * Extracts the entity name from the current URL and returns it.
- * @return {string} The entity name extracted from the URL.
- */
-function verifyEntityName() {
-    const url = window.location.pathname;
-    let entityName = url.split("/")[2]
-    console.log(entityName);
-    return entityName;
-}
+    })
+    let listElement = document.createElement("li");
+    listElement.innerHTML = result.addressLine + " ( " + result.region + ", " + result.province + ", " + result.district + ").";
+    addressAddedList.appendChild(listElement);
+    btnSaveAddress.innerHTML = "Guardar Otra";
+});
 
 function fillChildren(parent, current, childrenName) {
     parent.addEventListener("change", function () {
@@ -121,35 +156,38 @@ function populateLocationSelector() {
     regionSelector.dispatchEvent(event);
 }
 
-btnSaveAddress.addEventListener("click", () => {
-    const regionValue = ubigeo.departamentos[Number(regionSelector.selectedIndex)];
-    const provinceValue = ubigeo.provincias[Number(regionSelector.value)][provinceSelector.selectedIndex];
-    const districtValue = ubigeo.distritos[Number(provinceSelector.value)][districtSelector.selectedIndex];
-    const addressAddedList = document.getElementById("addressAddedList");
-    const addressLineText = addressLineInput.value;
-    const obs = addressObservationsInput.value;
-    const result = {
-        "region": regionValue["nombre_ubigeo"],
-        "province": provinceValue["nombre_ubigeo"],
-        "district": districtValue["nombre_ubigeo"],
-        "addressLine": addressLineText,
-        "observations": obs
-    };
-    console.log(result);
-    jsonAddress.push(result);
-    let listElement = document.createElement("li");
-    listElement.innerHTML = result.addressLine + " ( " + result.region + ", " + result.province + ", " + result.district + ").";
-    addressAddedList.appendChild(listElement);
-    btnSaveAddress.innerHTML = "Guardar Otra";
-});
+function addDeleteAddressLinkListeners() {
+    Array.from(deleteAddressLink).forEach(link => {
+            link.addEventListener("click", e => {
+                e.preventDefault();
+                let url = e.target.getAttribute("href");
+                fetch(url, {
+                    method: "DELETE"
+                }).then(response => {
+                    const result = response.status;
+                    switch (result) {
+                        case 200:
+                            console.log("Deleted address!")
+                            window.location.reload();
+                            break;
+                        case 404:
+                            console.log("Cannot delete address! Address or entity not found!")
+                            break;
+                        case 500:
+                            console.log("Cannot delete address: Internal Server Error")
+                            break;
+                    }
+                })
+            })
+        }
+    )
+}
 
 window.onload = () => {
     populateLocationSelector();
-    creationStatusSpinner.style.visibility = "hidden";
-    creationSuccessAlert.style.display = "none";
-    creationErrorAlert.style.display = "none";
-    entityForm.addEventListener("submit", e => {
-        e.preventDefault();
-    })
+    addDeleteAddressLinkListeners();
+    toggleStatusClientErrorInfo.style.display = "none";
+    toggleStatusClientOkInfo.style.display = "none";
+    deleteClientOkInfo.style.display = "none";
+    deleteClientErrorInfo.style.display = "none";
 }
-

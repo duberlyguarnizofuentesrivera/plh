@@ -27,7 +27,7 @@ public class Client extends AuditableEntity {
     @Column(unique = true)
     private String idNumber;
     @Enumerated(EnumType.STRING)
-    private PersonType type;
+    private PersonType clientType;
     @NotBlank
     private String names;
     private String contactNames;

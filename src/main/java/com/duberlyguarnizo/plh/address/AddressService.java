@@ -1,5 +1,6 @@
 package com.duberlyguarnizo.plh.address;
 
+import com.duberlyguarnizo.plh.util.PlhException;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.data.domain.PageRequest;
@@ -59,14 +60,13 @@ public class AddressService {
         return repository.findById(id).map(mapper::toDto);
     }
 
-    public boolean save(AddressDto address) {
+    public Long save(AddressBasicDto address) {
 
         try {
-            repository.save(mapper.toEntity(address));
-            return true;
+            Address result = repository.save(mapper.toEntity(address));
+            return result.getId();
         } catch (Exception e) {
-            log.warn("AddressService: save(): Failed to save address with id: {} and message: {}", address.id(), e.getMessage());
-            return false;
+            throw new PlhException(e, "AddressService: save(): Failed to save address, with message: " + e.getMessage());
         }
     }
 }

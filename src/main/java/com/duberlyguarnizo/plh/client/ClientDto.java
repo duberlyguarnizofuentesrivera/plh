@@ -32,7 +32,7 @@ public final class ClientDto extends RepresentationModel<ClientDto> implements S
     private final LocalDateTime lastModifiedDate;
     private final Long id;
     private final @NotBlank String idNumber;
-    private final PersonType type;
+    private final PersonType clientType;
     private final @NotBlank String names;
     private final String contactNames;
     private final String phone;

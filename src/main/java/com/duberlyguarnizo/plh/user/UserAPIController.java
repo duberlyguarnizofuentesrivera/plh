@@ -130,7 +130,7 @@ public class UserAPIController {
                                     .withRel("search")));
             var pagedModel = pagedResourcesAssembler.toModel(result);
             if (result.isEmpty()) {
-                //TODO: implement message indicator for this error
+                //TODO: implement message indicator for this error in frontend
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             } else {
                 return ResponseEntity.ok()

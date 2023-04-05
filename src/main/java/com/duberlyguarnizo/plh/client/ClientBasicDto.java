@@ -25,8 +25,8 @@ public final class ClientBasicDto extends RepresentationModel<ClientBasicDto> im
     private final Long id;
     private final String notes;
     private final @NotBlank String idNumber;
-    private final PersonType type;
     private final @NotBlank String names;
     private final String contactNames;
+    private final PersonType clientType;
     private final UserStatus status;
 }

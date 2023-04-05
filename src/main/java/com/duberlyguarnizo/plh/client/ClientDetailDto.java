@@ -1,5 +1,6 @@
 package com.duberlyguarnizo.plh.client;
 
+import com.duberlyguarnizo.plh.address.Address;
 import com.duberlyguarnizo.plh.enums.PersonType;
 import com.duberlyguarnizo.plh.enums.UserStatus;
 import jakarta.validation.constraints.Email;
@@ -23,13 +24,13 @@ public final class ClientDetailDto extends RepresentationModel<ClientDetailDto> 
     @Serial
     private static final long serialVersionUID = 0L;
     private final Long id;
-    private final String notes;
-    private final @NotBlank String idNumber;
-    private final PersonType type;
-    private final @NotBlank String names;
-    private final String contactNames;
-    private final String phone;
-    private final @Email String email;
+    private final String notes;//
+    private final @NotBlank String idNumber;//
+    private final PersonType clientType;//
+    private final @NotBlank String names;//
+    private final String contactNames;//
+    private final String phone;//
+    private final @Email String email;//
     private final UserStatus status;
-    private final Set<Long> pickUpAddressIds;
+    private final Set<Address> pickUpAddress;
 }

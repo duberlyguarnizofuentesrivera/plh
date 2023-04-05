@@ -52,13 +52,23 @@ class ClientServiceTest {
                 .idNumber("000000001")
                 .phone("000000000")
                 .pickUpAddresses(Collections.emptySet())
-                .type(PersonType.PERSON)
+                .clientType(PersonType.PERSON)
                 .status(UserStatus.ACTIVE)
                 .contactNames("Juan Barreto")
                 .build();
-//        log.warn(mockClientDto.toString());
-        mockClientDetailDto = mapper.toDetailDto(mockClient);
-//        log.warn(mockClientDetailDto.toString());
+
+
+        mockClientDetailDto = ClientDetailDto.builder()
+                .id(mockClient.getId())
+                .names(mockClient.getNames())
+                .email(mockClient.getEmail())
+                .idNumber(mockClient.getIdNumber())
+                .phone(mockClient.getPhone())
+                .pickUpAddress(Collections.emptySet())
+                .clientType(mockClient.getClientType())
+                .status(mockClient.getStatus())
+                .contactNames(mockClient.getContactNames())
+                .build();
     }
 
     // ------------- Update tests ---------------
