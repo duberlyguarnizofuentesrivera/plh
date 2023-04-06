@@ -3,6 +3,7 @@ package com.duberlyguarnizo.plh.client;
 import com.duberlyguarnizo.plh.address.AddressBasicDto;
 import com.duberlyguarnizo.plh.util.PlhException;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/v1/clients")
+@Slf4j
 public class ClientAPIController {
     private final ClientService service;
     private final PagedResourcesAssembler<ClientBasicDto> pagedResourcesAssembler;
@@ -45,6 +47,17 @@ public class ClientAPIController {
         } catch (PlhException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/toggle-status/{id}")
+    public ResponseEntity<Boolean> toggleClientStatus(@PathVariable Long id) {
+        try {
+            var result = service.toggleStatus(id);
+            return result ? ResponseEntity.ok().body(Boolean.TRUE) : ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     @GetMapping
@@ -91,7 +104,6 @@ public class ClientAPIController {
         var result = service.save(dto);
         return result ? new ResponseEntity<>(Boolean.TRUE, HttpStatus.CREATED) : new ResponseEntity<>(Boolean.FALSE, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
     @PostMapping("/{id}/add-address")
     public ResponseEntity<Boolean> addSingleAddress(@PathVariable Long id, @Valid @RequestBody AddressBasicDto addressBasicDto) {
         try {

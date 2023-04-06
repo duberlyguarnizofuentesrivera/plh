@@ -12,6 +12,11 @@ const addressLineInput = document.getElementById("addressLineInput");
 const addressObservationsInput = document.getElementById("addressObservationsInput");
 const btnEditClient = document.getElementById("btnEditClient");
 const deleteAddressLink = document.getElementsByClassName("deleteAddressLink");
+//buttons and checks to delete or disable entities
+const checkDeleteClient = document.getElementById("securityNotifyDeleteClient");
+const checkDeactivateClient = document.getElementById("securityNotifyDeactivateClient");
+const btnDeleteClient = document.getElementById("btn-delete-client");
+const btnToggleStatusClient = document.getElementById("btn-toggle-status-client");
 //Values from entity put in hidden fields
 const hiddenEntityName = document.getElementById("hiddenEntityName").value;
 const hiddenEntityId = document.getElementById("hiddenEntityId").value;
@@ -21,6 +26,13 @@ const ubigeo = window.ubigeo;
 const jsonAddress = [];
 const jsonBody = {};
 let formIsValid = false;
+
+checkDeleteClient.addEventListener("change", () => {
+    btnDeleteClient.toggleAttribute("disabled");
+});
+checkDeactivateClient.addEventListener("change", () => {
+    btnToggleStatusClient.toggleAttribute("disabled");
+});
 
 btnEditClient.addEventListener("click", () => {
     Array.from(fields).forEach(field => {
@@ -106,13 +118,65 @@ btnSaveAddress.addEventListener("click", () => {
                 console.log("add-address: internal server error");
                 break;
         }
-
     })
     let listElement = document.createElement("li");
     listElement.innerHTML = result.addressLine + " ( " + result.region + ", " + result.province + ", " + result.district + ").";
     addressAddedList.appendChild(listElement);
     btnSaveAddress.innerHTML = "Guardar Otra";
 });
+
+btnDeleteClient.addEventListener("click", () => {
+    btnDeleteClient.setAttribute("disabled", "");
+    fetch("/api/v1/" + hiddenEntityName + "/" + hiddenEntityId, {
+        method: 'DELETE',
+    })
+        .then(
+            response => {
+                const result = response.status;
+                switch (result) {
+                    case 200:
+                        deleteClientOkInfo.style.display = "block";
+                        break;
+                    case 404:
+                    case 500:
+                        deleteClientErrorInfo.style.display = "block"
+                        btnDeleteClient.removeAttribute("disabled");
+                        break;
+                }
+                btnDeleteClient.removeAttribute("disabled");
+            }
+        ).catch(() => {
+        deleteClientErrorInfo.style.display = "block";
+        btnDeleteClient.removeAttribute("disabled");
+    });
+});
+
+
+btnToggleStatusClient.addEventListener("click", () => {
+    btnToggleStatusClient.setAttribute("disabled", "");
+    fetch("/api/v1/" + hiddenEntityName + "/toggle-status/" + hiddenEntityId)
+        .then(
+            response => {
+                const result = response.status;
+                console.log("response result = " + result);
+                switch (result) {
+                    case 200:
+                        toggleStatusClientOkInfo.style.display = "block";
+                        break;
+                    default:
+                        toggleStatusClientErrorInfo.style.display = "block";
+                        break;
+                }
+                btnToggleStatusClient.removeAttribute("disabled");
+            }
+        ).catch(err => {
+        console.log("Error toggling status of client");
+        console.log(err);
+        toggleStatusClientErrorInfo.style.display = "block";
+        btnToggleStatusClient.removeAttribute("disabled");
+    });
+});
+
 
 function fillChildren(parent, current, childrenName) {
     parent.addEventListener("change", function () {

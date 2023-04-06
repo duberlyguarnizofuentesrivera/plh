@@ -1,5 +1,6 @@
 package com.duberlyguarnizo.plh.client;
 
+import com.duberlyguarnizo.plh.address.Address;
 import com.duberlyguarnizo.plh.address.AddressBasicDto;
 import com.duberlyguarnizo.plh.address.AddressMapper;
 import com.duberlyguarnizo.plh.address.AddressRepository;
@@ -14,7 +15,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.duberlyguarnizo.plh.client.ClientRepository.*;
@@ -49,16 +52,37 @@ public class ClientService {
         }
     }
 
+    /**
+     * Saves a new client to the database or updates an existing one. If the passed client has a non-null ID and
+     * already exists in the database, the method returns false and does nothing. If the ID is null or the client does not
+     * exist, the client is inserted into the database along with any pickup addresses associated with it.
+     *
+     * @param client a ClientDetailDto representing the client to save
+     * @return true if the client was successfully saved, false if the client already exists in the database
+     * @throws PlhException             if there was a problem saving the client or associated pickup addresses
+     * @throws NullPointerException     if the passed client is null
+     * @throws IllegalArgumentException if the passed client has invalid or incomplete data that prevents it from being saved
+     */
     public boolean save(ClientDetailDto client) throws PlhException {
         boolean idIsNull = client.getId() == null;
-        Optional<Client> dbClient = Optional.empty();
+        boolean clientExists = false;
         if (!idIsNull) {
-            dbClient = repository.findById(client.getId());
+            clientExists = repository.existsById(client.getId());
         }
-
-        if (dbClient.isEmpty()) {
+        if (!clientExists) {
             try {
-                repository.save(mapper.toEntity(client));
+                var clientToSave = mapper.toEntity(client);
+                var savedClient = repository.save(clientToSave);
+                var passedAddresses = client.getPickUpAddress();
+                Set<Address> newAddresses = new HashSet<>();
+                //if there are addresses, save them in DB, and then link them to client entity, and re-save.
+                if (!passedAddresses.isEmpty()) {
+                    for (Address address : passedAddresses) {
+                        newAddresses.add(addressRepository.save(address));
+                    }
+                    savedClient.setPickUpAddresses(newAddresses);
+                    repository.save(savedClient);
+                }
                 return true;
             } catch (Exception e) {
                 throw new PlhException(e, "ClientService: save(): Error saving entity in repository. Message: " + e.getMessage());
@@ -187,7 +211,7 @@ public class ClientService {
                     .and(hasUserStatus(statusValue))
                     .and(nameContains(name))
                     .and(dateIsBetween(startDate, endDate)), paging);
-            if (result == null) { //for some reason, with invalid parameters this returns null! (impossible to debug)
+            if (result == null) { //for some reason, with invalid parameters this returns null (when mocking in tests)! (not possible to debug)
                 return Page.empty();
             }
             return result.map(mapper::toBasicDto);
@@ -196,6 +220,24 @@ public class ClientService {
         }
     }
 
-    //-------Utility methods-------------------------
-
+    public boolean toggleStatus(Long id) {
+        try {
+            var clientExists = repository.findById(id);
+            if (clientExists.isPresent()) {
+                var client = clientExists.get();
+                var currentStatus = client.getStatus();
+                if (currentStatus == UserStatus.ACTIVE) {
+                    currentStatus = UserStatus.INACTIVE;
+                } else {
+                    currentStatus = UserStatus.ACTIVE;
+                }
+                client.setStatus(currentStatus);
+                repository.save(client);
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            throw new PlhException(e, "ClientService: toggleStatus(): Failed to change status of client with id: " + id);
+        }
+    }
 }

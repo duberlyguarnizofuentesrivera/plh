@@ -28,9 +28,9 @@
     <link rel="stylesheet" th:href="@{/common-assets/css/style.css}">
 </head>
 <body>
-<header th:replace="fragments::header">
+<header th:replace="~{fragments::header}">
 </header>
-<aside th:replace="fragments::aside">
+<aside th:replace="~{fragments::aside}">
 </aside>
 <main class="main" id="main">
     <div class="pagetitle">
@@ -137,8 +137,8 @@
                             </div>
                         </form>
                         <div class="alert alert-success m-2 start-no-display" id="creationSuccessAlert" role="alert">
-                            Usuario creado con éxito! Puedes revisarlo en la lista de usuarios, <a
-                                th:href="@{/system/users/list}">aquí</a>.
+                            Cliente creado con éxito! Puedes revisarlo en la lista de clientes, <a
+                                th:href="@{/system/clients/list}">aquí</a>.
                         </div>
                         <div class="alert alert-danger m-2 start-no-display" id="creationErrorAlert" role="alert">
                             Ocurrió un error por parte del servidor
@@ -151,7 +151,7 @@
     </section>
 </main>
 
-<footer th:replace="fragments::footer"></footer>
+<footer th:replace="~{fragments::footer}"></footer>
 <a class="back-to-top d-flex align-items-center justify-content-center" href="#"><i
         class="bi bi-arrow-up-short"></i></a>
 <!-- Modal Add Address-->

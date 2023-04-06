@@ -126,16 +126,9 @@
 
                             <div class="tab-pane fade show active profile-overview" id="profile-overview">
                                 <h5 class="card-title">Notas</h5>
-                                <p class="small fst-italic" id="fieldUserNotes" th:text="${client.getNotes()}"></p>
+                                <p class="small fst-italic" id="fieldClientNotes" th:text="${client.getNotes()}"></p>
 
                                 <h5 class="card-title">Detalles de cliente</h5>
-
-                                <!--                                <div class="row">-->
-                                <!--                                    <div class="col-lg-4 col-md-5 label ">Nombres Completos</div>-->
-                                <!--                                    <div class="col-lg-8 col-md-7"><span class="text-capitalize"-->
-                                <!--                                                                         th:text="${userDto.firstName() +' '+ userDto.lastName()}"></span>-->
-                                <!--                                    </div>-->
-                                <!--                                </div>-->
 
                                 <div class="row">
                                     <div class="col-lg-4 col-md-5 label">DNI o RUC</div>
@@ -184,7 +177,7 @@
                                         <label class="col-md-4 col-lg-3 col-form-label"
                                                for="editNotes">Notas</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control editUserForm" id="editNotes" name="notes"
+                                            <input class="form-control editClientForm" id="editNotes" name="notes"
                                                    th:value="${client.getNotes()}" type="text">
                                         </div>
                                     </div>
@@ -193,7 +186,7 @@
                                         <label class="col-md-4 col-lg-3 col-form-label"
                                                for="editNames">Nombres</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control editUserForm" id="editNames" name="names"
+                                            <input class="form-control editClientForm" id="editNames" name="names"
                                                    th:value="${client.getNames()}" type="text">
                                         </div>
                                     </div>
@@ -201,7 +194,7 @@
                                         <label class="col-md-4 col-lg-3 col-form-label"
                                                for="editIdNumber">DNI/CE</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control editUserForm" id="editIdNumber" name="idNumber"
+                                            <input class="form-control editClientForm" id="editIdNumber" name="idNumber"
                                                    th:value="${client.getIdNumber()}" type="number">
                                         </div>
                                     </div>
@@ -209,7 +202,7 @@
                                         <label class="col-md-4 col-lg-3 col-form-label"
                                                for="editContactNames">Persona de contacto</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control editUserForm" id="editContactNames"
+                                            <input class="form-control editClientForm" id="editContactNames"
                                                    name="contactNames"
                                                    th:value="${client.getContactNames()}" type="text">
                                         </div>
@@ -217,7 +210,7 @@
                                     <div class="row mb-3">
                                         <label class="col-md-4 col-lg-3 col-form-label" for="editPhone">Celular</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control editUserForm" id="editPhone" name="phone"
+                                            <input class="form-control editClientForm" id="editPhone" name="phone"
                                                    th:value="${client.getPhone()}" type="tel">
                                         </div>
                                     </div>
@@ -225,7 +218,7 @@
                                     <div class="row mb-3">
                                         <label class="col-md-4 col-lg-3 col-form-label" for="editEmail">Email</label>
                                         <div class="col-md-8 col-lg-9">
-                                            <input class="form-control editUserForm" id="editEmail" name="email"
+                                            <input class="form-control editClientForm" id="editEmail" name="email"
                                                    th:value="${client.getEmail()}" type="email">
                                         </div>
                                     </div>
@@ -268,7 +261,7 @@
 
                             <div class="tab-pane fade pt-3" id="profile-settings">
                                 <!-- deactivateClient Form -->
-                                <div class="form mb-3" id="form-deactivate-user">
+                                <div class="form mb-3" id="form-deactivate-client">
                                     <div class="row mb-4">
                                         <h5>Cambiar Estado De Cliente</h5>
                                         <p>Si un cliente deja de realizar envíos, es útil desactivarlo en vez de
@@ -283,8 +276,8 @@
                                         <div class="col-md-8 col-lg-9">
                                             <div class="form-check">
                                                 <input class="form-check-input"
-                                                       id="securityNotifyDeactivateUser" type="checkbox">
-                                                <label class="form-check-label" for="securityNotifyDeactivateUser">
+                                                       id="securityNotifyDeactivateClient" type="checkbox">
+                                                <label class="form-check-label" for="securityNotifyDeactivateClient">
                                                     Entiendo lo que representa desactivar o activar a un cliente.
                                                 </label>
                                             </div>
@@ -295,12 +288,12 @@
                                            sec:authorize="hasAnyAuthority('DISPATCHER', 'TRANSPORTER')">No
                                             autorizado</p>
                                         <button class="btn btn-warning" disabled
-                                                id="btn-toggle-status-user"
+                                                id="btn-toggle-status-client"
                                                 sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')">
                                             <i class="bi bi-exclamation-triangle pe-2"></i>Cambiar Estado De Cliente
                                         </button>
                                         <button class="btn btn-warning" disabled
-                                                id="dummy-btn-toggle-status-user"
+                                                id="dummy-btn-toggle-status-client"
                                                 sec:authorize="hasAnyAuthority('DISPATCHER', 'TRANSPORTER')">
                                             <i class="bi bi-exclamation-triangle pe-2"></i>Cambiar Estado De Cliente
                                         </button>
@@ -325,7 +318,7 @@
                                     </div>
                                 </div><!-- End deactivateClient Form -->
                                 <!-- deleteClient Form -->
-                                <div class="form mb-4" id="form-delete-user">
+                                <div class="form mb-4" id="form-delete-client">
                                     <div class="row mb-3">
                                         <h5>Eliminar Cliente</h5>
                                         <p>Borrar clientes es una acción importante.
@@ -336,8 +329,8 @@
                                         <div class="col-md-8 col-lg-9">
                                             <div class="form-check">
                                                 <input class="form-check-input"
-                                                       id="securityNotifyDeleteUser" type="checkbox">
-                                                <label class="form-check-label" for="securityNotifyDeleteUser">
+                                                       id="securityNotifyDeleteClient" type="checkbox">
+                                                <label class="form-check-label" for="securityNotifyDeleteClient">
                                                     Entiendo lo que estoy haciendo.
                                                 </label>
                                             </div>
@@ -348,7 +341,7 @@
                                            sec:authorize="hasAnyAuthority('DISPATCHER', 'TRANSPORTER')">No
                                             autorizado</p>
                                         <button class="btn btn-danger" disabled
-                                                id="btn-delete-user"
+                                                id="btn-delete-client"
                                                 sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')">
                                             <i class="bi bi-exclamation-triangle pe-2"></i>Eliminar Cliente
                                         </button>

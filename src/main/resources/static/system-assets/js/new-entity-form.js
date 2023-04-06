@@ -41,7 +41,7 @@ submitButton.addEventListener("click", () => {
     if (formIsValid) {
         creationStatusSpinner.style.visibility = "visible";
         if (jsonAddress.length > 0) {
-            jsonBody["pickUpAddressIds"] = jsonAddress;
+            jsonBody["pickUpAddress"] = jsonAddress;
         }
         let entity = verifyEntityName(); //in plural
         console.log(JSON.stringify(jsonBody));
@@ -65,7 +65,6 @@ submitButton.addEventListener("click", () => {
             creationStatusSpinner.style.visibility = "hidden";
         })
     }
-    console.log(JSON.stringify(jsonBody));
 })
 
 /**
@@ -135,8 +134,8 @@ btnSaveAddress.addEventListener("click", () => {
         "addressLine": addressLineText,
         "observations": obs
     };
-    console.log(result);
     jsonAddress.push(result);
+    console.log(jsonAddress);
     let listElement = document.createElement("li");
     listElement.innerHTML = result.addressLine + " ( " + result.region + ", " + result.province + ", " + result.district + ").";
     addressAddedList.appendChild(listElement);
