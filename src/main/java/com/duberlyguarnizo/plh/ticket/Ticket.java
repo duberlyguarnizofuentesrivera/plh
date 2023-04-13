@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedBy;
 
 import java.util.ArrayList;
@@ -21,6 +23,8 @@ import java.util.List;
 @ToString
 @NoArgsConstructor
 @Entity
+@SQLDelete(sql = "UPDATE ticket SET deleted = true WHERE id = ?")
+@Where(clause = "deleted=false")
 public class Ticket extends AuditableEntity {
     @Id
     @GeneratedValue

@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="es" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+          name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <title>RedXpress Soluciones - Detalle De Cliente</title>
+    <!-- Favicons -->
+    <link rel="icon" th:href="@{/common-assets/img/favicon.png}">
+    <link rel="apple-touch-icon" th:href="@{/common-assets/img/apple-touch-icon.png}">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+          rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/bootstrap-icons/bootstrap-icons.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/boxicons/css/boxicons.min.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/remixicon/remixicon.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/simple-datatables/style.css}">
+
+    <!-- Template Main CSS File -->
+    <link rel="stylesheet" th:href="@{/common-assets/css/style.css}">
+</head>
+<body>
+<header th:replace="~{fragments::header}">
+</header>
+<aside th:replace="~{fragments::aside}">
+</aside>
+<main class="main" id="main">
+    <div class="pagetitle">
+        <h1>Sistema RedXPress - Detalle de Cliente</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">Principal</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/system}">Sistema</a></li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+    <section class="section profile">
+        <div class="row">
+            <div class="col-xl-4">
+                <div class="card">
+                    <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
+                        <h2><span class="text-capitalize" th:text="${client.getNames()}"></span></h2>
+                        <h3><span class="text-capitalize" th:text="${client.getClientType()}"></span>
+                        </h3>
+                        <h3>
+                            <span class="text-capitalize badge bg-success"
+                                  th:if="${client.getStatus().name()=='ACTIVE'}">Activo</span>
+                            <span class="text-capitalize badge bg-danger"
+                                  th:if="${client.getStatus().name()!='ACTIVE'}">Inactivo</span>
+                        </h3>
+                        <div class="social-links mt-2">
+                            <a class="" href="#" id="fieldSocialLinksPhone"></a>
+                            <a class="" href="#" id="fieldSocialLinksWhatsApp"></a>
+                            <a class="" href="#" id="fieldSocialLinksEmail"></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')">
+                    <div class="card-body profile-overview">
+                        <h5 class="card-title">Auditoría</h5>
+                        <div class="row">
+                            <div class="col-lg-5 col-md-4 label ">Creación</div>
+                            <div class="col-lg-7 col-md-8">
+                                <span class="text-capitalize" id="fieldCreationDate"
+                                      th:text="${#temporals.format(client.getCreatedDate(),'dd-MM-yyyy HH:mm')}"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-5 col-md-4 label ">Creado Por</div>
+                            <div class="col-lg-7 col-md-8">
+                                <span class="text-capitalize" id="fieldCreatedBy" th:text="${createdByName}"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-5 col-md-4 label ">Modificación</div>
+                            <div class="col-lg-7 col-md-8">
+                                <span class="text-capitalize" id="fieldLastModifiedDate"
+                                      th:text="${#temporals.format(client.getLastModifiedDate(),'dd-MM-yyyy HH:mm')}"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-5 col-md-4 label ">Modificado Por</div>
+                            <div class="col-lg-7 col-md-8">
+                                <span class="text-capitalize" id="fieldLastModifiedBy"
+                                      th:text="${modifiedByName}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-xl-8">
+
+                <div class="card">
+                    <div class="card-body pt-3">
+                        <!-- Bordered Tabs -->
+                        <ul class="nav nav-tabs nav-tabs-bordered">
+
+                            <li class="nav-item">
+                                <button class="nav-link active" data-bs-target="#profile-overview" data-bs-toggle="tab">
+                                    Resumen
+                                </button>
+                            </li>
+
+                            <li class="nav-item" sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')">
+                                <button class="nav-link" data-bs-target="#profile-edit" data-bs-toggle="tab">Editar
+                                    Perfil
+                                </button>
+                            </li>
+
+                            <li class="nav-item" sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')">
+                                <button class="nav-link" data-bs-target="#profile-settings" data-bs-toggle="tab">
+                                    Opciones
+                                </button>
+                            </li>
+
+                        </ul>
+                        <div class="tab-content pt-2">
+
+                            <div class="tab-pane fade show active profile-overview" id="profile-overview">
+                                <h5 class="card-title">Notas</h5>
+                                <p class="small fst-italic" id="fieldClientNotes" th:text="${client.getNotes()}"></p>
+
+                                <h5 class="card-title">Detalles de cliente</h5>
+
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label">DNI o RUC</div>
+                                    <div class="col-lg-8 col-md-7"><span th:text="${client.getIdNumber()}"></span></div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label">Nombres Completos</div>
+                                    <div class="col-lg-8 col-md-7"><span th:text="${client.getNames()}"></span></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label">Nombres del contacto</div>
+                                    <div class="col-lg-8 col-md-7"><span th:text="${client.getContactNames()}"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label">Celular</div>
+                                    <div class="col-lg-8 col-md-7">
+                                        <span th:text="${client.getPhone()}"></span>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label">Email</div>
+                                    <div class="col-lg-8 col-md-7">
+                                        <span th:text="${client.getEmail()}"></span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-5 label">Direcciones</div>
+                                    <div class="col-lg-8 col-md-7">
+                                        <ul th:each="add : ${addresses}">
+                                            <li th:text="${add.addressLine() + ', ' + add.district() + ', '+ add.province() + ', '+ add.region() }"></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
+
+                                <!-- Client Edit Form -->
+                                <div class="form" id="form-edit-client">
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label"
+                                               for="editNotes">Notas</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control editClientForm" id="editNotes" name="notes"
+                                                   th:value="${client.getNotes()}" type="text">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label"
+                                               for="editNames">Nombres</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control editClientForm" id="editNames" name="names"
+                                                   th:value="${client.getNames()}" type="text">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label"
+                                               for="editIdNumber">DNI/CE</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control editClientForm" id="editIdNumber" name="idNumber"
+                                                   th:value="${client.getIdNumber()}" type="number">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label"
+                                               for="editContactNames">Persona de contacto</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control editClientForm" id="editContactNames"
+                                                   name="contactNames"
+                                                   th:value="${client.getContactNames()}" type="text">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="editPhone">Celular</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control editClientForm" id="editPhone" name="phone"
+                                                   th:value="${client.getPhone()}" type="tel">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="editEmail">Email</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <input class="form-control editClientForm" id="editEmail" name="email"
+                                                   th:value="${client.getEmail()}" type="email">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="editClientType">Tipo de
+                                            cliente</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <select class="form-control form-select" id="editClientType">
+                                                <option th:each="type: ${clientTypes}"
+                                                        th:selected="${client.getClientType().name() == type.name()}"
+                                                        th:text="${type.toString()}"
+                                                        th:value="${type.name()}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-md-4 col-lg-3 col-form-label" for="addressAddedList">Direcciones</label>
+                                        <div class="col-md-8 col-lg-9">
+                                            <ul class="list-group list-group-flush" id="addressAddedList">
+                                                <li class="list-group-item d-flex justify-content-between"
+                                                    th:each="add: ${addresses}">
+                                                    <span th:text="${#strings.abbreviate(add.addressLine() + ' ('+add.district() + ', ' +add.province() +', '+add.region()+')', 50)}"></span>&nbsp;
+                                                    <a class="btn btn-danger btn-sm deleteAddressLink"
+                                                       th:href="@{'/api/v1/clients/' +${client.getId()} +'/' + ${add.id()}}">
+                                                        <i class="bi-exclamation-circle-fill"></i> Borrar
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                            <button class="btn btn-outline-primary btn-sm"
+                                                    data-bs-target="#newAddressModal"
+                                                    data-bs-toggle="modal">Agregar Dirección
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <button class="btn btn-primary" id="btnEditClient">Guardar Cambios</button>
+                                    </div>
+                                </div><!-- End Client Edit Form -->
+
+                            </div>
+
+                            <div class="tab-pane fade pt-3" id="profile-settings">
+                                <!-- deactivateClient Form -->
+                                <div class="form mb-3" id="form-deactivate-client">
+                                    <div class="row mb-4">
+                                        <h5>Cambiar Estado De Cliente</h5>
+                                        <p>Si un cliente deja de realizar envíos, es útil desactivarlo en vez de
+                                            borrarlo.
+                                            De esta manera, mantienes todos sus registros asociados. Si el cliente
+                                            regresa, puedes
+                                            volver a activarlo.
+                                            <br>Necesitas tener rol de administrador o supervisor para poder desactivar
+                                            o activar a
+                                            un cliente.
+                                        </p>
+                                        <div class="col-md-8 col-lg-9">
+                                            <div class="form-check">
+                                                <input class="form-check-input"
+                                                       id="securityNotifyDeactivateClient" type="checkbox">
+                                                <label class="form-check-label" for="securityNotifyDeactivateClient">
+                                                    Entiendo lo que representa desactivar o activar a un cliente.
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-muted"
+                                           sec:authorize="hasAnyAuthority('DISPATCHER', 'TRANSPORTER')">No
+                                            autorizado</p>
+                                        <button class="btn btn-warning" disabled
+                                                id="btn-toggle-status-client"
+                                                sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')">
+                                            <i class="bi bi-exclamation-triangle pe-2"></i>Cambiar Estado De Cliente
+                                        </button>
+                                        <button class="btn btn-warning" disabled
+                                                id="dummy-btn-toggle-status-client"
+                                                sec:authorize="hasAnyAuthority('DISPATCHER', 'TRANSPORTER')">
+                                            <i class="bi bi-exclamation-triangle pe-2"></i>Cambiar Estado De Cliente
+                                        </button>
+                                    </div>
+                                    <div class="alert alert-success mt-3 alert-dismissible fade show"
+                                         id="toggleStatusClientOkInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-check-circle"></i> Se cambió correctamente el estado
+                                        cliente. Refresca la página para ver el cambio.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                    </div>
+                                    <div class="alert alert-danger mt-3 alert-dismissible fade show"
+                                         id="toggleStatusClientErrorInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-x-circle"></i> Hubo un error al intentar cambiar el estado
+                                        del cliente.
+                                        Refresca la página y vuelve a intentar. Si el error persiste, pide ayuda al
+                                        personal de IT.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                    </div>
+                                </div><!-- End deactivateClient Form -->
+                                <!-- deleteClient Form -->
+                                <div class="form mb-4" id="form-delete-client">
+                                    <div class="row mb-3">
+                                        <h5>Eliminar Cliente</h5>
+                                        <p>Borrar clientes es una acción importante.
+                                            Deberías hacerlo únicamente si es que te equivocaste al crearlo,
+                                            y preferentemente sin que este haya creado ningún ticket o envío.<br>
+                                            Solo podrás eliminar un cliente si tienes el rol de Administrador o
+                                            Supervisor.</p>
+                                        <div class="col-md-8 col-lg-9">
+                                            <div class="form-check">
+                                                <input class="form-check-input"
+                                                       id="securityNotifyDeleteClient" type="checkbox">
+                                                <label class="form-check-label" for="securityNotifyDeleteClient">
+                                                    Entiendo lo que estoy haciendo.
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-muted"
+                                           sec:authorize="hasAnyAuthority('DISPATCHER', 'TRANSPORTER')">No
+                                            autorizado</p>
+                                        <button class="btn btn-danger" disabled
+                                                id="btn-delete-client"
+                                                sec:authorize="hasAnyAuthority('ADMIN', 'SUPERVISOR')">
+                                            <i class="bi bi-exclamation-triangle pe-2"></i>Eliminar Cliente
+                                        </button>
+                                        <button class="btn btn-danger" disabled
+                                                id="dummy-btn-delete"
+                                                sec:authorize="hasAnyAuthority('DISPATCHER', 'TRANSPORTER')">
+                                            <i class="bi bi-exclamation-triangle pe-2"></i>Eliminar Cliente
+                                        </button>
+                                    </div>
+                                    <div class="alert alert-success mt-3 alert-dismissible fade show"
+                                         id="deleteClientOkInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-check-circle"></i> Se eliminó correctamente al cliente.
+                                        Serás redirigido al listado en unos segundos.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                    </div>
+                                    <div class="alert alert-danger mt-3 alert-dismissible fade show"
+                                         id="deleteClientErrorInfo"
+                                         role="alert">
+                                        <i class="pe-1 bi bi-x-circle"></i> Hubo un error al intentar eliminar al
+                                        cliente.
+                                        Refresca la página y vuelve a intentar. Si el error persiste, pide ayuda al
+                                        personal de IT.
+                                        <button aria-label="Close" class="btn-close" data-bs-dismiss="alert"
+                                                type="button"></button>
+                                    </div>
+                                </div><!-- End deleteClient Form -->
+
+                            </div>
+
+                        </div>
+
+                    </div><!-- End Bordered Tabs -->
+
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<!-- Modal Add Address-->
+<div class="modal" id="newAddressModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar dirección</h5>
+                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newAddressForm">
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="region">Región</label>
+                        <div class="col-sm-9">
+                            <select class="form-control form-select" id="region">
+
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="province">Provincia</label>
+                        <div class="col-sm-9">
+                            <select class="form-control form-select" id="province">
+
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="district">Distrito</label>
+                        <div class="col-sm-9">
+                            <select class="form-control form-select" id="district">
+
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="addressLineInput">Dirección</label>
+                        <div class="col-sm-9">
+                            <input autocapitalize="words" class="form-control" id="addressLineInput"
+                                   name="addressLineInput" required
+                                   type="text">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label" for="addressObservationsInput">Observaciones</label>
+                        <div class="col-sm-9">
+                            <input autocapitalize="words" class="form-control" id="addressObservationsInput"
+                                   name="addressObservationsInput"
+                                   type="text">
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cerrar</button>
+                <button class="btn btn-primary" id="btnSaveAddress" type="button">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Hidden fields for storing entity data-->
+<input id="hiddenEntityId" th:value="${client.getId()}" type="hidden">
+<input id="hiddenEntityName" type="hidden" value="clients">
+<footer th:replace="~{fragments::footer}"></footer>
+<a class="back-to-top d-flex align-items-center justify-content-center" href="#"><i
+        class="bi bi-arrow-up-short"></i></a>
+
+<!-- Vendor JS Files -->
+
+<script th:src="@{/common-assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+<script th:src="@{/common-assets/vendor/echarts/echarts.min.js}"></script>
+
+<script th:src="@{/common-assets/vendor/simple-datatables/simple-datatables.js}"></script>
+
+
+<!-- Template Main JS File -->
+<script th:src="@{/system-assets/js/ubigeo.js}"></script>
+<script th:src="@{/common-assets/js/main.js}"></script>
+<script th:src="@{/system-assets/js/client-detail.js}"></script>
+</body>
+</html>

@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,6 +21,8 @@ import java.util.Set;
 @ToString
 @NoArgsConstructor
 @Entity
+@SQLDelete(sql = "UPDATE receiver SET deleted = true WHERE id = ?")
+@Where(clause = "deleted=false")
 public class Receiver extends AuditableEntity {
     @Id
     @GeneratedValue

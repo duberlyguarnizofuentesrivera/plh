@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="es" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+          name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <title>RedXpress Soluciones - Nuevo Destinatario</title>
+    <!-- Favicons -->
+    <link rel="icon" th:href="@{/common-assets/img/favicon.png}">
+    <link rel="apple-touch-icon" th:href="@{/common-assets/img/apple-touch-icon.png}">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+          rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/bootstrap-icons/bootstrap-icons.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/boxicons/css/boxicons.min.css}">
+
+
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/remixicon/remixicon.css}">
+    <link rel="stylesheet" th:href="@{/common-assets/vendor/simple-datatables/style.css}">
+
+    <!-- Template Main CSS File -->
+    <link rel="stylesheet" th:href="@{/common-assets/css/style.css}">
+</head>
+<body>
+<header th:replace="~{fragments::header}">
+</header>
+<aside th:replace="~{fragments::aside}">
+</aside>
+<main class="main" id="main">
+    <div class="pagetitle">
+        <h1>Sistema RedXPress - Nuevo Destinatario</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">Principal</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/system}">Sistema</a></li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+    <section class="section">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="filter pe-1">
+                        <div class="spinner-border start-hidden" id="creationStatusSpinner" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Crear Nuevo Destinatario</h5>
+                        <p class="text-muted">Antes de crear un nuevo destinatario, ¡asegurate de verificar si ya
+                            existe!</p>
+                        <form autocomplete="off" class="needs-validation" id="entityForm">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label required" for="receiverType">Tipo de
+                                    destinatario</label>
+                                <div class="col-sm-9">
+                                    <select class="form-control form-select" id="receiverType" name="receiverType"
+                                            required>
+                                        <option th:each="type: ${typesList}" th:text="${type.toString()}"
+                                                th:value="${type.name()}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label required" for="names">Nombres completos</label>
+                                <div class="col-sm-9">
+                                    <input autocapitalize="words" class="form-control" id="names" name="names" required
+                                           type="text">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label" for="contactNames">Nombre de contacto</label>
+                                <div class="col-sm-9">
+                                    <input autocapitalize="words" class="form-control" id="contactNames"
+                                           name="contactNames"
+                                           type="text">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label required" for="idNumber">DNI/CE/RUC</label>
+                                <div class="col-sm-9">
+                                    <input class="form-control" id="idNumber" name="idNumber" pattern="/^\d{8,20}$/g"
+                                           required type="number">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label" for="phone">Celular</label>
+                                <div class="col-sm-9">
+                                    <input class="form-control" id="phone" name="phone" pattern="[\d]{9}" type="tel">
+                                    <div class="form-text">Sin espacios ni guiones</div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label" for="email">Email</label>
+                                <div class="col-sm-9">
+                                    <input class="form-control" id="email" name="email" spellcheck="false" type="email">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label required" for="status">Estado</label>
+                                <div class="col-sm-9">
+                                    <select class="form-control form-select" id="status" name="status" required>
+                                        <option th:each="statusItem: ${statusList}" th:text="${statusItem.toString()}"
+                                                th:value="${statusItem.name()}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label" for="notes">Notas</label>
+                                <div class="col-sm-9">
+                                    <input class="form-control" id="notes" name="notes" type="text">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label" for="notes">Direcciones</label>
+                                <div class="col-sm-9">
+                                    <ol id="addressAddedList">
+
+                                    </ol>
+                                </div>
+                            </div>
+                            <div class="row mb-3 justify-content-center">
+                                <button class="btn btn-secondary col-4 col-sm-3" data-bs-target="#newAddressModal"
+                                        data-bs-toggle="modal" id="btnAddAddress">
+                                    Agregar Dirección
+                                </button>
+                                <div class="col-12" id="newAddressList">
+
+                                </div>
+                            </div>
+                            <div class="row mt-3 justify-content-between">
+                                <button class="btn btn-primary col-4 col-sm-3" id="submitButton">Crear</button>
+                                <a class="btn btn-warning col-4 col-sm-3" th:href="@{/system/admin-panel}">Cancelar</a>
+                            </div>
+                        </form>
+                        <div class="alert alert-success m-2 start-no-display" id="creationSuccessAlert" role="alert">
+                            Destinatario creado con éxito! Puedes revisarlo en la lista de destinatarios, <a
+                                th:href="@{/system/receivers/list}">aquí</a>.
+                        </div>
+                        <div class="alert alert-danger m-2 start-no-display" id="creationErrorAlert" role="alert">
+                            Ocurrió un error por parte del servidor
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments::footer}"></footer>
+<a class="back-to-top d-flex align-items-center justify-content-center" href="#"><i
+        class="bi bi-arrow-up-short"></i></a>
+<!-- Modal Add Address-->
+<div class="modal" id="newAddressModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar dirección</h5>
+                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newAddressForm">
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="region">Región</label>
+                        <div class="col-sm-9">
+                            <select class="form-control form-select" id="region">
+
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="province">Provincia</label>
+                        <div class="col-sm-9">
+                            <select class="form-control form-select" id="province">
+
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="district">Distrito</label>
+                        <div class="col-sm-9">
+                            <select class="form-control form-select" id="district">
+
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="addressLineInput">Dirección</label>
+                        <div class="col-sm-9">
+                            <input autocapitalize="words" class="form-control" id="addressLineInput"
+                                   name="addressLineInput" required
+                                   type="text">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label" for="addressObservationsInput">Observaciones</label>
+                        <div class="col-sm-9">
+                            <input autocapitalize="words" class="form-control" id="addressObservationsInput"
+                                   name="addressObservationsInput"
+                                   type="text">
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cerrar</button>
+                <button class="btn btn-primary" id="btnSaveAddress" type="button">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Vendor JS Files -->
+<script th:src="@{/common-assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+
+<!-- Template Main JS File -->
+<script th:src="@{/common-assets/js/main.js}"></script>
+<script th:src="@{/system-assets/js/ubigeo.js}"></script>
+<script th:src="@{/system-assets/js/new-entity-form.js}"></script>
+</body>
+</html>

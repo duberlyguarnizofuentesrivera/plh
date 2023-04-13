@@ -61,12 +61,12 @@ function fetchUsersWithFilters() {
                                     }
                                     tr.innerHTML =
                                         "<td>" + user.idNumber + "</td>" +
-                                        "<td><a href="
-                                        + user._links.self.href + "><i class='bi bi-person-fill pe-1'></i> "
+                                        "<td><a href= '/system/users/"
+                                        + user.username + "'><i class='bi bi-person-fill pe-1'></i> "
                                         + user.username + "</a></td>" +
                                         "<td>" + user.firstName + " " + user.lastName + "</td>" +
-                                        "<td><a href="
-                                        + user._links.search.href + "><i class='bi bi-ticket-detailed pe-1'></i> "
+                                        "<td><a href='/system/tickets/by-user/"
+                                        + user.username + "'><i class='bi bi-ticket-detailed pe-1'></i> "
                                         + "Tickets</a></td>" +
                                         "<td>" + user.role.label + "</td>" +
                                         "<td>" + statusLabel + "</td>";
@@ -302,6 +302,129 @@ function fetchClientsWithFilters() {
         )
 }
 
+function fetchReceiversWithFilters() {
+    console.log('Fetching receivers with filters')
+    //disable fields until fetch is complete
+    fields.forEach(field => {
+        field.disabled = true;
+    });
+    loadingIndicator.style.visibility = "visible";
+    //correct order of sorting... default is firstName, but clients do not have that field.
+    if (currentSort === "firstName") {
+        currentSort = "names";
+    }
+    console.log("/api/v1/receivers?" + params.toString() + "&page=" + currentPage + "&sort=" + currentSort + "&order=" + currentSortOrder);
+    fetch("/api/v1/receivers?" + params.toString() + "&page=" + currentPage + "&sort=" + currentSort + "&order=" + currentSortOrder)
+        .then(response => {
+                if (response.status === 200) {
+                    table.innerHTML = "";
+                    response.json().then((data) => {
+                        console.log("Received data")
+                        console.log(data['_embedded']['receiverBasicDtoList']);
+                        console.log(data['page']);
+
+                        table.innerHTML = "";
+                        data['_embedded']['receiverBasicDtoList'].forEach((receiver) => {
+                            const tr = document.createElement("tr");
+                            tr.innerHTML =
+                                "<td>" + receiver.idNumber + "</td>" +
+
+                                "<td><a href='/system/receivers/"
+                                + receiver.id + "'><i class='bi bi-person-fill pe-1'></i> "
+                                + receiver.names + "</a></td>" +
+
+                                "<td>" + receiver.type.label + "</td>" +
+                                "<td><a href="
+                                + receiver._links.search.href + "><i class='bi bi-ticket-detailed pe-1'></i> "
+                                + "Tickets</a></td>";
+                            table.appendChild(tr);
+
+                        })
+
+                        //pagination
+                        const numberOfPages = data['page']['totalPages'];
+                        const activePage = data['page']['number'] + 1;
+                        const pageSize = data['page']['size'];
+                        const totalElements = data['page']['totalElements'];
+                        const paginationFooter = "Mostrando página " + activePage + " de " + numberOfPages + ". Total: " + totalElements + " registros.";
+
+                        //First page link creation (starting from 1)
+
+                        if (activePage > 1) {
+                            const firstPageListItem = document.createElement('li');
+                            const firstPageLink = document.createElement('a');
+                            firstPageLink.href = "#";
+                            firstPageLink.innerHTML = "Anterior";
+                            firstPageLink.addEventListener("click", () => {
+                                currentPage = activePage - 1;
+                                fetchUsersWithFilters();
+                            });
+                            firstPageListItem.appendChild(firstPageLink);
+                            firstPageListItem.className = 'page-item'
+                            pagination.appendChild(firstPageListItem)
+                        }
+
+                        // Numbered page links creation
+                        for (let i = 0; i < numberOfPages; i++) {
+                            const pageListItem = document.createElement('li');
+                            const pageLink = document.createElement('a');
+                            pageLink.addEventListener("click", () => {
+                                currentPage = i + 1;
+                                fetchUsersWithFilters();
+                            });
+                            pageLink.innerHTML = (i + 1).toString();
+                            if (i === activePage - 1) {
+                                pageLink.className = 'page-link active';
+                            }
+                            pageListItem.appendChild(pageLink);
+                            pageListItem.className = 'page-item';
+                            pagination.appendChild(pageListItem)
+                            paginationInfo.innerHTML = paginationFooter;
+                        }
+
+                        // Next page link creation
+                        if (currentPage < numberOfPages) {
+                            const nextPageListItem = document.createElement('li');
+                            const nextPageLink = document.createElement('a');
+                            nextPageLink.href = "#";
+                            nextPageLink.innerHTML = "Siguiente";
+                            nextPageLink.addEventListener("click", () => {
+                                currentPage = activePage + 1;
+                                fetchUsersWithFilters();
+                            });
+                            nextPageListItem.appendChild(nextPageLink);
+                            nextPageListItem.className = 'page-item';
+                            pagination.appendChild(nextPageListItem)
+                        }
+
+                        //re-enable fields
+                        enableFields();
+                        loadingIndicator.style.visibility = "hidden";
+                        console.log(loadingIndicator.style.visibility);
+                    })
+                    //enable fields and hide spinner, but wait half a second to give a "loading" effect
+                    fields.forEach(field => {
+                        field.disabled = false;
+                    });
+                    loadingIndicator.style.visibility = "hidden";
+                    console.log(loadingIndicator.style.visibility);
+
+                } else if (response.status === 204) {
+                    table.innerHTML = "<p class='text-muted'>No hay coincidencias para los criterios seleccionados</p>"
+                    loadingIndicator.style.visibility = "hidden";
+                    enableFields();
+                } else if (response.status === 500) {
+                    table.innerHTML = "<p class='text-muted'>Ocurrió un <strong>error</strong> en el servidor. Intenta recargar la página. Si el error persiste, comunícate con un administrador.</p>"
+                    loadingIndicator.style.visibility = "hidden";
+                    enableFields();
+                } else {
+                    table.innerHTML = "<p class='text-muted'>Ocurrió un <strong>error</strong> desconocido (código: " + response.status + " ). Intenta recargar la página. Si el error persiste, comunícate con un administrador.</p>"
+                    loadingIndicator.style.visibility = "hidden";
+                    enableFields();
+                }
+            }
+        )
+}
 function clearPagination() {
     pagination.innerHTML = "";
 }
@@ -355,7 +478,10 @@ function doFilter() {
             fetchUsersWithFilters();
             break;
         case "clients":
-            fetchClientsWithFilters()
+            fetchClientsWithFilters();
+            break;
+        case "receivers":
+            fetchReceiversWithFilters();
             break;
     }
 }
