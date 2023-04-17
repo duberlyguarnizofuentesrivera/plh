@@ -27,8 +27,8 @@ public interface ClientMapper {
 
     Client toEntity(ClientDetailDto clientDetailDto);
 
-    @Mapping(target = "pickUpAddressIds", expression = "java(pickUpAddressesToPickUpAddressIds(client.getPickUpAddresses()))")
-    ClientDetailDto toDetailDto(Client client);
+//    @Mapping(target = "pickUpAddressIds", expression = "java(pickUpAddressesToPickUpAddressIds(client.getPickUpAddresses()))")
+//    ClientDetailDto toDetailDto(Client client);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     Client partialUpdate(ClientDetailDto clientDetailDto, @MappingTarget Client client);
@@ -36,6 +36,4 @@ public interface ClientMapper {
     default Set<Long> pickUpAddressesToPickUpAddressIds(Set<Address> pickUpAddresses) {
         return pickUpAddresses.stream().map(Address::getId).collect(Collectors.toSet());
     }
-
-
 }

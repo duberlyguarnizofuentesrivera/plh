@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("api/v1/addresses")
@@ -58,13 +57,13 @@ public class AddressAPIController {
     }
 
     //---- CRUD----------------------
-    @PostMapping
-    public ResponseEntity<Map<String, String>> createAddress(@RequestBody AddressDto addressDto) {
-        var result = service.save(addressDto);
-        if (result) {
-            return new ResponseEntity<>(Map.of("result", "CREATED"), HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(Map.of("result", "ERROR"), HttpStatus.CONFLICT);
-        }
-    }
+//    @PostMapping
+//    public ResponseEntity<Map<String, String>> createAddress(@RequestBody AddressDto addressDto) {
+//        var result = service.save(addressDto);
+//        if (result) {
+//            return new ResponseEntity<>(Map.of("result", "CREATED"), HttpStatus.CREATED);
+//        } else {
+//            return new ResponseEntity<>(Map.of("result", "ERROR"), HttpStatus.CONFLICT);
+//        }
+//    }
 }

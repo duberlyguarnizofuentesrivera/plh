@@ -100,14 +100,19 @@ class UserServiceTest {
 
     @Test
     void testGetByIdWithExistingClient() {
-        when(repository.findById(anyLong())).thenReturn(Optional.of(user1));
+        var resultUser = Optional.of(user1);
+        when(repository.findById(anyLong())).thenReturn(resultUser);
+        var queryResult = repository.findById(1L);
+        assertEquals(resultUser, queryResult);
         verify(repository).findById(anyLong());
     }
 
     @Test
     void testGetByIdWithNonExistingClient() {
-        when(repository.findById(anyLong())).thenReturn(Optional.empty());
-        assertEquals(Optional.empty(), service.getById(anyLong()));
+        Optional<User> resultUser = Optional.empty();
+        when(repository.findById(anyLong())).thenReturn(resultUser);
+        var queryResult = service.getById(2L);
+        assertEquals(Optional.empty(), queryResult);
     }
 
 }

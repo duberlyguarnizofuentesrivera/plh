@@ -10,6 +10,7 @@
 --------------------------------------------------------------*/
 :root {
     scroll-behavior: smooth;
+    --plh-accent-color: #4154f1;
 }
 
 body {
@@ -1269,4 +1270,9 @@ h6 {
 
 .start-hidden {
     visibility: hidden;
+}
+
+.required:after {
+    content: "*";
+    color: var(--plh-accent-color) !important;
 }

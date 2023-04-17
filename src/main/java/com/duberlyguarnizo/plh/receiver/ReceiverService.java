@@ -1,6 +1,7 @@
 package com.duberlyguarnizo.plh.receiver;
 
 import com.duberlyguarnizo.plh.enums.PersonType;
+import com.duberlyguarnizo.plh.util.PlhException;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.data.domain.Page;
@@ -87,6 +88,16 @@ public class ReceiverService {
         }
     }
 
+    public Optional<ReceiverDto> getReceiverById(Long id) throws PlhException {
+        try {
+            Optional<Receiver> result = repository.findById(id);
+            return result.map(mapper::toDto);
+        } catch (Exception e) {
+            throw new PlhException(e, "ReceiverService: getReceiverById(): " +
+                    "error with argument or error mapping optional. Message: " + e.getMessage());
+        }
+    }
+
     public Optional<ReceiverDetailDto> getDetailReceiver(String idNumber) {
         var receiverExists = repository.findByIdNumber(idNumber);
         if (receiverExists.isPresent()) {
@@ -109,12 +120,12 @@ public class ReceiverService {
      *                 defaults to first page of 10 elements and sort by receiver's names.
      * @return the page with filters applied, or an empty page if there was an error querying the repository.
      */
-    public Page<ReceiverBasicDto> getWithFilters(String type,
-                                                 String names,
-                                                 String idNumber,
-                                                 LocalDate start,
-                                                 LocalDate end,
-                                                 PageRequest paging) {
+    public Page<ReceiverBasicDto> getAll(String type,
+                                         String names,
+                                         String idNumber,
+                                         LocalDate start,
+                                         LocalDate end,
+                                         PageRequest paging) throws PlhException {
         PersonType typeValue;
         try {
             typeValue = PersonType.valueOf(type);
@@ -131,8 +142,7 @@ public class ReceiverService {
                             .and(dateIsBetween(start, end)), paging)
                     .map(mapper::toBasicDto);
         } catch (Exception e) {
-            log.error("ReceiverService: getWithFilters(): Error trying to query from repository. Error is: {}", e.getMessage());
-            return Page.empty();
+            throw new PlhException(e, "ReceiverService: getWithFilters(): Error trying to query from repository. Error is: " + e.getMessage());
         }
     }
 

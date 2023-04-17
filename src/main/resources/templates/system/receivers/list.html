@@ -5,7 +5,7 @@
     <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
           name="viewport">
     <meta content="ie=edge" http-equiv="X-UA-Compatible">
-    <title>RedXpress Soluciones - Listado de clientes</title>
+    <title>RedXpress Soluciones - Listado de destinatarios</title>
     <!-- Favicons -->
     <link rel="icon" th:href="@{/common-assets/img/favicon.png}">
     <link rel="apple-touch-icon" th:href="@{/common-assets/img/apple-touch-icon.png}">
@@ -34,7 +34,7 @@
 </aside>
 <main class="main" id="main">
     <div class="pagetitle">
-        <h1>Sistema RedXPress - Listado de clientes</h1>
+        <h1>Sistema RedXPress - Listado de destinatarios</h1>
         <nav>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a th:href="@{/}">Principal</a></li>
@@ -51,38 +51,50 @@
                             <span class="visually-hidden">Loading...</span>
                         </div>
                     </div>
-                    <div class="card-body"><h5 class="card-title">Clientes Registrados <span>| Todos</span></h5>
+                    <div class="card-body"><h5 class="card-title">Destinatarios Registrados <span>| Todos</span></h5>
                         <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
                             <div class="dataTable-top d-flex justify-content-around row g-2">
                                 <div class="dataTable-dropdown col">
-                                    <label>
-                                        <select class="dataTable-selector filter-form" id="size">
-                                            <option value="5">5</option>
-                                            <option selected="" value="10">10</option>
-                                            <option value="15">15</option>
-                                            <option value="20">20</option>
-                                            <option value="25">25</option>
-                                        </select> entradas por página
-                                    </label>
+                                    <label for="size">Por página</label>
+                                    <select class="dataTable-selector filter-form" id="size">
+                                        <option value="5">5</option>
+                                        <option selected="" value="10">10</option>
+                                        <option value="15">15</option>
+                                        <option value="20">20</option>
+                                        <option value="25">25</option>
+                                    </select>
                                 </div>
                                 <div class="col">
-                                    <select class="dataTable-selector filter-form" id="role">
-                                        <option selected value="all">Filtrar Tipo (Todos)</option>
-                                        <option th:each="type: ${types}" th:text="${type.toString()}"
+                                    <label for="clientType">Tipo</label>
+                                    <select class="dataTable-selector filter-form" id="clientType">
+                                        <option selected value="all">Todos</option>
+                                        <option th:each="type: ${typesList}" th:text="${type.toString()}"
                                                 th:value="${type.name()}"></option>
                                     </select>
                                 </div>
-                                <div class="col">
-                                    <select class="dataTable-selector filter-form" id="status">
-                                        <option selected value="all">Filtrar Estado (todos)</option>
-                                        <option th:each="status: ${statusList}" th:text="${status.toString()}"
-                                                th:value="${status.name()}"></option>
-                                    </select>
-                                </div>
                                 <div class="dataTable-search col">
-                                    <input class="dataTable-input filter-form" data-ms-editor="true" id="search"
+                                    <label for="names">Nombres</label>
+                                    <input class="dataTable-input filter-form" id="names"
                                            placeholder="Buscar..." spellcheck="false"
                                            type="text">
+                                </div>
+                                <div class="dataTable-search col">
+                                    <label for="idNumber">DNI/RUC</label>
+                                    <input class="dataTable-input filter-form" id="idNumber"
+                                           placeholder="Buscar..." type="number">
+                                </div>
+                                <div class="dataTable-search col">
+                                    <label for="start">Desde</label>
+                                    <input class="dataTable-input filter-form" id="start"
+                                           max="2022-01-01" min="2022-01-01" placeholder="Desde" type="date"
+                                           value="2022-01-01">
+                                </div>
+                                <!--TODO: set max value for calendars to today-->
+                                <div class="dataTable-search col">
+                                    <label for="end">Hasta</label>
+                                    <input class="dataTable-input filter-form" id="end"
+                                           max="2022-01-01" min="2022-01-01" placeholder="Hasta" type="date"
+                                           value="2022-01-01">
                                 </div>
                             </div>
                             <div class="dataTable-container table-responsive">
@@ -115,12 +127,9 @@
                                 </table>
                             </div>
                             <div class="dataTable-bottom">
-                                <div class="dataTable-info">Showing 1 to 5 of 5 entries</div>
+                                <div class="dataTable-info" id="pagination-info">Showing 1 to 5 of 5 entries</div>
                                 <nav class="dataTable-pagination">
-                                    <ul class="dataTable-pagination-list">
-                                        <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-                                        <li class="page-item"><a class="page-link">1</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                                    <ul class="dataTable-pagination-list" id="pagination">
                                     </ul>
                                 </nav>
                             </div>

@@ -5,9 +5,9 @@ spring:
       ddl-auto: update
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://192.168.3.35:32768/plh_db
+    url: jdbc:postgresql://192.168.3.44:5432/plh
     username: postgres
-    password: postgrespw
+    password: 1801
   security:
     user:
       password: 1801

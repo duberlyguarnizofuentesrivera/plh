@@ -2,8 +2,6 @@ package com.duberlyguarnizo.plh.client;
 
 import com.duberlyguarnizo.plh.enums.PersonType;
 import com.duberlyguarnizo.plh.enums.UserStatus;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -11,13 +9,12 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecificationExecutor<Client> {
     static Specification<Client> isType(PersonType type) {
         if (type != null) {
-            return (client, query, cb) -> cb.equal(client.get("type"), type);
+            return (client, query, cb) -> cb.equal(client.get("clientType"), type);
         } else {
             return null;
         }
@@ -45,8 +42,5 @@ public interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecif
         return (client, query, cb) -> cb.between(client.get("lastModifiedDate"), start, end);
     }
 
-    Optional<Client> findByIdNumber(String clientIdNumber);
-
-    Page<Client> findByNamesContainingIgnoreCase(String clientNames, Pageable pageable);
 
 }
